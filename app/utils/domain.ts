@@ -10,3 +10,9 @@ export function getApiDomain(): string {
 	const devUrl = 'http://localhost:8080';
 	return isProduction() ? prodUrl : devUrl;
 }
+
+export function getWebSocketDomain(): string {
+	const prodUrl = process.env.NEXT_PUBLIC_PROD_WS_URL || 'wss://sopra-fs25-group-25-server.oa.r.appspot.com/ws'; // TODO: update with your production URL as needed.
+	const devUrl = 'ws://localhost:8080/ws';
+	return isProduction() ? prodUrl : devUrl;
+}
