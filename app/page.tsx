@@ -79,6 +79,9 @@ export default function Home() {
 						rel='noopener noreferrer'>
 						Read our docs
 					</Button>
+					<Button type='primary' variant='solid' onClick={() => router.push('/register')}>
+						Go to register
+					</Button>
 					<Button type='primary' variant='solid' onClick={() => router.push('/login')}>
 						Go to login
 					</Button>
