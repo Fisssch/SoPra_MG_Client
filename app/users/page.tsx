@@ -20,14 +20,9 @@ const columns: TableProps<User>["columns"] = [
     key: "username",
   },
   {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Id",
-    dataIndex: "id",
-    key: "id",
+    title: "Online Status",
+    dataIndex: "onlineStatus",
+    key: "onlineStatus",
   },
 ];
 
@@ -74,9 +69,10 @@ const Dashboard: React.FC = () => {
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
 
   return (
-    <div className="card-container">
+    <div className="page-background">
+      <div className="card-container">
       <Card
-        title="Get all users from secure endpoint:"
+        title="Overview of users"
         loading={!users}
         className="dashboard-container"
       >
@@ -92,12 +88,19 @@ const Dashboard: React.FC = () => {
                 style: { cursor: "pointer" },
               })}
             />
-            <Button onClick={handleLogout} type="primary">
-              Logout
-            </Button>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
+  <Button onClick={handleLogout} type="primary">
+    Logout
+  </Button>
+  <Button onClick={() => router.push("/")} type="default">
+    Back
+  </Button>
+</div>
+
           </>
         )}
       </Card>
+    </div>
     </div>
   );
 };
