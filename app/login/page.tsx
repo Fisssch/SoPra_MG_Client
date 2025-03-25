@@ -41,7 +41,7 @@ const Login: React.FC = () => {
       if (user?.id) {
         setUserId(String(user.id));
         alert("Login successful!");
-        router.push("/users");
+        router.push("/mainpage");
       }
       
     } catch (error: any) {

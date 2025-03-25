@@ -37,7 +37,7 @@ const Register: React.FC = () => {
       if (user?.id) {
         setUserId(String(user.id));
         alert("Registration successful!");
-        router.push("/users");
+        router.push("/mainpage");
 }
 
     } catch (error: any) {
