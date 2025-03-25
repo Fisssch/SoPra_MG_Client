@@ -30,13 +30,46 @@ a {
   }
 }
 
-.login-container {
+/* Login.css */
+.page-background {
+  background-color: #a34d3f;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: rgb(41, 44, 59);
 }
+
+.login-container {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+input {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #2e2e2e;
+  color: white;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  margin-top: 0.5rem;
+  background-color: #2e2e2e;
+}
+
 
 .login-button {
   width: 100%;

@@ -57,60 +57,82 @@ const Login: React.FC = () => {
     router.push("/");
   };
 
-
+  const handleSignUp = () => {
+    router.push("/register"); // adjust if your sign-up page is elsewhere
+  };
 
   return (
-    <div className="login-container">
-      {message && (
-        <div
-          style={{
-            backgroundColor: "#ffefef",
-            padding: "1rem",
-            borderRadius: "4px",
-            marginBottom: "1rem",
-            color: "#b00020",
-          }}
+    <div className="page-background">
+      <div className="login-container">
+        {message && (
+          <div
+            style={{
+              backgroundColor: "#ffefef",
+              padding: "1rem",
+              borderRadius: "4px",
+              marginBottom: "1rem",
+              color: "#b00020",
+            }}
+          >
+            {message}
+          </div>
+        )}
+        <Form
+          form={form}
+          name="login"
+          size="large"
+          variant="outlined"
+          onFinish={handleLogin}
+          layout="vertical"
         >
-          {message} 
-        </div>
-      )}
-      <Form
-        form={form}
-        name="login"
-        size="large"
-        variant="outlined"
-        onFinish={handleLogin}
-        layout="vertical"
-      >
-        <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input placeholder="Enter password" />
-        </Form.Item>
-        <Form.Item>
-          <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-          <Button type="primary" htmlType="submit" loading={loading}>
-            Login
+          <Form.Item
+            name="username"
+            label={<span className="text-black">Username</span>}
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input placeholder="Enter username" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            label={<span className="text-black">Password</span>}
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password
+              placeholder="Enter password"
+              className="bg-white text-black"
+            />
+          </Form.Item>
+
+          <Form.Item>
+  <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+    <Button
+      type="primary"
+      htmlType="submit"
+      loading={loading}
+      style={{ flex: 1 }}
+    >
+      Login
+    </Button>
+    <Button
+      onClick={handleBackToStart}
+      className="back-button"
+      style={{ flex: 1 }}
+    >
+      Back to Start Page
+    </Button>
+  </div>
+</Form.Item>
+        </Form>
+       {/* Sign up button under the form */}
+       <div className="mt-4 text-center">
+          <Button type="default" onClick={handleSignUp}>
+            Sign up
           </Button>
-          <Button onClick={handleBackToStart} className="back-button">
-        Back to Start Page
-      </Button>
+        </div>
       </div>
-        </Form.Item>
-      </Form>
-      
     </div>
   );
-}
-
+}; 
+      
 
 export default Login;

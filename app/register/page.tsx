@@ -28,6 +28,7 @@ const Register: React.FC = () => {
       const { data: user, headers } = await apiService.post<User>("/users", values);
 
       const authHeader = headers.get("Authorization");
+      console.log("Authorization Header:", authHeader); 
       if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.split(" ")[1];
         setToken(token);
@@ -52,6 +53,7 @@ const Register: React.FC = () => {
   };
 
   return (
+    <div className="page-background">
     <div className="login-container">
       <Form
         form={form}
@@ -62,7 +64,7 @@ const Register: React.FC = () => {
       >
         <Form.Item
           name="username"
-          label="Username"
+          label={<span className="text-black">Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
         >
           <Input placeholder="Enter username" />
@@ -71,6 +73,7 @@ const Register: React.FC = () => {
         <Form.Item
           name="password"
           label="Password"
+          label={<span className="text-black">Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password placeholder="Enter password" />
@@ -87,6 +90,7 @@ const Register: React.FC = () => {
           </div>
         </Form.Item>
       </Form>
+    </div>
     </div>
   );
 };
