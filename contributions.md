@@ -34,8 +34,9 @@ reason).
 
 | **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
 | ----------- | -------- | -------------------| --------------- | ------------- |
-| **[Silvan Wyss](https://github.com/Fisssch)**    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Client/commit/c29a64b4f731641cc9d0947e52e20edb5d1ffb48 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
-|                    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Server/commit/3d2b879523fbbc4bacdc8776c8d3fc0207991cf5 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
+| **[Silvan Wyss](https://github.com/Fisssch)**    | 24.03.25 | [Commit1](https://github.com/Fisssch/SoPra_MG_Client/commit/c29a64b4f731641cc9d0947e52e20edb5d1ffb48) | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
+|                    | 24.03.25 | [Commit2](https://github.com/Fisssch/SoPra_MG_Server/commit/3d2b879523fbbc4bacdc8776c8d3fc0207991cf5) | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
+|                    | 26.03.25   | [Commit3](https://github.com/Fisssch/SoPra_MG_Server/commit/ea94ec6d922d01b47252792b8da6778e4d047f52) | Implemented a database connection to a mongodb & added save of creation dat of user to db | We want to have persistence & save the creation date of a user |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
