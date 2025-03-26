@@ -36,8 +36,9 @@ reason).
 | ----------- | -------- | -------------------| --------------- | ------------- |
 | **[Silvan Wyss](https://github.com/Fisssch)**    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Client/commit/c29a64b4f731641cc9d0947e52e20edb5d1ffb48 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
 |                    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Server/commit/3d2b879523fbbc4bacdc8776c8d3fc0207991cf5 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
-| **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[Elia Wyrsch ](https://github.com/eliawy)** | 26.03.35   | https://github.com/Fisssch/SoPra_MG_Client/commit/d56b3ded67c0d9067938198841f148c2ecc0dbfc | Implemented Logout functionality| Deleting the token ensures that only logged in users can use the functionality of the game.  |
+|                    | 25.03.25   | https://github.com/Fisssch/SoPra_MG_Client/commit/a237301534b440b35154e31cccde5b51aafdea20 | Added the login / registration functionality as well as the starting page and a main page  | Login and register is needed to be able to play the game. The other two pages are important to navigate and will later offer possibilities to join lobbies or change the user data. |
+                      | 25.03.25   | https://github.com/Fisssch/SoPra_MG_Client/commit/29a8e819f500047ae64f24763046b7f1b6028624 | Added the possibility to get an overview over all users and look | Can look up if other users are online and offline which might be important for the user to decide if he wants to play a new round or not. | 
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
