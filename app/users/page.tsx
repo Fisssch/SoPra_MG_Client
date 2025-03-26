@@ -39,10 +39,36 @@ const Dashboard: React.FC = () => {
     clear: clearToken, // all we need in this scenario is a method to clear the token
   } = useLocalStorage<string>("token", ""); // if you wanted to select a different token, i.e "lobby", useLocalStorage<string>("lobby", "");
 
-  const handleLogout = (): void => {
-    // Clear token using the returned function 'clear' from the hook
-    clearToken();
-    router.push("/login");
+  const handleLogout = async () => {
+    let token = localStorage.getItem('token');
+
+
+    if (!token) {
+      console.error('Missing token or username');
+      return;
+    }
+
+    token = token.replace(/^"|"$/g, ''); // Removes leading and trailing quotes
+    console.log("Token being sent to logout:", token); // Debugging output
+
+    try {
+      const response = await fetch('/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.clear();
+        router.push('/');
+      } else {
+        console.error('Logout failed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   useEffect(() => {
