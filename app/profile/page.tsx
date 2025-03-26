@@ -6,9 +6,36 @@ import { Button } from 'antd';
 export default function LobbyPage() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.clear(); // or just remove token/id if needed
-    router.push('/');
+  const handleLogout = async () => {
+    let token = localStorage.getItem('token');
+
+
+    if (!token) {
+      console.error('Missing token or username');
+      return;
+    }
+
+    token = token.replace(/^"|"$/g, ''); // Removes leading and trailing quotes
+    console.log("Token being sent to logout:", token); // Debugging output
+
+    try {
+      const response = await fetch('/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.clear();
+        router.push('/');
+      } else {
+        console.error('Logout failed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleChangePassword = () => {
