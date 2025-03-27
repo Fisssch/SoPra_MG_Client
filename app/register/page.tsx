@@ -72,7 +72,6 @@ const Register: React.FC = () => {
 
         <Form.Item
           name="password"
-          label="Password"
           label={<span className="text-black">Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
