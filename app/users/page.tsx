@@ -2,6 +2,7 @@
 // clicking on a user in this list will display /app/users/[id]/page.tsx
 "use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
+import "@ant-design/v5-patch-for-react-19";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
@@ -30,9 +31,19 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
   // useLocalStorage hook example use
   // The hook returns an object with the value and two functions
   // Simply choose what you need from the hook:
+  useEffect(() => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    if (!token) {
+      router.replace("/?message=Please login first.");
+    } else {
+      setAuthorized(true);
+    }
+  }, []);
+
   const {
     // value: token, // is commented out because we dont need to know the token value for logout
     // set: setToken, // is commented out because we dont need to set or update the token value
@@ -74,59 +85,57 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        // apiService.get<User[]> returns the parsed JSON object directly,
-        // thus we can simply assign it to our users variable.
-        const users: User[] = await apiService.get<User[]>("/users");
+        const rawToken = localStorage.getItem("token");
+        const token = rawToken?.replace(/^"|"$/g, "");
+
+        const users: User[] = await apiService.get<User[]>("/users", {
+          Authorization: `Bearer ${token}`,
+        });
+
         setUsers(users);
-        console.log("Fetched users:", users);
       } catch (error) {
-        if (error instanceof Error) {
-          alert(`Something went wrong while fetching users:\n${error.message}`);
-        } else {
-          console.error("An unknown error occurred while fetching users.");
-        }
+        console.error("Error durig loading of the users:", error);
       }
     };
 
-    fetchUsers();
-  }, [apiService]); // dependency apiService does not re-trigger the useEffect on every render because the hook uses memoization (check useApi.tsx in the hooks).
-  // if the dependency array is left empty, the useEffect will trigger exactly once
-  // if the dependency array is left away, the useEffect will run on every state change. Since we do a state change to users in the useEffect, this results in an infinite loop.
-  // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
+    if (authorized) {
+      fetchUsers();
+    }
+  }, [authorized, apiService]);
+
+  if (authorized === null) {
+    return null;
+  }
 
   return (
     <div className="page-background">
       <div className="card-container">
-      <Card
-        title="Overview of users"
-        loading={!users}
-        className="dashboard-container"
-      >
-        {users && (
-          <>
-            {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
-            <Table<User>
-              columns={columns}
-              dataSource={users}
-              rowKey="id"
-              onRow={(row) => ({
-                onClick: () => router.push(`/users/${row.id}`),
-                style: { cursor: "pointer" },
-              })}
-            />
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
-  <Button onClick={handleLogout} type="primary">
-    Logout
-  </Button>
-  <Button onClick={() => router.push("/")} type="default">
-    Back
-  </Button>
-</div>
-
-          </>
-        )}
-      </Card>
-    </div>
+        <Card
+          title="Overview of users"
+          loading={!users}
+          className="dashboard-container"
+        >
+          {users && (
+            <>
+              {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
+              <Table<User>
+                columns={columns}
+                dataSource={users}
+                rowKey="id"
+                onRow={(row) => ({
+                  onClick: () => router.push(`/users/${row.id}`),
+                  style: { cursor: "pointer" },
+                })}
+              />
+              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
+              <Button onClick={handleLogout} type="primary">
+              Logout
+              </Button>
+            </div>
+            </>
+          )}
+        </Card>
+      </div>
     </div>
   );
 };
