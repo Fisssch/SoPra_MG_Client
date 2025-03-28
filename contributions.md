@@ -60,7 +60,9 @@ reason).
 |                    | 27.03.25   | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/62/commits/7264a54a3fc2b6c94c0689fe9c267f9f0779bd25) | made the hole stats page with the right informations | With this users are finally able to see stats of the other players |
 |                    | 27.03.25   | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/63/commits/8184a1ae8d08f43bb3291339dfe9da466f2c3fca) | made the change username and change password page as well as made it work correctly | This is important because we wanted to give the user the ability to change those information's if he wanted to and know the user can |
 |                    | 27.03.25   | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/pull/64/commits/b771847f45e003a0c96e41650933166aa2ea975d) | made that only logged in users can go to the main page | We wanted to make the game only usable for registered users and now they can get to the main page without registration |
-
+| **[Luis Schmid](https://github.com/LooPyt)** | 23.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/559f18dc694b10fa9e17f153e5ad602986224abc) | Added Player and Team entities | Prerequisite for lobby logic |
+|            | 25.03.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/025cfdbb6725f855675646a3b36f0a3a36b33b80) | Implemented lobby creation w/ teams | Required for lobby/team-based setup |
+|            | 25.03.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/3ae539fb06bb6173ab5d07af353163690d3b86fb) | Added LobbyService tests | Ensures functionality is tested |
 
 ---
 
@@ -68,7 +70,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@githubUser1]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[Silvan Wyss](https://github.com/Fisssch)** | 28.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/2e84473fa1df7433f73113bfb3ec1259336a1b01) | Added ability to give a hint, which is validated, send the hint via websocket to all players and save it to the database | We want the spymaster to give a hint which should be validated and sent to all players so they can make their guesses accordingly |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
