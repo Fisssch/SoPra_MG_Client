@@ -34,8 +34,10 @@ reason).
 
 | **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
 | ----------- | -------- | -------------------|-----------------| ------------- |
+
 | **[Silvan Wyss](https://github.com/Fisssch)**    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Client/commit/c29a64b4f731641cc9d0947e52e20edb5d1ffb48 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
 |                    | 24.03.25 | https://github.com/Fisssch/SoPra_MG_Server/commit/3d2b879523fbbc4bacdc8776c8d3fc0207991cf5 | Implemented websockets & ability to switch game mode | Websockets are needed for most of our game & we want ability to switch game mode |
+                     | 26.03.25   |https://github.com/Fisssch/SoPra_MG_Server/commit/ea94ec6d922d01b47252792b8da6778e4d047f52 | Implemented a database connection to a mongodb & added save of creation dat of user to db | We want to have persistence & save the creation date of a user |
 | **[Elia Wyrsch ](https://github.com/eliawy)** | 24.03.25   | https://github.com/Fisssch/SoPra_MG_Client/commit/4d1c5530b02bc5198e68569ea14c339cae9af737| Started with tailwind installation. | Helps us for the UI design throughout the project.  |
 |                     |25.03.25   | https://github.com/Fisssch/SoPra_MG_Client/commit/79684d38c3d618e09cb9035158f874610d9a3ae2| Added the registration page. | Login and register is needed to be able to play the game.  |
 |                    | 25.03.25   | https://github.com/Fisssch/SoPra_MG_Client/commit/400e6edc9fc6db1f8559e974a61ab6dfbd9d9411 | Added the login page. | Login and register is needed to be able to play the game.|
