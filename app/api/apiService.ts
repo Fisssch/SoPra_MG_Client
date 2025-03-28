@@ -73,23 +73,37 @@ export class ApiService {
   }
 
   /**
-   * POST request.
-   * @param endpoint - The API endpoint (e.g. "/users").
-   * @param data - The payload to post.
-   * @returns JSON data of type T.
-   */
-  public async post<T>(endpoint: string, data: unknown): Promise<T> {
+ * POST request.
+ * @param endpoint - The API endpoint (e.g. "/users").
+ * @param data - The payload to post.
+ * @returns An object containing the response data and headers.
+ */
+  public async post<T>(
+    endpoint: string,
+    data: unknown,
+    customHeaders?: HeadersInit
+  ): Promise<{ data: T; headers: Headers }> {
     const url = `${this.baseURL}${endpoint}`;
+    const headers = {
+      ...this.defaultHeaders,
+      ...customHeaders,
+    };
+  
     const res = await fetch(url, {
       method: "POST",
-      headers: this.defaultHeaders,
+      headers,
       body: JSON.stringify(data),
     });
-    return this.processResponse<T>(
+  
+    const responseData = await this.processResponse<T>(
       res,
       "An error occurred while posting the data.\n",
     );
+  
+    return { data: responseData, headers: res.headers };
   }
+  
+
 
   /**
    * PUT request.

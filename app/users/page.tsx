@@ -20,14 +20,9 @@ const columns: TableProps<User>["columns"] = [
     key: "username",
   },
   {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Id",
-    dataIndex: "id",
-    key: "id",
+    title: "Online Status",
+    dataIndex: "onlineStatus",
+    key: "onlineStatus",
   },
 ];
 
@@ -44,10 +39,36 @@ const Dashboard: React.FC = () => {
     clear: clearToken, // all we need in this scenario is a method to clear the token
   } = useLocalStorage<string>("token", ""); // if you wanted to select a different token, i.e "lobby", useLocalStorage<string>("lobby", "");
 
-  const handleLogout = (): void => {
-    // Clear token using the returned function 'clear' from the hook
-    clearToken();
-    router.push("/login");
+  const handleLogout = async () => {
+    let token = localStorage.getItem('token');
+
+
+    if (!token) {
+      console.error('Missing token or username');
+      return;
+    }
+
+    token = token.replace(/^"|"$/g, ''); // Removes leading and trailing quotes
+    console.log("Token being sent to logout:", token); // Debugging output
+
+    try {
+      const response = await fetch('/users/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.clear();
+        router.push('/');
+      } else {
+        console.error('Logout failed:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   useEffect(() => {
@@ -74,9 +95,10 @@ const Dashboard: React.FC = () => {
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
 
   return (
-    <div className="card-container">
+    <div className="page-background">
+      <div className="card-container">
       <Card
-        title="Get all users from secure endpoint:"
+        title="Overview of users"
         loading={!users}
         className="dashboard-container"
       >
@@ -92,12 +114,19 @@ const Dashboard: React.FC = () => {
                 style: { cursor: "pointer" },
               })}
             />
-            <Button onClick={handleLogout} type="primary">
-              Logout
-            </Button>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
+  <Button onClick={handleLogout} type="primary">
+    Logout
+  </Button>
+  <Button onClick={() => router.push("/")} type="default">
+    Back
+  </Button>
+</div>
+
           </>
         )}
       </Card>
+    </div>
     </div>
   );
 };
