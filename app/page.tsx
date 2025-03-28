@@ -1,9 +1,7 @@
 'use client';
 import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { Button } from 'antd';
-import { BookOutlined, CodeOutlined, GlobalOutlined } from '@ant-design/icons';
 import { webSocketService } from './api/webSocketService';
 import { useApi } from './hooks/useApi';
 import { useEffect } from 'react';
