@@ -3,9 +3,24 @@
 import { useRouter } from 'next/navigation';
 import { Button } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
+import {useEffect, useState} from "react";
 
 export default function Home() {
-  const router = useRouter();
+    const router = useRouter();
+    const [authorized, setAuthorized] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+        if (!token) {
+            router.replace("/?message=Please login first.");
+        } else {
+            setAuthorized(true);
+        }
+    }, []);
+
+    if (authorized === null) {
+        return null;
+    }
 
   return (
     <div className="min-h-screen bg-[#a34d3f] text-white relative flex flex-col items-center px-4 pt-16">
