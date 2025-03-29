@@ -1,7 +1,9 @@
 export interface User {
-  id: string | null;
-  name: string | null;
-  username: string | null;
-  token: string | null;
-  status: string | null;
+  id: number;
+  username: string;
+  token: string|null;
+  onlineStatus: "ONLINE" | "OFFLINE" | string;
+  wins: number;
+  losses: number;
+  blackCardGuesses: number;
 }

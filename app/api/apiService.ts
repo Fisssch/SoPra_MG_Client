@@ -60,15 +60,21 @@ export class ApiService {
    * @param endpoint - The API endpoint (e.g. "/users").
    * @returns JSON data of type T.
    */
-  public async get<T>(endpoint: string): Promise<T> {
+  public async get<T>(endpoint: string, customHeaders?: HeadersInit): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+    const headers = {
+      ...this.defaultHeaders,
+      ...customHeaders,
+    };
+
     const res = await fetch(url, {
       method: "GET",
-      headers: this.defaultHeaders,
+      headers,
     });
+
     return this.processResponse<T>(
-      res,
-      "An error occurred while fetching the data.\n",
+        res,
+        "An error occurred while fetching the data.\n"
     );
   }
 
@@ -111,17 +117,29 @@ export class ApiService {
    * @param data - The payload to update.
    * @returns JSON data of type T.
    */
-  public async put<T>(endpoint: string, data: unknown): Promise<T> {
+  public async put<T>(
+      endpoint: string,
+      data: unknown,
+      customHeaders?: HeadersInit
+  ): Promise<{ data: T; headers: Headers }> {
     const url = `${this.baseURL}${endpoint}`;
+    const headers = {
+      ...this.defaultHeaders,
+      ...customHeaders,
+    };
+
     const res = await fetch(url, {
       method: "PUT",
-      headers: this.defaultHeaders,
+      headers,
       body: JSON.stringify(data),
     });
-    return this.processResponse<T>(
-      res,
-      "An error occurred while updating the data.\n",
+
+    const responseData = await this.processResponse<T>(
+        res,
+        "An error occurred while updating the data.\n"
     );
+
+    return { data: responseData, headers: res.headers };
   }
 
   /**
