@@ -71,7 +71,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[Silvan Wyss](https://github.com/Fisssch)** | 28.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/2e84473fa1df7433f73113bfb3ec1259336a1b01) | Added ability to give a hint, which is validated, send the hint via websocket to all players and save it to the database | We want the spymaster to give a hint which should be validated and sent to all players so they can make their guesses accordingly |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | 31.03.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/5ec7325b06e91cba08346b99bf6311b338009fbd) | Changed implementation of various lobby methods, added websocket calls in lobby methods, fixed tests | We want to have working tests, we want the lobby methods to work as expected and send messages over the websockets |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
