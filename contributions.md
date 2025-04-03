@@ -87,6 +87,7 @@ reason).
 | **[Luis Schmid](https://github.com/LooPyt)** | 28.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/18a1bd268a6736539c74eaa4c4091beb406e980a) | Added endpoints in LobbyController and Testing | Make the specified REST endpoints working is the first step to check workflow with the Client requests.|
 |            | 28.03.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/c9a9925656113f874f1e1c00836e5ba4dd7e71fb) | Adjusting the Code based on the Feedback on the pull request | To merge the Code and close userstories is important to keep in line|
 |            | 30.03.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/6091c3db012152bd06d8b0602f77934e5f3b55a7) | Only one Spymaster can be assigned - last issue concerning this userstory to be pulled.  | All issues of a userstory should be fullfilled before merging to the main branch |
+|            | 03.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/375b2cd085385dd2a7302071984567e1cb8e2693) | support for multiple lobbies and joining by code | This commit is important because it enables the core multiplayer functionality by allowing players to join, manage, and persist multiple lobbies through unique codes, laying the foundation for scalable gameplay. |
 
 ---
 
