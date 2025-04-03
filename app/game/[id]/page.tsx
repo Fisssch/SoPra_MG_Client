@@ -25,10 +25,39 @@ type GameData = {
 const GamePage: React.FC = () => {
   const params = useParams();
   const gameId = params.id;
+  
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hintText, setHintText] = useState('');
+  const [hintNumber, setHintNumber] = useState(0);
+  const [currentHint, setCurrentHint] = useState<{ hint: string; wordsCount: number } | null>(null);
+
   const ws = new webSocketService();
+  const isSpymaster = true; // Set to false to test guesser view
+  const teamColor: 'RED' | 'BLUE' = 'RED'; // ⬅️ hardcode for now
+
+  const sendHint = async () => {
+    try {
+      await fetch(`http://localhost:8080/game/${gameId}/hint`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 293a59e7-3b28-4811-8041-ee04ea84c343', // your test token
+        },
+        body: JSON.stringify({
+          hint: hintText,
+          wordsCount: hintNumber
+        }),
+      });
+  
+      setHintText('');
+      setHintNumber(0);
+    } catch (err) {
+      console.error('Error sending hint:', err);
+    }
+  };
+  
 
   useEffect(() => {
     const fetchGame = async () => {
@@ -37,7 +66,7 @@ const GamePage: React.FC = () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer f4fe0a69-56a5-4cb6-820d-3a46e5112a3e',
+            'Authorization': 'Bearer 293a59e7-3b28-4811-8041-ee04ea84c343',
           },
           body: JSON.stringify({
             startingTeam: 'RED',
@@ -81,15 +110,51 @@ const GamePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#a44c3e] text-white px-4! py-6!">
-      {/* Turn indicator */}
+      
+      {/* Turn-based message / hint input */}
       <div className="text-center mb-6">
-        <h1 className="text-5xl font-bold">
-          {gameData.teamTurn === 'RED'
-            ? 'Das rote Team ist dran...'
-            : 'Das blaue Team ist dran...'}
-        </h1>
+        {teamColor === gameData.teamTurn ? (
+          !isSpymaster ? (
+            <h1 className="text-3xl font-bold text-yellow-300">
+              Wartet auf den Hinweis von eurem Spymaster...
+            </h1>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+      <p className="text-3xl  font-bold mb-4!">
+        Your turn, enter a hint and a number
+      </p>
+      <div className="flex items-center gap-4 !mt-4">
+        <input
+          type="text"
+          placeholder="Enter hint"
+          className="text-black px-4 py-3 rounded w-64 text-lg"
+          value={hintText}
+          onChange={(e) => setHintText(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="# words"
+          className="text-black px-2 py-3 rounded w-20 text-lg text-center"
+          value={hintNumber}
+          onChange={(e) => setHintNumber(Number(e.target.value))}
+        />
+        <button
+          onClick={sendHint}
+          className="bg-green-600 px-6 py-3 rounded text-lg font-semibold text-white"
+        >
+          Give Hint
+        </button>
       </div>
+    </div>
 
+
+
+          )
+        ) : (
+          <p className="text-3xl font-bold">Das andere Team ist dran...</p>
+        )}
+      </div>
+  
       {/* Score display */}
       <div className="flex justify-between items-center w-full px-12 max-w-7xl mx-auto mb-10">
         {/* Blue team */}
@@ -99,41 +164,48 @@ const GamePage: React.FC = () => {
           </span>
           <span className="text-2xl fond-bold mt-2!">Team blau</span>
         </div>
-
+  
         {/* Red team */}
-        <div className="bg-red-700 p-4 rounded-xl flex flex-col items-center shadow-md w-40 h-30 absolute right-4 border-4 border-red-400">
+        <div className="bg-red-700 p-4 rounded-xl flex flex-col items-center shadow-md w-40 h-30 border-4 border-red-400 absolute right-4">
           <span className="text-2xl font-bold mt-5!">
             {gameData.board.filter(card => card.color === 'RED' && !card.guessed).length}
           </span>
           <span className="text-2xl font-bold mt-2!">Team rot</span>
         </div>
       </div>
-
+  
+      {/* Hint display for guessers */}
+      {!isSpymaster && currentHint && (
+        <div className="text-center mb-6">
+          <p className="text-2xl">
+            Hint: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
+          </p>
+        </div>
+      )}
+  
       {/* Game board */}
       <div className="flex justify-center mt-8!">
         <div className="grid grid-cols-5 gap-5 max-w-5xl">
           {gameData.board.map((card, index) => {
-             console.log(card);
             const baseStyles =
-              'flex items-center justify-center h-24 sm:h-28 text-base sm:text-lg font-semibold border-4 rounded-2xl shadow-md transition-all duration-200';
-
+              'flex items-center justify-center aspect-square w-24 sm:w-28 text-base sm:text-lg font-semibold border-4 rounded-2xl shadow-md transition-all duration-200';
+  
             const unguessedStyles = {
               RED: 'bg-red-600 text-white border-red-800',
               BLUE: 'bg-blue-600 text-white border-blue-800',
               NEUTRAL: 'bg-gray-400 text-white border-gray-500',
               BLACK: 'bg-black text-white border-gray-800',
             };
-
+  
             const guessedStyle = 'bg-white text-black border-gray-300';
-
+  
             return (
               <div
                 key={index}
                 className={`${baseStyles} ${
                   card.guessed
-                  ? guessedStyle
-                  : unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles] || 'bg-gray-300'
-      
+                    ? guessedStyle
+                    : unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles] || 'bg-gray-300'
                 }`}
               >
                 {card.word}
@@ -144,6 +216,7 @@ const GamePage: React.FC = () => {
       </div>
     </div>
   );
+  
 };
 
 export default GamePage;
