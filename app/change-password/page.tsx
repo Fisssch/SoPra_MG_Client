@@ -71,7 +71,7 @@ const EditPassword: React.FC = () => {
                             label={<span className="text-black">Old Password</span>}
                             required
                         >
-                            <Input
+                            <Input.Password
                                 placeholder="Enter current password"
                                 className="bg-white text-black"
                                 value={oldPassword}
@@ -83,7 +83,7 @@ const EditPassword: React.FC = () => {
                             label={<span className="text-black">New Password</span>}
                             required
                         >
-                            <Input
+                            <Input.Password
                                 placeholder="Enter new password"
                                 className="bg-white text-black"
                                 value={newPassword}

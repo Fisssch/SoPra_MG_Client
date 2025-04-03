@@ -4,7 +4,7 @@ import "@ant-design/v5-patch-for-react-19";
 import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, Alert } from "antd";
 
 const UserProfile: React.FC = () => {
@@ -85,12 +85,21 @@ const UserProfile: React.FC = () => {
                             display: "flex",
                             flexDirection: "column",
                             alignItems: "center",
-                            gap: "10px",
                             marginTop: "20px"
                         }}>
                             <Button type="primary" onClick={() => router.push("/users")}>
                                 Back to Users
                             </Button>
+                        </div>
+                        <div style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            marginTop: "20px"
+                        }}>
+                        <Button onClick={() => router.push('/mainpage')} type="default">
+                            Back to Home
+                        </Button>
                         </div>
                     </Card>
                 )}
