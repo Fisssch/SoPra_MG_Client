@@ -38,7 +38,7 @@ export default function Profile() {
         });
         setUser(response);
       } catch (error) {
-        console.error("Fehler beim Laden des Benutzers:", error);
+        console.error("Error during loading of the user:", error);
       }
     };
 
