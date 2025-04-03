@@ -60,9 +60,7 @@ reason).
 |                    | 27.03.25   | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/62/commits/7264a54a3fc2b6c94c0689fe9c267f9f0779bd25) | made the hole stats page with the right informations | With this users are finally able to see stats of the other players |
 |                    | 27.03.25   | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/63/commits/8184a1ae8d08f43bb3291339dfe9da466f2c3fca) | made the change username and change password page as well as made it work correctly | This is important because we wanted to give the user the ability to change those information's if he wanted to and know the user can |
 |                    | 27.03.25   | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/pull/64/commits/b771847f45e003a0c96e41650933166aa2ea975d) | made that only logged in users can go to the main page | We wanted to make the game only usable for registered users and now they can get to the main page without registration |
-| **[Luis Schmid](https://github.com/LooPyt)** | 23.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/559f18dc694b10fa9e17f153e5ad602986224abc) | Added Player and Team entities | Prerequisite for lobby logic |
-|            | 25.03.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/025cfdbb6725f855675646a3b36f0a3a36b33b80) | Implemented lobby creation w/ teams | Required for lobby/team-based setup |
-|            | 25.03.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/3ae539fb06bb6173ab5d07af353163690d3b86fb) | Added LobbyService tests | Ensures functionality is tested |
+
 
 ---
 
@@ -78,8 +76,9 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[Luis Schmid](https://github.com/LooPyt)** | 28.03.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/18a1bd268a6736539c74eaa4c4091beb406e980a) | Added endpoints in LobbyController and Testing | Make the specified REST endpoints working is the first step to check workflow with the Client requests.|
+|            | 28.03.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/c9a9925656113f874f1e1c00836e5ba4dd7e71fb) | Adjusting the Code based on the Feedback on the pull request | To merge the Code and close userstories is important to keep in line|
+|            | 30.03.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/pull/139/commits/6091c3db012152bd06d8b0602f77934e5f3b55a7) | Only one Spymaster can be assigned - last issue concerning this userstory to be pulled.  | All issues of a userstory should be fullfilled before merging to the main branch |
 
 ---
 
