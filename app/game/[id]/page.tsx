@@ -115,21 +115,21 @@ const GamePage: React.FC = () => {
 
   return (
   <div
-    className="min-h-screen text-white px-4 py-6"
+    className="min-h-screen text-white px-4 py-6 "
     style={{
       backgroundColor: teamColor === 'BLUE' ? '#5587b2' : '#a44c3e',
     }}
   >
     {/* Turn-based message / hint input */}
-    <div className="text-center mb-6">
+    <div className="text-center mb-6 mt-6 pt-5!">
       {teamColor === gameData.teamTurn ? (
         !isSpymaster ? (
-          <h1 className="text-3xl font-bold text-white-300 mt-6">
+          <h1 className="text-4xl font-bold text-white mt-6">
             Wartet auf den Hinweis von eurem Spymaster...
           </h1>
         ) : (
           <div className="flex flex-col items-center gap-2 mt-6">
-            <p className="text-3xl font-bold mb-4">
+            <p className="text-4xl font-bold mb-4">
               Your turn, enter a hint and a number
             </p>
             <div className="flex items-center gap-4 mt-2">
@@ -157,30 +157,33 @@ const GamePage: React.FC = () => {
           </div>
         )
       ) : (
-        <p className="text-3xl font-bold mt-6">
+        <p className="text-4xl font-bold mt-6">
           Das andere Team ist dran...
         </p>
       )}
     </div>
 
     {/* Score display */}
-    <div className="flex justify-between items-center w-full px-12 max-w-7xl mx-auto mb-10">
-      {/* Blue team */}
-      <div className="bg-blue-700 p-4 rounded-xl flex flex-col items-center shadow-md w-40 h-30 border-4 border-blue-400">
-        <span className="text-2xl font-bold mt-5">
-          {gameData.board.filter(card => card.color === 'BLUE' && !card.guessed).length}
-        </span>
-        <span className="text-2xl font-bold mt-2">Team blau</span>
-      </div>
+<div className="flex justify-between items-center w-full px-12 max-w-7xl mx-auto mb-10">
+  {/* Blue team */}
+<div className="bg-blue-700 h-32 w-40 p-4 rounded-xl flex flex-col justify-center items-center shadow-md border-4 border-blue-400 ml-4!">
+  <span className="text-3xl font-bold">
+    {gameData.board.filter(card => card.color === 'BLUE' && !card.guessed).length}
+  </span>
+  <span className="text-2xl font-bold mt-2">Team blau</span>
+</div>
 
-      {/* Red team */}
-      <div className="bg-red-700 p-4 rounded-xl flex flex-col items-center shadow-md w-40 h-30 absolute right-4 border-4 border-red-400">
-        <span className="text-2xl font-bold mt-5">
-          {gameData.board.filter(card => card.color === 'RED' && !card.guessed).length}
-        </span>
-        <span className="text-2xl font-bold mt-2">Team rot</span>
-      </div>
-    </div>
+
+  {/* Red team */}
+  <div className="bg-red-700 h-32 w-40 p-4 rounded-xl flex flex-col justify-center items-center shadow-md border-4 border-red-400 absolute right-4 ">
+    <span className="text-3xl font-bold mt-5">
+      {gameData.board.filter(card => card.color === 'RED' && !card.guessed).length}
+    </span>
+    <span className="text-2xl font-bold mt-2">Team rot</span>
+  </div>
+</div>
+
+    
 
     {/* Hint display for guessers */}
     {!isSpymaster && currentHint && (
@@ -196,33 +199,39 @@ const GamePage: React.FC = () => {
       <div className="grid grid-cols-5 gap-5 max-w-5xl">
         {gameData.board.map((card, index) => {
           const baseStyles =
-            'flex items-center justify-center aspect-square w-24 sm:w-28 text-base sm:text-lg font-semibold border-4 rounded-2xl shadow-md transition-all duration-200';
+          'flex items-center justify-center text-center break-words w-32 sm:w-36 min-h-[120px] px-6 py-4 text-base font-semibold border-4 rounded-2xl shadow-md transition-all duration-200 leading-tight';
+        
+        
 
           const unguessedStyles = {
             RED: 'bg-red-600 text-white border-red-800',
             BLUE: 'bg-blue-600 text-white border-blue-800',
             NEUTRAL: 'bg-gray-400 text-white border-gray-500',
-            BLACK: 'bg-black text-white border-gray-800',
+            BLACK: 'bg-black text-white border-grayw-800',
           };
 
           const guessedStyle = 'bg-white text-black border-gray-300';
 
           return (
             <div
-              key={index}
-              className={`${baseStyles} ${
-                card.guessed
-                ? guessedStyle
-                : isSpymaster
-        ? unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles]
-        :  'bg-amber-100 text-black border-gray-500'
+      key={index}
+      className={`${baseStyles} ${
+        card.guessed
+          ? guessedStyle
+          : isSpymaster
+          ? unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles]
+          : 'bg-amber-100 text-black border-gray-500'
       }`}
->
-            
-              {card.word}
-            </div>
-          );
-        })}
+      style={{
+        overflowWrap: 'break-word',
+        wordBreak: 'break-word',
+        textAlign: 'center', // just to be sure it's centered
+      }}
+    >
+      {card.word}
+    </div>
+  );
+})}
       </div>
     </div>
   </div>
