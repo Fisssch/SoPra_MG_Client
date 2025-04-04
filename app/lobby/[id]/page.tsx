@@ -51,12 +51,15 @@ export default function LobbyPage() {
                     { Authorization: `Bearer ${token}` }
                 );
                 setRole(roleRes.role);
+                localStorage.setItem("isSpymaster", String(roleRes.role === "SPYMASTER"));
 
                 const teamRes = await apiService.get<PlayerTeamDTO>(
                     `/lobby/${id}/team/${userId}`,
                     { Authorization: `Bearer ${token}` }
                 );
-                setTeamColor(teamRes.color.toLowerCase());
+                const usersTeam = teamRes.color.toLowerCase();
+                setTeamColor(usersTeam);
+                localStorage.setItem("playerTeam", usersTeam);
 
                 const readyRes = await apiService.get<ReadyStatusDTO>(
                     `/lobby/${id}/status/${userId}`,
@@ -116,6 +119,7 @@ export default function LobbyPage() {
                     { Authorization: `Bearer ${token}` }
                 );
                 setRole(selectedRole);
+                localStorage.setItem("isSpymaster", String(selectedRole === "SPYMASTER"));
             } catch (error) {
                 console.error("Error during role change:", error);
             }
@@ -131,6 +135,7 @@ export default function LobbyPage() {
                     { Authorization: `Bearer ${token}` }
                 );
                 setTeamColor(selectedTeam);
+                localStorage.setItem("playerTeam", selectedTeam);
             } catch (error) {
                 console.error("Error during team change:", error);
             }
