@@ -101,35 +101,50 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="page-background">
-      <div className="card-container">
-        <Card
-          title="Overview of users"
-          loading={!users}
-          className="dashboard-container"
-        >
-          {users && (
-            <>
-              {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
-              <Table<User>
-                columns={columns}
-                dataSource={users}
-                rowKey="id"
-                onRow={(row) => ({
-                  onClick: () => router.push(`/users/${row.id}`),
-                  style: { cursor: "pointer" },
-                })}
-              />
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "1rem" }}>
-              <Button onClick={handleLogout} type="primary">
-              Logout
-              </Button>
-            </div>
-            </>
-          )}
-        </Card>
+      <div className="page-background">
+        <div className="card-container">
+          <Card
+              title="Overview of users"
+              loading={!users}
+              className="dashboard-container"
+          >
+            {users && (
+                <>
+                  {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
+                  <Table<User>
+                      columns={columns}
+                      dataSource={users}
+                      rowKey="id"
+                      onRow={(row) => ({
+                        onClick: () => router.push(`/users/${row.id}`),
+                        style: { cursor: "pointer" },
+                      })}
+                  />
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginTop: "20px"
+                  }}>
+                    <Button onClick={handleLogout} type="primary">
+                      Logout
+                    </Button>
+                  </div>
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    marginTop: "20px"
+                  }}>
+                  <Button onClick={() => router.push('/mainpage')} type="default">
+                    Back to Home
+                  </Button>
+                  </div>
+                </>
+            )}
+          </Card>
+        </div>
       </div>
-    </div>
   );
 };
 

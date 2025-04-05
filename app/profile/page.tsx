@@ -4,18 +4,45 @@ import "@ant-design/v5-patch-for-react-19";
 import { useRouter } from 'next/navigation';
 import { Button } from 'antd';
 import {useEffect, useState} from "react";
+import { useApi } from "@/hooks/useApi";
 
-export default function LobbyPage() {
+
+interface User {
+  id: number;
+  username: string;
+}
+
+export default function Profile() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const apiService = useApi();
+
 
   useEffect(() => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-    if (!token) {
+    const userId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
+
+    if (!token || !userId) {
       router.replace("/?message=Please login first.");
-    } else {
-      setAuthorized(true);
+      return;
     }
+
+    setAuthorized(true);
+
+    // Gets the user for showcase the username
+    const fetchUser = async () => {
+      try {
+        const response = await apiService.get<User>(`/users/${userId}`, {
+          Authorization: `Bearer ${token}`,
+        });
+        setUser(response);
+      } catch (error) {
+        console.error("Error during loading of the user:", error);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
@@ -64,7 +91,12 @@ export default function LobbyPage() {
 
   return (
     <div className="min-h-screen bg-[#a34d3f] text-white flex flex-col items-center justify-center px-4">
-      <h1 className="text-7xl font-bold mb-16!">User profile options</h1>
+      <h1 className="text-7xl font-bold mb-10!">User profile options</h1>
+      {user && (
+          <h1 className="text-3xl font-bold mb-10!">
+            Logged in as: {user.username}
+          </h1>
+      )}
       <div className="flex flex-col gap-6 w-full max-w-xs">
         <Button type="primary" size="large" onClick={handleLogout}>
           Logout

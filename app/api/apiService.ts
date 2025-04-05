@@ -131,7 +131,7 @@ export class ApiService {
     const res = await fetch(url, {
       method: "PUT",
       headers,
-      body: JSON.stringify(data),
+      body: data !== undefined ? JSON.stringify(data) : undefined,
     });
 
     const responseData = await this.processResponse<T>(
