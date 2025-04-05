@@ -143,6 +143,20 @@ export default function LobbyPage() {
         setIsTeamModalOpen(false);
     };
 
+    const handleLeaveLobby = async () => {
+      try {
+      await apiService.delete(`/lobby/${id}/${userId}`, {
+        Authorization: `Bearer ${token}`
+      });
+        localStorage.removeItem("isSpymaster");
+        localStorage.removeItem("playerTeam");
+        router.replace('/mainpage');
+      } catch (error) {
+        console.error("Error leaving the lobby:", error);
+        alert("Failed to leave the lobby.");
+      }
+    };
+
     const backgroundColor =
         teamColor === 'red' ? '#ff6161' :
             teamColor === 'blue' ? '#61b5ff' :
@@ -152,7 +166,7 @@ export default function LobbyPage() {
         <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor }}>
             <Card
                 className="p-8 rounded-2xl shadow-xl text-center bg-white/10 backdrop-blur-md"
-                style={{ width: '90%', maxWidth: '500px' }}
+                style={{ width: '90%', maxWidth: '600px' }}
                 title={<h1 className="text-3xl font-bold text-white">Game Lobby</h1>}
                 styles={{ header: { borderBottom: '1px solid #ffffff30' } }}
             >
@@ -188,6 +202,9 @@ export default function LobbyPage() {
                     >
                         Change Team
                     </Button>
+                      <Button danger type="default" onClick={handleLeaveLobby}>
+                        Leave Lobby
+                      </Button>
                 </div>
             </Card>
 
