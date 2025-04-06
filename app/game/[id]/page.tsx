@@ -141,8 +141,20 @@ const GamePage: React.FC = () => {
     <div className="text-center mb-6 mt-6 pt-5!">
       {teamColor === gameData.teamTurn ? (
         !isSpymaster ? (
-          <h1 className="text-4xl font-bold text-white mt-6">
-            Wartet auf den Hinweis von eurem Spymaster...
+          currentHint ? (
+            <div className="text-center mb-6">
+              <p className="text-2xl">
+                Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
+              </p>
+            </div>
+          ) : (
+            <h1 className="text-4xl font-bold text-white mt-6">
+              Wartet auf den Hinweis von eurem Spymaster...
+            </h1>
+          )
+        ) : currentHint ? (
+          <h1 className="text-3xl font-semibold text-white mt-6">
+            Warte bis deine Teammitglieder ihren Zug beendet haben
           </h1>
         ) : (
           <div className="flex flex-col items-center gap-2 mt-6">
@@ -180,6 +192,7 @@ const GamePage: React.FC = () => {
       )}
     </div>
 
+    
     {/* Score display */}
 <div className="flex justify-between items-center w-full px-12 max-w-7xl mx-auto mb-10">
   {/* Blue team */}
@@ -202,14 +215,8 @@ const GamePage: React.FC = () => {
 
     
 
-    {/* Hint display for guessers */}
-    {!isSpymaster && currentHint && (
-      <div className="text-center mb-6">
-        <p className="text-2xl">
-          Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
-        </p>
-      </div>
-    )}
+    
+
 
     {/* Game board */}
     <div className="flex justify-center mt-8">
