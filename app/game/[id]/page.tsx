@@ -34,17 +34,23 @@ const GamePage: React.FC = () => {
   const [currentHint, setCurrentHint] = useState<{ hint: string; wordsCount: number } | null>(null);
 
   const ws = new webSocketService();
-  const isSpymaster = false; // Set to false to test guesser view
-  const teamColor: 'RED' | 'BLUE' = 'BLUE'; //  hardcode for now
+  const [isSpymaster, setIsSpymaster] = useState(false);
+  const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
+
 
   const sendHint = async () => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+  if (!token) {
+    console.error("No token found when trying to send hint.");
+    return;
+  }
     try {
       console.log("sending hint to gameId:", gameId);
       await fetch(`http://localhost:8080/game/${gameId}/hint`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 293a59e7-3b28-4811-8041-ee04ea84c343', // your test token
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           hint: hintText,
@@ -62,12 +68,23 @@ const GamePage: React.FC = () => {
 
   useEffect(() => {
     const fetchGame = async () => {
+      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+      if (!token) {
+      setError("No token found in localStorage.");
+      setLoading(false);
+      return;
+    }
+      const storedColor = localStorage.getItem("playerTeam");
+      setTeamColor(storedColor?.toUpperCase());
+      const role = localStorage.getItem("isSpymaster"); // say it's "true"
+      setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
+
       try {
         const res = await fetch(`http://localhost:8080/game/${gameId}/start`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer 293a59e7-3b28-4811-8041-ee04ea84c343',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
             startingTeam: 'RED',
