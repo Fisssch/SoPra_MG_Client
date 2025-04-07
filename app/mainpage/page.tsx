@@ -55,7 +55,7 @@ export default function Home() {
       let lobby: LobbyResponseDTO;
 
       if (lobbyCode.trim()) {
-        lobby = await apiService.get<LobbyResponseDTO>(`/lobby/by-code/${parseInt(lobbyCode)}`, {
+        lobby = await apiService.get<LobbyResponseDTO>(`/lobby?code=${parseInt(lobbyCode)}`, {
           Authorization: `Bearer ${token}`,
         });
       } else {
