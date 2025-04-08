@@ -64,6 +64,43 @@ const GamePage: React.FC = () => {
       console.error('Error sending hint:', err);
     }
   };
+  const handleGuess = async (word: string) => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    const team = localStorage.getItem("playerTeam")?.toUpperCase(); // e.g. "RED" or "BLUE"
+  
+    if (!token || !team) {
+      console.error("Missing token or team in localStorage.");
+      return;
+    }
+  
+    try {
+      console.log("Sending guess with payload:", {
+        wordStr: word,
+        teamColor: team,
+      });
+      console.log("Expected teamTurn from gameData:", gameData?.teamTurn);      
+      const res = await fetch(`http://localhost:8080/game/${gameId}/guess`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          wordStr: word,
+          teamColor: team,
+        }),
+      });
+  
+      if (!res.ok) {
+        const errorMessage = await res.text(); // try to read the error response body
+        throw new Error(`Guess failed: ${res.status} - ${errorMessage}`);
+      }
+    } catch (err) {
+      console.error("Error making guess:", err);
+    }
+  };
+  
+
   
 
   useEffect(() => {
@@ -108,12 +145,19 @@ const GamePage: React.FC = () => {
       try {
         await ws.connect();
         await ws.subscribe(`/topic/game/${gameId}`, (updatedGame: GameData) => {
-          console.log("🔁 Received update:", updatedGame);
+          console.log("Received update:", updatedGame);
           setGameData(updatedGame);
         });
         await ws.subscribe(`/topic/game/${gameId}/hint`, (receivedHint: { hint: string; wordsCount: number }) => {
           console.log(" Received hint via WebSocket:", receivedHint);
           setCurrentHint(receivedHint);
+        });
+        await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
+          console.log(" Card guessed:", guess);
+          // Optionally: You could highlight the guessed card, or just let the board auto-update via gameData
+        });
+        await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
+          alert(`Game over! Team ${winningTeam} wins!`);
         });
       } catch (e) {
         console.error("WebSocket connection failed:", e);
@@ -238,23 +282,37 @@ const GamePage: React.FC = () => {
 
           return (
             <div
-      key={index}
-      className={`${baseStyles} ${
-        card.guessed
-          ? guessedStyle
-          : isSpymaster
-          ? unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles]
-          : 'bg-amber-100 text-black border-gray-500'
-      }`}
-      style={{
-        overflowWrap: 'break-word',
-        wordBreak: 'break-word',
-        textAlign: 'center', // just to be sure it's centered
-      }}
-    >
-      {card.word}
-    </div>
-  );
+              key={index}
+              onClick={() => {
+                if (
+                  !card.guessed &&
+                  !isSpymaster &&
+                  teamColor === gameData.teamTurn
+                ) {
+                  handleGuess(card.word);
+                }
+              }}
+              className={`${baseStyles} ${
+                card.guessed
+                  ? guessedStyle
+                  : isSpymaster
+                  ? unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles]
+                  : 'bg-amber-100 text-black border-gray-500'
+              } ${
+                !card.guessed && !isSpymaster && teamColor === gameData.teamTurn
+                  ? 'cursor-pointer hover:scale-105'
+                  : 'cursor-not-allowed opacity-50'
+              }`}
+              style={{
+                overflowWrap: 'break-word',
+                wordBreak: 'break-word',
+                textAlign: 'center',
+              }}
+            >
+              {card.word}
+            </div>
+          );
+          
 })}
       </div>
     </div>
