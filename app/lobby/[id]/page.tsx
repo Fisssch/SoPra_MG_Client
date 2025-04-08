@@ -4,298 +4,256 @@ import "@ant-design/v5-patch-for-react-19";
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { Button, Card, Modal, Radio } from 'antd';
+import { Button, Card, Modal } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 
 interface PlayerRoleDTO {
-    role: string;
+  role: string;
 }
-
 interface PlayerTeamDTO {
-    color: string;
+  color: string;
 }
-
 interface ReadyStatusDTO {
-    ready: boolean;
+  ready: boolean;
+}
+interface LobbyInfoDTO {
+  id: number;
+  lobbyName: string;
+  gameMode: string;
+  lobbyCode: number;
 }
 
 export default function LobbyPage() {
-    const router = useRouter();
-    const { id } = useParams();
-    const apiService = useApi();
-    const [role, setRole] = useState<string | null>(null);
-    const [teamColor, setTeamColor] = useState<string | null>(null);
-    const [ready, setReady] = useState<boolean>();
+  const router = useRouter();
+  const { id } = useParams();
+  const apiService = useApi();
 
-    const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
-    const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [teamColor, setTeamColor] = useState<string | null>(null);
+  const [ready, setReady] = useState<boolean>(false);
+  const [lobbyCode, setLobbyCode] = useState<number | null>(null);
 
-    const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
-    const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
-    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-    const userId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
+  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
 
-    const wsS = new webSocketService();
+  const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+  const userId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
 
-    useEffect(() => {
-        const fetchPlayerInfo = async () => {
-            if (!token || !userId || !id) {
-                router.replace('/?message=Missing session data');
-                return;
-            }
+  const wsS = new webSocketService();
 
-            try {
-                const roleRes = await apiService.get<PlayerRoleDTO>(
-                    `/lobby/${id}/role/${userId}`,
-                    { Authorization: `Bearer ${token}` }
-                );
-                setRole(roleRes.role);
-                localStorage.setItem("isSpymaster", String(roleRes.role === "SPYMASTER"));
+  useEffect(() => {
+    const fetchPlayerInfo = async () => {
+      if (!token || !userId || !id) {
+        router.replace('/?message=Missing session data');
+        return;
+      }
 
-                const teamRes = await apiService.get<PlayerTeamDTO>(
-                    `/lobby/${id}/team/${userId}`,
-                    { Authorization: `Bearer ${token}` }
-                );
-                const usersTeam = teamRes.color.toLowerCase();
-                setTeamColor(usersTeam);
-                localStorage.setItem("playerTeam", usersTeam);
+      try {
+        const roleRes = await apiService.get<PlayerRoleDTO>(
+          `/lobby/${id}/role/${userId}`,
+          { Authorization: `Bearer ${token}` }
+        );
+        setRole(roleRes.role);
+        localStorage.setItem("isSpymaster", String(roleRes.role === "SPYMASTER"));
 
-                const readyRes = await apiService.get<ReadyStatusDTO>(
-                    `/lobby/${id}/status/${userId}`,
-                    { Authorization: `Bearer ${token}` }
-                );
-                setReady(readyRes.ready);
+        const teamRes = await apiService.get<PlayerTeamDTO>(
+          `/lobby/${id}/team/${userId}`,
+          { Authorization: `Bearer ${token}` }
+        );
+        const usersTeam = teamRes.color.toLowerCase();
+        setTeamColor(usersTeam);
+        localStorage.setItem("playerTeam", usersTeam);
 
-            } catch (error) {
-                console.error("Error during loading with information of the player:", error);
-                alert("Player information could not be loaded.");
-            }
-        };
+        const readyRes = await apiService.get<ReadyStatusDTO>(
+          `/lobby/${id}/status/${userId}`,
+          { Authorization: `Bearer ${token}` }
+        );
+        setReady(readyRes.ready);
 
-        fetchPlayerInfo();
-    }, [id, token, userId]);
+        const lobbyInfo = await apiService.get<LobbyInfoDTO>(
+          `/lobby/${id}`,
+          { Authorization: `Bearer ${token}` }
+        );
+        setLobbyCode(lobbyInfo.lobbyCode);
+        localStorage.setItem("lobbyCode", lobbyInfo.lobbyCode.toString());
 
-    //websocket
-    useEffect(() => {
-        (async () => {
-            try {
-                await wsS.connect();
-                await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
-                    if (shouldStart) router.push(`/game/${id}`);
-                });
-            } catch (e) {
-                console.error("WebSocket error:", e);
-            }
-        })();
-
-        return () => {
-            wsS.disconnect();
-        };
-    }, [id]);
-
-    //ready button function
-    const handleReadyToggle = async () => {
-        try {
-            const newReady = !ready;
-            await apiService.put<ReadyStatusDTO>(
-                `/lobby/${id}/status/${userId}`,
-                { ready: newReady },
-                { Authorization: `Bearer ${token}` }
-            );
-            setReady(newReady);
-        } catch (error) {
-            console.error("Error during updating of the status:", error);
-            alert("Ready-Status could not be changed.");
-        }
+      } catch (error) {
+        console.error("Error loading player info:", error);
+        alert("Player info could not be loaded.");
+      }
     };
 
-    //Role Change
-    const handleRoleChange = async () => {
-        if (selectedRole && selectedRole !== role) {
-            try {
-                await apiService.put(`/lobby/${id}/role/${userId}`,
-                    { role: selectedRole },
-                    { Authorization: `Bearer ${token}` }
-                );
-                setRole(selectedRole);
-                localStorage.setItem("isSpymaster", String(selectedRole === "SPYMASTER"));
-            } catch (error) {
-                console.error("Error during role change:", error);
-            }
-        }
-        setIsRoleModalOpen(false);
-    };
+    fetchPlayerInfo();
+  }, [id, token, userId]);
 
-    const handleTeamChange = async () => {
-        if (selectedTeam && selectedTeam !== teamColor) {
-            try {
-                await apiService.put(`/lobby/${id}/team/${userId}`,
-                    { color: selectedTeam },
-                    { Authorization: `Bearer ${token}` }
-                );
-                setTeamColor(selectedTeam);
-                localStorage.setItem("playerTeam", selectedTeam);
-            } catch (error) {
-                console.error("Error during team change:", error);
-            }
-        }
-        setIsTeamModalOpen(false);
-    };
+  useEffect(() => {
+    (async () => {
+      try {
+        await wsS.connect();
+        await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
+          if (shouldStart) router.push(`/game/${id}`);
+        });
+      } catch (e) {
+        console.error("WebSocket error:", e);
+      }
+    })();
+    return () => wsS.disconnect();
+  }, [id]);
 
-    const backgroundColor =
-        teamColor === 'red' ? '#ff6161' :
-            teamColor === 'blue' ? '#61b5ff' :
-                '#333';
+  const handleReadyToggle = async () => {
+    try {
+      const newReady = !ready;
+      await apiService.put<ReadyStatusDTO>(
+        `/lobby/${id}/status/${userId}`,
+        { ready: newReady },
+        { Authorization: `Bearer ${token}` }
+      );
+      setReady(newReady);
+    } catch (error) {
+      console.error("Ready toggle failed:", error);
+      alert("Ready status could not be changed.");
+    }
+  };
 
-    return (
-        <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor }}>
-            <Card
-                className="p-8 rounded-2xl shadow-xl text-center bg-white/10 backdrop-blur-md"
-                style={{ width: '90%', maxWidth: '500px' }}
-                title={<h1 className="text-3xl font-bold text-white">Game Lobby</h1>}
-                styles={{ header: { borderBottom: '1px solid #ffffff30' } }}
-            >
-                <div className="text-xl mb-4 flex items-center justify-center gap-2">
-                    <span>Your Role:</span>
-                    <span className="font-semibold">{role ? role : 'Lade...'}</span>
-                </div>
-                {teamColor && (
-                    <p className="text-lg mb-3!">
-                        Your Team: <span className="font-semibold capitalize">{teamColor}</span>
-                    </p>
-                )}
-                <div className="mt-3 mb-2 flex gap-2 justify-center">
-                    <Button
-                        type="default"
-                        onClick={handleReadyToggle}
-                    >
-                        {ready ? 'Ready ✔': 'Click to Ready'}
-                    </Button>
-                    <Button
-                        className={`transition-all ${ready ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                        onClick={() => {
-                            if (!ready) setIsRoleModalOpen(true);
-                        }}
-                    >
-                        Change Role
-                    </Button>
-                    <Button
-                        className={`transition-all ${ready ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                        onClick={() => {
-                            if (!ready) setIsTeamModalOpen(true);
-                        }}
-                    >
-                        Change Team
-                    </Button>
-                </div>
-            </Card>
+  const handleRoleChange = async () => {
+    if (selectedRole && selectedRole !== role) {
+      try {
+        await apiService.put(`/lobby/${id}/role/${userId}`, { role: selectedRole }, {
+          Authorization: `Bearer ${token}`
+        });
+        setRole(selectedRole);
+        localStorage.setItem("isSpymaster", String(selectedRole === "SPYMASTER"));
+      } catch (error) {
+        console.error("Error changing role:", error);
+      }
+    }
+    setIsRoleModalOpen(false);
+  };
 
-            <Modal
-                title={<h2 className="text-center text-black text-xl font-semibold">Choose Role</h2>}
-                open={isRoleModalOpen}
-                footer={null}
-                onCancel={() => setIsRoleModalOpen(false)}
-                centered
-                width={400}
-            >
-                <div className="flex flex-col items-center gap-6 mt-4">
-                    <Radio.Group
-                        value={selectedRole}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="flex gap-4"
-                    >
-                        <Radio.Button
-                            value="SPYMASTER"
-                            className={`w-35 text-center px-4 py-2 rounded-md font-semibold flex items-center justify-center border-2 transition-all
-                                ${selectedRole === "SPYMASTER"
-                                    ? "!border-green-500 !text-green-500 !bg-black"
-                                    : "border-black text-white bg-black"}
-                            `}
-                        >
-                            Spymaster
-                        </Radio.Button>
-                        <Radio.Button
-                            value="FIELD_OPERATIVE"
-                            className={`w-40 text-center px-4 py-2 rounded-md font-semibold flex items-center justify-center border-2 transition-all
-                                ${selectedRole === "FIELD_OPERATIVE"
-                                    ? "!border-green-500 !text-green-500 !bg-black"
-                                    : "border-black text-white bg-black"}
-                            `}
-                        >
-                            Field Operative
-                        </Radio.Button>
-                    </Radio.Group>
+  const handleTeamChange = async () => {
+    if (selectedTeam && selectedTeam !== teamColor) {
+      try {
+        await apiService.put(`/lobby/${id}/team/${userId}`, { color: selectedTeam }, {
+          Authorization: `Bearer ${token}`
+        });
+        setTeamColor(selectedTeam);
+        localStorage.setItem("playerTeam", selectedTeam);
+      } catch (error) {
+        console.error("Error changing team:", error);
+      }
+    }
+    setIsTeamModalOpen(false);
+  };
 
-                    <div className="flex gap-4 justify-center mt-6">
-                        <Button
-                            onClick={() => setIsRoleModalOpen(false)}
-                            className="text-black border-gray-300"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type = "primary"
-                            onClick={handleRoleChange}
-                        >
-                            Confirm
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+  const handleLeaveLobby = async () => {
+    try {
+      await apiService.delete(`/lobby/${id}/${userId}`, {
+        Authorization: `Bearer ${token}`
+      });
+      localStorage.removeItem("isSpymaster");
+      localStorage.removeItem("playerTeam");
+      localStorage.removeItem("lobbyCode");
+      router.replace('/mainpage');
+    } catch (error) {
+      console.error("Error leaving lobby:", error);
+      alert("Could not leave the lobby.");
+    }
+  };
 
-            <Modal
-                title={<h2 className="text-center text-black text-xl font-semibold">Choose Team</h2>}
-                open={isTeamModalOpen}
-                onCancel={() => setIsTeamModalOpen(false)}
-                footer={null}
-                centered
-                width={400}
-            >
-                <div className="flex flex-col items-center gap-6 mt-4">
-                    <Radio.Group
-                        value={selectedTeam}
-                        onChange={(e) => setSelectedTeam(e.target.value)}
-                        className="flex gap-4"
-                    >
-                        <Radio.Button
-                            value="red"
-                            className={`w-35 text-center px-4 py-2 rounded-md font-semibold flex items-center justify-center border-2 transition-all
-                                    ${selectedTeam === "red"
-                                ? "!border-red-400 !text-red-400 !bg-black"
-                                : "border-black text-white bg-black"}
-                                `}
-                        >
-                            Team Red
-                        </Radio.Button>
-                        <Radio.Button
-                            value="blue"
-                            className={`w-40 text-center px-4 py-2 rounded-md font-semibold flex items-center justify-center border-2 transition-all
-                                    ${selectedTeam === "blue"
-                                ? "!border-blue-400 !text-blue-400 !bg-black"
-                                : "border-black text-white bg-black"}
-                                `}
-                            >
-                            Team Blue
-                        </Radio.Button>
-                    </Radio.Group>
+  const backgroundColor =
+    teamColor === 'red' ? '#ff6161' :
+      teamColor === 'blue' ? '#61b5ff' :
+        '#333';
 
-                    <div className="flex gap-4 justify-center mt-6">
-                        <Button
-                            onClick={() => setIsTeamModalOpen(false)}
-                            className="text-black border-gray-300"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            type = "primary"
-                            onClick={handleTeamChange}
-                        >
-                            Confirm
-                        </Button>
-                    </div>
-                </div>
-            </Modal>
+  return (
+    <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor }}>
+      <Card
+        className="p-8 text-center"
+        style={{ width: '100%', maxWidth: 500 }}
+        title={<h1 className="text-2xl font-bold text-white">Game Lobby</h1>}
+      >
+        <p className="text-lg">Your Role: <b>{role ?? "..."}</b></p>
+        <p className="text-lg">Your Team: <b>{teamColor ?? "..."}</b></p>
+        <p className="text-lg">Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
+
+        <div className="mt-4 flex flex-wrap gap-2 justify-center">
+          <Button onClick={handleReadyToggle}>
+            {ready ? "Ready ✔" : "Click to Ready"}
+          </Button>
+          <Button onClick={() => !ready && setIsRoleModalOpen(true)} disabled={ready}>
+            Change Role
+          </Button>
+          <Button onClick={() => !ready && setIsTeamModalOpen(true)} disabled={ready}>
+            Change Team
+          </Button>
+          <Button danger onClick={handleLeaveLobby}>
+            Leave Lobby
+          </Button>
         </div>
-    );
+      </Card>
+
+      {/* Role Modal */}
+      <Modal
+        open={isRoleModalOpen}
+        onCancel={() => setIsRoleModalOpen(false)}
+        footer={null}
+        centered
+        title="Choose Role"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            type={selectedRole === "SPYMASTER" ? "primary" : "default"}
+            onClick={() => setSelectedRole("SPYMASTER")}
+            block
+          >
+            Spymaster
+          </Button>
+          <Button
+            type={selectedRole === "FIELD_OPERATIVE" ? "primary" : "default"}
+            onClick={() => setSelectedRole("FIELD_OPERATIVE")}
+            block
+          >
+            Field Operative
+          </Button>
+          <div className="mt-4 flex gap-3">
+            <Button onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
+            <Button type="primary" onClick={handleRoleChange}>Confirm</Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Team Modal */}
+      <Modal
+        open={isTeamModalOpen}
+        onCancel={() => setIsTeamModalOpen(false)}
+        footer={null}
+        centered
+        title="Choose Team"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            type={selectedTeam === "red" ? "primary" : "default"}
+            onClick={() => setSelectedTeam("red")}
+            block
+          >
+            Team Red
+          </Button>
+          <Button
+            type={selectedTeam === "blue" ? "primary" : "default"}
+            onClick={() => setSelectedTeam("blue")}
+            block
+          >
+            Team Blue
+          </Button>
+          <div className="mt-4 flex gap-3">
+            <Button onClick={() => setIsTeamModalOpen(false)}>Cancel</Button>
+            <Button type="primary" onClick={handleTeamChange}>Confirm</Button>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
 }
