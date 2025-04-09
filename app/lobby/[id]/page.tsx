@@ -33,6 +33,8 @@ export default function LobbyPage() {
   const [ready, setReady] = useState<boolean>(false);
   const [lobbyCode, setLobbyCode] = useState<number | null>(null);
   const [gameMode, setGameMode] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
@@ -43,12 +45,21 @@ export default function LobbyPage() {
   const [isGameModeModalOpen, setIsGameModeModalOpen] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState<string | null>(null);
 
-  const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-  const userId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
+  const [customWords, setCustomWords] = useState<string[]>([]); 
+  const [newCustomWord, setNewCustomWord] = useState<string>('');
 
   const wsS = new webSocketService();
 
+  //load token and id safely if not in a use effect we get an error when reloading the page 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setToken(localStorage.getItem("token")?.replace(/^"|"$/g, "") ?? null);
+      setUserId(localStorage.getItem("id")?.replace(/^"|"$/g, "") ?? null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!token || !userId || !id) return;
     const fetchPlayerInfo = async () => {
       if (!token || !userId || !id) {
         router.replace('/?message=Missing session data');
@@ -119,6 +130,12 @@ export default function LobbyPage() {
         } catch (modeErr) {
           console.error("WebSocket error in gamemode:", modeErr);
         }
+
+        //own words 
+        await wsS.subscribe(`/topic/lobby${id}/customWords`, (updatedCustomWords: string[]) => {
+          console.log("Custom words updated:", updatedCustomWords);
+          setCustomWords(updatedCustomWords);
+        });
 
       } catch (connectionErr) {
         console.error("WebSocket was not able to connect:", connectionErr);
@@ -191,6 +208,21 @@ export default function LobbyPage() {
     }
   };
 
+  const handleAddCustomWord = async () => {
+    if (!newCustomWord.trim()) return; 
+    try {
+      await apiService.put(
+        `/lobby/${id}/customWord`,
+        { word: newCustomWord }, 
+        { Authorization: `Bearer ${token}` }
+      );
+      setNewCustomWord(''); 
+    } catch (error) {
+      console.error("Error adding custom word:", error);
+      alert("Failed to add custom word.");
+    }
+  };
+
   const handleLeaveLobby = async () => {
     try {
       await apiService.delete(`/lobby/${id}/${userId}`, {
@@ -258,6 +290,51 @@ export default function LobbyPage() {
           </Button>
         </div>
       </Card>
+
+      {/* Custom Words only visible when gamemode == OWN_WORDS*/}
+      {gameMode === 'OWN_WORDS' && (
+        <Card
+          className="p-6 text-center"
+          style={{ width: '100%', maxWidth: 400 }}
+          title={<h2 className="text-xl font-bold text-white">Custom Words</h2>}
+        >
+          <div className="mb-4 flex flex-col items-center gap-2">
+          {customWords.length === 0 ? (
+            <p className="text-white">No words added yet.</p>
+          ) : (
+            <div className="flex flex-wrap justify-center gap-2 text-white">
+              {customWords.map((word, index) => (
+                <div
+                  key={index}
+                  className="px-3 py-1 rounded-full border border-white bg-gray-700 text-sm hover:bg-white hover:text-black transition-colors"
+                >
+                  {word}
+                </div>
+              ))}
+            </div>
+            )}
+          </div>
+
+          <div className="flex gap-2 justify-center">
+            <input
+              type="text"
+              value={newCustomWord}
+              onChange={(e) => setNewCustomWord(e.target.value)}
+              placeholder="Enter new word"
+              className="p-2 rounded text-black"
+              style={{ color: 'white', backgroundColor: '#333' }}
+            />
+            <Button 
+              type="primary" 
+              onClick={handleAddCustomWord}
+              disabled={customWords.length >= 25} //when reaching 25 custom words button is no longer available 
+            >
+              Add
+            </Button>
+          </div>
+          <p className="text-xs mt-2 text-white">{customWords.length} / 25 words added</p>
+        </Card>
+      )}
 
       {/* Role Modal */}
       <Modal
