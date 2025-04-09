@@ -22,6 +22,10 @@ interface LobbyInfoDTO {
   gameMode: string;
   lobbyCode: number;
 }
+interface LobbyPlayerStatusDTO {
+  totalPlayers: number;
+  readyPlayers: number;
+}
 
 export default function LobbyPage() {
   const router = useRouter();
@@ -44,6 +48,9 @@ export default function LobbyPage() {
 
   const [isGameModeModalOpen, setIsGameModeModalOpen] = useState(false);
   const [selectedGameMode, setSelectedGameMode] = useState<string | null>(null);
+
+  const [totalPlayers, setTotalPlayers] = useState<number>(0);
+  const [readyPlayers, setReadyPlayers] = useState<number>(0);
 
   const [customWords, setCustomWords] = useState<string[]>([]); 
   const [newCustomWord, setNewCustomWord] = useState<string>('');
@@ -96,6 +103,13 @@ export default function LobbyPage() {
         localStorage.setItem("lobbyCode", lobbyInfo.lobbyCode.toString());
         setGameMode(lobbyInfo.gameMode);
 
+        const statusRes = await apiService.get<LobbyPlayerStatusDTO>(
+            `/lobby/${id}/players/status`,
+            { Authorization: `Bearer ${token}` }
+        );
+        setTotalPlayers(statusRes.totalPlayers);
+        setReadyPlayers(statusRes.readyPlayers);
+
         const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
           Authorization: `Bearer ${token}`
         });
@@ -135,6 +149,16 @@ export default function LobbyPage() {
         } catch (modeErr) {
           console.error("WebSocket error in gamemode:", modeErr);
         }
+
+        //number of player
+        try{
+          await wsS.subscribe(`/topic/lobby${id}/playerStatus`, (status: LobbyPlayerStatusDTO) => {
+            setTotalPlayers(status.totalPlayers);
+            setReadyPlayers(status.readyPlayers);
+          });
+          } catch (countErr) {
+            console.error("WebSocket error with count of players:", countErr);
+          }
 
         //own words 
         await wsS.subscribe(`/topic/lobby${id}/customWords`, (updatedCustomWords: string[]) => {
@@ -271,6 +295,7 @@ export default function LobbyPage() {
           <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
           <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
           <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
+          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
 
           <div className="!mt-2 flex flex-col gap-2 items-center">
             <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
