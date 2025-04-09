@@ -96,6 +96,11 @@ export default function LobbyPage() {
         localStorage.setItem("lobbyCode", lobbyInfo.lobbyCode.toString());
         setGameMode(lobbyInfo.gameMode);
 
+        const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
+          Authorization: `Bearer ${token}`
+        });
+        setCustomWords(existingWords);
+
       } catch (error) {
         console.error("Error loading player info:", error);
         alert("Player info could not be loaded.");
@@ -254,177 +259,181 @@ export default function LobbyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor }}>
-      <Card
-        className="p-8 text-center"
-        style={{ width: '100%', maxWidth: 300 }}
-        title={<h1 className="text-2xl font-bold text-white">Game Lobby</h1>}
-      >
-        <p>Your Role: <b>{formatEnum(role ?? "")}</b></p>
-        <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
-        <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
-        <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
 
-        <div className="!mt-2 flex flex-col gap-2 items-center">
-          <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
-            {ready ? "Ready ✔" : "Click to Ready"}
-          </Button>
-          <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsRoleModalOpen(true)} disabled={ready}>
-            Change Role
-          </Button>
-          <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsTeamModalOpen(true)} disabled={ready}>
-            Change Team
-          </Button>
-          <Button
-              size="small"
-              className="w-48 h-8 text-sm"
-              onClick={() => {
-                setSelectedGameMode(gameMode);
-                setIsGameModeModalOpen(true);
-              }}
-              disabled={ready}
-          >
-            Change GameMode
-          </Button>
-          <Button size="small" danger className="w-48 h-8 text-sm" onClick={handleLeaveLobby}>
-            Leave Lobby
-          </Button>
-        </div>
-      </Card>
+      <div className="flex flex-col items-center gap-8">
 
-      {/* Custom Words only visible when gamemode == OWN_WORDS*/}
-      {gameMode === 'OWN_WORDS' && (
         <Card
-          className="p-6 text-center"
-          style={{ width: '100%', maxWidth: 400 }}
-          title={<h2 className="text-xl font-bold text-white">Custom Words</h2>}
+          className="p-8 text-center"
+          style={{ width: '100%', maxWidth: 300 }}
+          title={<h1 className="text-2xl font-bold text-white">Game Lobby</h1>}
         >
-          <div className="mb-4 flex flex-col items-center gap-2">
-          {customWords.length === 0 ? (
-            <p className="text-white">No words added yet.</p>
-          ) : (
-            <div className="flex flex-wrap justify-center gap-2 text-white">
-              {customWords.map((word, index) => (
-                <div
-                  key={index}
-                  className="px-3 py-1 rounded-full border border-white bg-gray-700 text-sm hover:bg-white hover:text-black transition-colors"
-                >
-                  {word}
-                </div>
-              ))}
-            </div>
-            )}
-          </div>
+          <p>Your Role: <b>{formatEnum(role ?? "")}</b></p>
+          <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
+          <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
+          <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
 
-          <div className="flex gap-2 justify-center">
-            <input
-              type="text"
-              value={newCustomWord}
-              onChange={(e) => setNewCustomWord(e.target.value)}
-              placeholder="Enter new word"
-              className="p-2 rounded text-black"
-              style={{ color: 'white', backgroundColor: '#333' }}
-            />
-            <Button 
-              type="primary" 
-              onClick={handleAddCustomWord}
-              disabled={customWords.length >= 25} //when reaching 25 custom words button is no longer available 
+          <div className="!mt-2 flex flex-col gap-2 items-center">
+            <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
+              {ready ? "Ready ✔" : "Click to Ready"}
+            </Button>
+            <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsRoleModalOpen(true)} disabled={ready}>
+              Change Role
+            </Button>
+            <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsTeamModalOpen(true)} disabled={ready}>
+              Change Team
+            </Button>
+            <Button
+                size="small"
+                className="w-48 h-8 text-sm"
+                onClick={() => {
+                  setSelectedGameMode(gameMode);
+                  setIsGameModeModalOpen(true);
+                }}
+                disabled={ready}
             >
-              Add
+              Change GameMode
+            </Button>
+            <Button size="small" danger className="w-48 h-8 text-sm" onClick={handleLeaveLobby}>
+              Leave Lobby
             </Button>
           </div>
-          <p className="text-xs mt-2 text-white">{customWords.length} / 25 words added</p>
         </Card>
-      )}
 
-      {/* Role Modal */}
-      <Modal
-        open={isRoleModalOpen}
-        onCancel={() => setIsRoleModalOpen(false)}
-        footer={null}
-        centered
-        title={<h2 className="text-black text-center w-full">Choose Role</h2>}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <Button
-            type={selectedRole === "SPYMASTER" ? "primary" : "default"}
-            onClick={() => setSelectedRole("SPYMASTER")}
-            block
+        {/* Custom Words only visible when gamemode == OWN_WORDS*/}
+        {gameMode === 'OWN_WORDS' && (
+          <Card
+            className="p-6 text-center"
+            style={{ width: '100%', maxWidth: 400 }}
+            title={<h2 className="text-xl font-bold text-white">Custom Words</h2>}
           >
-            Spymaster
-          </Button>
-          <Button
-            type={selectedRole === "FIELD_OPERATIVE" ? "primary" : "default"}
-            onClick={() => setSelectedRole("FIELD_OPERATIVE")}
-            block
-          >
-            Field Operative
-          </Button>
-          <div className="mt-4 flex gap-3">
-            <Button onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
-            <Button type="primary" onClick={handleRoleChange}>Confirm</Button>
-          </div>
-        </div>
-      </Modal>
+            <div className="mb-4 flex flex-col items-center gap-2 mb-10">
+            {customWords.length === 0 ? (
+              <p className="text-white">No words added yet.</p>
+            ) : (
+              <div className="flex flex-wrap justify-center gap-2 text-white">
+                {customWords.map((word, index) => (
+                  <div
+                    key={index}
+                    className="px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors"
+                  >
+                    {word}
+                  </div>
+                ))}
+              </div>
+              )}
+            </div>
 
-      {/* Team Modal */}
-      <Modal
-        open={isTeamModalOpen}
-        onCancel={() => setIsTeamModalOpen(false)}
-        footer={null}
-        centered
-        title={<h2 className="text-black text-center w-full">Choose Team</h2>}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <Button
-            type={selectedTeam === "red" ? "primary" : "default"}
-            onClick={() => setSelectedTeam("red")}
-            block
-          >
-            Team Red
-          </Button>
-          <Button
-            type={selectedTeam === "blue" ? "primary" : "default"}
-            onClick={() => setSelectedTeam("blue")}
-            block
-          >
-            Team Blue
-          </Button>
-          <div className="mt-4 flex gap-3">
-            <Button onClick={() => setIsTeamModalOpen(false)}>Cancel</Button>
-            <Button type="primary" onClick={handleTeamChange}>Confirm</Button>
-          </div>
-        </div>
-      </Modal>
+            <div className="flex gap-2 justify-center">
+              <input
+                type="text"
+                value={newCustomWord}
+                onChange={(e) => setNewCustomWord(e.target.value)}
+                placeholder="Enter new word"
+                className="p-2 rounded text-black"
+                style={{ color: 'white', backgroundColor: '#333' }}
+              />
+              <Button 
+                type="primary" 
+                onClick={handleAddCustomWord}
+                disabled={customWords.length >= 25} //when reaching 25 custom words button is no longer available 
+              >
+                Add
+              </Button>
+            </div>
+            <p className="text-xs mt-2 text-white">{customWords.length} / 25 words added</p>
+          </Card>
+        )}
+      </div>
 
-      <Modal
-          open={isGameModeModalOpen}
-          onCancel={() => setIsGameModeModalOpen(false)}
+        {/* Role Modal */}
+        <Modal
+          open={isRoleModalOpen}
+          onCancel={() => setIsRoleModalOpen(false)}
           footer={null}
           centered
-          title={<h2 className="text-black text-center w-full">Choose Game Mode</h2>}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <Button
-              type={selectedGameMode === "CLASSIC" ? "primary" : "default"}
-              onClick={() => setSelectedGameMode("CLASSIC")}
+          title={<h2 className="text-black text-center w-full">Choose Role</h2>}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <Button
+              type={selectedRole === "SPYMASTER" ? "primary" : "default"}
+              onClick={() => setSelectedRole("SPYMASTER")}
               block
-          >
-            Classic
-          </Button>
-          <Button
-              type={selectedGameMode === "OWN_WORDS" ? "primary" : "default"}
-              onClick={() => setSelectedGameMode("OWN_WORDS")}
+            >
+              Spymaster
+            </Button>
+            <Button
+              type={selectedRole === "FIELD_OPERATIVE" ? "primary" : "default"}
+              onClick={() => setSelectedRole("FIELD_OPERATIVE")}
               block
-          >
-            Own Words
-          </Button>
-
-          <div className="mt-4 flex gap-3">
-            <Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
-            <Button type="primary" onClick={handleGameModeChange}>Confirm</Button>
+            >
+              Field Operative
+            </Button>
+            <div className="mt-4 flex gap-3">
+              <Button onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
+              <Button type="primary" onClick={handleRoleChange}>Confirm</Button>
+            </div>
           </div>
-        </div>
-      </Modal>
-    </div>
+        </Modal>
+
+        {/* Team Modal */}
+        <Modal
+          open={isTeamModalOpen}
+          onCancel={() => setIsTeamModalOpen(false)}
+          footer={null}
+          centered
+          title={<h2 className="text-black text-center w-full">Choose Team</h2>}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <Button
+              type={selectedTeam === "red" ? "primary" : "default"}
+              onClick={() => setSelectedTeam("red")}
+              block
+            >
+              Team Red
+            </Button>
+            <Button
+              type={selectedTeam === "blue" ? "primary" : "default"}
+              onClick={() => setSelectedTeam("blue")}
+              block
+            >
+              Team Blue
+            </Button>
+            <div className="mt-4 flex gap-3">
+              <Button onClick={() => setIsTeamModalOpen(false)}>Cancel</Button>
+              <Button type="primary" onClick={handleTeamChange}>Confirm</Button>
+            </div>
+          </div>
+        </Modal>
+
+        <Modal
+            open={isGameModeModalOpen}
+            onCancel={() => setIsGameModeModalOpen(false)}
+            footer={null}
+            centered
+            title={<h2 className="text-black text-center w-full">Choose Game Mode</h2>}
+        >
+          <div className="flex flex-col items-center gap-4">
+            <Button
+                type={selectedGameMode === "CLASSIC" ? "primary" : "default"}
+                onClick={() => setSelectedGameMode("CLASSIC")}
+                block
+            >
+              Classic
+            </Button>
+            <Button
+                type={selectedGameMode === "OWN_WORDS" ? "primary" : "default"}
+                onClick={() => setSelectedGameMode("OWN_WORDS")}
+                block
+            >
+              Own Words
+            </Button>
+
+            <div className="mt-4 flex gap-3">
+              <Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
+              <Button type="primary" onClick={handleGameModeChange}>Confirm</Button>
+            </div>
+          </div>
+        </Modal>
+      </div>
   );
 }
