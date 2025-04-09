@@ -32,12 +32,16 @@ export default function LobbyPage() {
   const [teamColor, setTeamColor] = useState<string | null>(null);
   const [ready, setReady] = useState<boolean>(false);
   const [lobbyCode, setLobbyCode] = useState<number | null>(null);
+  const [gameMode, setGameMode] = useState<string | null>(null);
 
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
 
   const [isTeamModalOpen, setIsTeamModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+
+  const [isGameModeModalOpen, setIsGameModeModalOpen] = useState(false);
+  const [selectedGameMode, setSelectedGameMode] = useState<string | null>(null);
 
   const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
   const userId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
@@ -79,6 +83,7 @@ export default function LobbyPage() {
         );
         setLobbyCode(lobbyInfo.lobbyCode);
         localStorage.setItem("lobbyCode", lobbyInfo.lobbyCode.toString());
+        setGameMode(lobbyInfo.gameMode);
 
       } catch (error) {
         console.error("Error loading player info:", error);
@@ -93,14 +98,36 @@ export default function LobbyPage() {
     (async () => {
       try {
         await wsS.connect();
-        await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
-          if (shouldStart) router.push(`/game/${id}`);
-        });
-      } catch (e) {
-        console.error("WebSocket error:", e);
+
+        // Ready/Start
+        try {
+          await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
+            if (shouldStart) {
+              router.push(`/game/${id}`);
+            }
+          });
+        } catch (startErr) {
+          console.error("WebSocket error during start:", startErr);
+        }
+
+        // GameMode
+        try {
+          await wsS.subscribe(`/topic/lobby${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
+            setGameMode(lobbyDto.gameMode);           // global
+            setSelectedGameMode(lobbyDto.gameMode);   // lokal
+          });
+        } catch (modeErr) {
+          console.error("WebSocket error in gamemode:", modeErr);
+        }
+
+      } catch (connectionErr) {
+        console.error("WebSocket was not able to connect:", connectionErr);
       }
     })();
-    return () => wsS.disconnect();
+
+    return () => {
+      wsS.disconnect();
+    };
   }, [id]);
 
   const handleReadyToggle = async () => {
@@ -148,6 +175,22 @@ export default function LobbyPage() {
     setIsTeamModalOpen(false);
   };
 
+  const handleGameModeChange = async () => {
+    if (selectedGameMode && selectedGameMode !== gameMode) {
+      try {
+        await apiService.put(`/lobby/${id}`, selectedGameMode, {
+          Authorization: `Bearer ${token}`,
+        });
+        setGameMode(selectedGameMode);
+        setIsGameModeModalOpen(false);
+      } catch (err) {
+        console.error("Failed to change game mode", err);
+      }
+    } else {
+      setIsGameModeModalOpen(false);
+    }
+  };
+
   const handleLeaveLobby = async () => {
     try {
       await apiService.delete(`/lobby/${id}/${userId}`, {
@@ -168,28 +211,49 @@ export default function LobbyPage() {
       teamColor === 'blue' ? '#61b5ff' :
         '#333';
 
+  function formatEnum(value?: string) {
+    if (!value) return "...";
+    return value
+        .toLowerCase()
+        .split("_")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center text-white" style={{ backgroundColor }}>
       <Card
         className="p-8 text-center"
-        style={{ width: '100%', maxWidth: 500 }}
+        style={{ width: '100%', maxWidth: 300 }}
         title={<h1 className="text-2xl font-bold text-white">Game Lobby</h1>}
       >
-        <p className="text-lg">Your Role: <b>{role ?? "..."}</b></p>
-        <p className="text-lg">Your Team: <b>{teamColor ?? "..."}</b></p>
-        <p className="text-lg">Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
+        <p>Your Role: <b>{formatEnum(role ?? "")}</b></p>
+        <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
+        <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
+        <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
 
-        <div className="mt-4 flex flex-wrap gap-2 justify-center">
-          <Button onClick={handleReadyToggle}>
+        <div className="!mt-2 flex flex-col gap-2 items-center">
+          <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
             {ready ? "Ready ✔" : "Click to Ready"}
           </Button>
-          <Button onClick={() => !ready && setIsRoleModalOpen(true)} disabled={ready}>
+          <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsRoleModalOpen(true)} disabled={ready}>
             Change Role
           </Button>
-          <Button onClick={() => !ready && setIsTeamModalOpen(true)} disabled={ready}>
+          <Button size="small" className="w-48 h-8 text-sm" onClick={() => !ready && setIsTeamModalOpen(true)} disabled={ready}>
             Change Team
           </Button>
-          <Button danger onClick={handleLeaveLobby}>
+          <Button
+              size="small"
+              className="w-48 h-8 text-sm"
+              onClick={() => {
+                setSelectedGameMode(gameMode);
+                setIsGameModeModalOpen(true);
+              }}
+              disabled={ready}
+          >
+            Change GameMode
+          </Button>
+          <Button size="small" danger className="w-48 h-8 text-sm" onClick={handleLeaveLobby}>
             Leave Lobby
           </Button>
         </div>
@@ -201,7 +265,7 @@ export default function LobbyPage() {
         onCancel={() => setIsRoleModalOpen(false)}
         footer={null}
         centered
-        title="Choose Role"
+        title={<h2 className="text-black text-center w-full">Choose Role</h2>}
       >
         <div className="flex flex-col items-center gap-4">
           <Button
@@ -231,7 +295,7 @@ export default function LobbyPage() {
         onCancel={() => setIsTeamModalOpen(false)}
         footer={null}
         centered
-        title="Choose Team"
+        title={<h2 className="text-black text-center w-full">Choose Team</h2>}
       >
         <div className="flex flex-col items-center gap-4">
           <Button
@@ -251,6 +315,36 @@ export default function LobbyPage() {
           <div className="mt-4 flex gap-3">
             <Button onClick={() => setIsTeamModalOpen(false)}>Cancel</Button>
             <Button type="primary" onClick={handleTeamChange}>Confirm</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+          open={isGameModeModalOpen}
+          onCancel={() => setIsGameModeModalOpen(false)}
+          footer={null}
+          centered
+          title={<h2 className="text-black text-center w-full">Choose Game Mode</h2>}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <Button
+              type={selectedGameMode === "CLASSIC" ? "primary" : "default"}
+              onClick={() => setSelectedGameMode("CLASSIC")}
+              block
+          >
+            Classic
+          </Button>
+          <Button
+              type={selectedGameMode === "OWN_WORDS" ? "primary" : "default"}
+              onClick={() => setSelectedGameMode("OWN_WORDS")}
+              block
+          >
+            Own Words
+          </Button>
+
+          <div className="mt-4 flex gap-3">
+            <Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
+            <Button type="primary" onClick={handleGameModeChange}>Confirm</Button>
           </div>
         </div>
       </Modal>
