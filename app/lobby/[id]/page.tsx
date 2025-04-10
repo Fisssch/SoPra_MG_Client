@@ -142,7 +142,7 @@ export default function LobbyPage() {
 
         // GameMode
         try {
-          await wsS.subscribe(`/topic/lobby${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
+          await wsS.subscribe(`/topic/lobby/${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
             setGameMode(lobbyDto.gameMode);           // global
             setSelectedGameMode(lobbyDto.gameMode);   // lokal
           });
@@ -152,7 +152,7 @@ export default function LobbyPage() {
 
         //number of player
         try{
-          await wsS.subscribe(`/topic/lobby${id}/playerStatus`, (status: LobbyPlayerStatusDTO) => {
+          await wsS.subscribe(`/topic/lobby/${id}/playerStatus`, (status: LobbyPlayerStatusDTO) => {
             setTotalPlayers(status.totalPlayers);
             setReadyPlayers(status.readyPlayers);
           });
@@ -161,7 +161,7 @@ export default function LobbyPage() {
           }
 
         //own words 
-        await wsS.subscribe(`/topic/lobby${id}/customWords`, (updatedCustomWords: string[]) => {
+        await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
           console.log("Custom words updated:", updatedCustomWords);
           setCustomWords(updatedCustomWords);
         });
