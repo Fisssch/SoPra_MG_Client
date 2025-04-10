@@ -190,24 +190,24 @@ const GamePage: React.FC = () => {
   >
     {/* Turn-based message / hint input */}
     <div className="text-center mb-6 mt-6 pt-5!">
+      {/* Turn-based message */}
       {teamColor === gameData.teamTurn ? (
         !isSpymaster ? (
           currentHint ? (
-            <div className="text-center mb-6">
-              <p className="text-2xl">
+            // Field operative sees only the hint if it's their team's turn
+            <div className="text-center mt-8">
+              <p className="text-4xl">
                 Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
               </p>
             </div>
           ) : (
+            // Field operative sees "waiting for hint" if no hint is available
             <h1 className="text-4xl font-bold text-white mt-6">
               Wartet auf den Hinweis von eurem Spymaster...
             </h1>
           )
-        ) : currentHint ? (
-          <h1 className="text-3xl font-semibold text-white mt-6">
-            Warte bis deine Teammitglieder ihren Zug beendet haben
-          </h1>
         ) : (
+          // Spymaster sees the input fields to provide a hint
           <div className="flex flex-col items-center gap-2 mt-6">
             <p className="text-4xl font-bold mb-4">
               Your turn, enter a hint and a number
@@ -237,9 +237,19 @@ const GamePage: React.FC = () => {
           </div>
         )
       ) : (
+        // Opposing team sees "it's the other team's turn"
         <p className="text-4xl font-bold mt-6">
           Das andere Team ist dran...
         </p>
+      )}
+
+      {/* Hint display (always visible to all players except field operative of the active team) */}
+      {currentHint && teamColor !== gameData.teamTurn && (
+        <div className="text-center mt-6!">
+          <p className="text-3xl">
+            Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
+          </p>
+        </div>
       )}
     </div>
 
