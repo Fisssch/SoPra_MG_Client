@@ -99,8 +99,18 @@ reason).
 | **[Silvan Wyss](https://github.com/Fisssch)** | 08.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/e350c6f4ac3ec50d3ef2a76da74ed4da2be26341) | Fixed a bug with the websockets not working properly in the deployed version (on google cloud). | It is quite important for our game, that websockets work. |
 |                    | 08.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/1a9f7f7fc1d87d70efd6e9e0a918d072d7085799) | Fixed multiple bugs within the game logic and also searched for not yet discovered bugs and fixed them as well. | We would prefer it if our game didn't too many bugs. |
 |                    | 09.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/534c7eb5b51fe85928870720f2e095fd2cc173c3) | Refactored / extended a few tests and wrote many new tests. | We want to achieve the required code coverage. |
-| **[Mathis Beeler](https://github.com/beelermathis)** | Date | [Commit 1](link) | Descr | Rel |
-|                    | Date | [Commit 2](link) | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | 07.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/c318bacf09cd653352c6678e096a303b10982ba2) | added tests for user stories: 1,2 & 3 | we want to test our code and achieve the reuqired code coverage |
+|                    | 07.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/d414c7d74524cbf4b83af17685d57cc64e83fd5e) | added tests for user stories: 7 & 15 | we want to test our code and achieve the reuqired code coverage |
+|                    | 08.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/058464f68f570b149420d6f4135a43d259ca5f64) | debugging & fixed bugs in lobby: when players leave lobby they now correctly removed from lobby | we want a working lobby in our game |
+|                    | 08.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/462ae4337026cb79e44935c9661e29132af752b5) | debugging & bug fix: spymaster is now cleared out in team after a role change | we want to have a correctly working role switch function |
+|                    | 08.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/80bcce4d542ed9a8e1c791b788a86c07497b6fda) | debugging & bug fix: team now gets correctly deleted after last player leaves lobby | when no player is in a lobby, then we don't need the lobby anymore |
+|                    | 09.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Server/commit/d6d3f2bd816819caad0e02e75782a4724586fd81) | added new method which counts total players & total ready players in lobby | in our lobby we want to display how many players are in there and how many of them are ready |
+|                    | 09.04.25 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Server/commit/1a78e8508229ba94df40c1393b5544f37f0edbc5) | added new lobby controller endpoint to support displaying own_words when reloading a page | when  players reload the lobby they want to see their own added custom words  |
+|                    | 09.04.25 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Client/commit/1d2f821f37cad3101d710c5486ba04cca5df7a65) | added field in lobby where players can enter custom words if gamemode is correctly set | players want to enter their own words when they play with OWN_WORDS gamemode |
+|                    | 09.04.25 | [Commit 10](https://github.com/Fisssch/SoPra_MG_Client/commit/2aeee12ddd0ab7496b1c188d380ba5bb22b0fa69) | added functionality for correctly adding own words in lobby | the player want to enter and see their own words on livetime |
+|                    | Date | [Commit 6](link) | Descr | Rel |
+|                    | Date | [Commit 6](link) | Descr | Rel |
+|                    | Date | [Commit 6](link) | Descr | Rel |
 | **[Elia Wyrsch](https://github.com/eliawy)** | Date | [Commit 1](link) | Descr | Rel |
 |                    | Date | [Commit 2](link) | Descr | Rel |
 | **[Luis Schmid](https://github.com/LooPyt)** | Date | [Commit 1](link) | Descr | Rel |
