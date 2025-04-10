@@ -170,9 +170,16 @@ const GamePage: React.FC = () => {
     };
   }, [gameId]);
 
-  if (loading) return <div className="p-6 text-lg">Loading game...</div>;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid mb-6"></div>
+        <p className="text-lg font-semibold">Loading game... Please wait.</p>
+      </div>
+    );
+  }
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
-  if (!gameData) return null;
+  if (!gameData) return <div className="p-6 text-red-600">Failed to load game data.</div>;
 
   return (
   <div
