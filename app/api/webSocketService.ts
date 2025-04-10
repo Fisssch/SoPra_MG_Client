@@ -35,7 +35,7 @@ export class webSocketService {
 		});
 	}
 
-	public async onError(error: any) {
+	public onError(error: any) {
 		console.log('error', error);
 	}
 
