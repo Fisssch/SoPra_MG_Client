@@ -161,7 +161,7 @@ export default function LobbyPage() {
           }
 
         //own words 
-        await wsS.subscribe(`/topic/lobby${id}/customWords`, (updatedCustomWords: string[]) => {
+        await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
           console.log("Custom words updated:", updatedCustomWords);
           setCustomWords(updatedCustomWords);
         });
