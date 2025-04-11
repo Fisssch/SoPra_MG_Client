@@ -66,7 +66,7 @@ const GamePage: React.FC = () => {
   };
   const handleGuess = async (word: string) => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-    const team = localStorage.getItem("playerTeam")?.toUpperCase(); // e.g. "RED" or "BLUE"
+    const team = localStorage.getItem("playerTeam")?.toUpperCase(); // e.g., "RED" or "BLUE"
   
     if (!token || !team) {
       console.error("Missing token or team in localStorage.");
@@ -78,7 +78,7 @@ const GamePage: React.FC = () => {
         wordStr: word,
         teamColor: team,
       });
-      console.log("Expected teamTurn from gameData:", gameData?.teamTurn);      
+  
       const res = await fetch(`http://localhost:8080/game/${gameId}/guess`, {
         method: 'PUT',
         headers: {
@@ -92,9 +92,20 @@ const GamePage: React.FC = () => {
       });
   
       if (!res.ok) {
-        const errorMessage = await res.text(); // try to read the error response body
+        const errorMessage = await res.text(); // Try to read the error response body
         throw new Error(`Guess failed: ${res.status} - ${errorMessage}`);
       }
+  
+      // Update the guessed card locally
+      setGameData((prevGameData) => {
+        if (!prevGameData) return prevGameData;
+  
+        const updatedBoard = prevGameData.board.map((card) =>
+          card.word === word ? { ...card, guessed: true } : card
+        );
+  
+        return { ...prevGameData, board: updatedBoard };
+      });
     } catch (err) {
       console.error("Error making guess:", err);
     }
@@ -284,18 +295,21 @@ const GamePage: React.FC = () => {
       <div className="grid grid-cols-5 gap-5 max-w-5xl">
         {gameData.board.map((card, index) => {
           const baseStyles =
-          'flex items-center justify-center text-center break-words w-32 sm:w-36 min-h-[120px] px-6 py-4 text-base font-semibold border-4 rounded-2xl shadow-md transition-all duration-200 leading-tight';
-        
-        
+            'flex items-center justify-center text-center break-words w-32 sm:w-36 min-h-[120px] px-6 py-4 text-base font-semibold border-4 rounded-2xl shadow-md transition-all duration-200 leading-tight';
 
           const unguessedStyles = {
             RED: 'bg-red-600 text-white border-red-800',
             BLUE: 'bg-blue-600 text-white border-blue-800',
             NEUTRAL: 'bg-gray-400 text-white border-gray-500',
-            BLACK: 'bg-black text-white border-grayw-800',
+            BLACK: 'bg-black text-white border-gray-800',
           };
 
-          const guessedStyle = 'bg-white text-black border-gray-300';
+          const guessedStyle = {
+            RED: 'bg-red-300 text-black border-red-500',
+            BLUE: 'bg-blue-300 text-black border-blue-500',
+            NEUTRAL: 'bg-gray-200 text-black border-gray-400',
+            BLACK: 'bg-black text-white border-gray-700',
+          };
 
           return (
             <div
@@ -311,9 +325,9 @@ const GamePage: React.FC = () => {
               }}
               className={`${baseStyles} ${
                 card.guessed
-                  ? guessedStyle
+                  ? guessedStyle[card.color]
                   : isSpymaster
-                  ? unguessedStyles[card.color?.toUpperCase() as keyof typeof unguessedStyles]
+                  ? unguessedStyles[card.color]
                   : 'bg-amber-100 text-black border-gray-500'
               } ${
                 !card.guessed && !isSpymaster && teamColor === gameData.teamTurn
@@ -329,8 +343,7 @@ const GamePage: React.FC = () => {
               {card.word}
             </div>
           );
-          
-})}
+        })}
       </div>
     </div>
   </div>
