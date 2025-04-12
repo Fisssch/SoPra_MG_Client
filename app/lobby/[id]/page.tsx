@@ -22,6 +22,7 @@ interface LobbyInfoDTO {
   lobbyName: string;
   gameMode: string;
   lobbyCode: number;
+  createdAt: string;
 }
 interface LobbyPlayerStatusDTO {
   totalPlayers: number;
@@ -32,6 +33,9 @@ export default function LobbyPage() {
   const router = useRouter();
   const { id } = useParams();
   const apiService = useApi();
+
+  const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
+  const [timerActive, setTimerActive] = useState<boolean>(true);
 
   const [role, setRole] = useState<string | null>(null);
   const [teamColor, setTeamColor] = useState<string | null>(null);
@@ -57,6 +61,22 @@ export default function LobbyPage() {
   const [newCustomWord, setNewCustomWord] = useState<string>('');
 
   const wsS = new webSocketService();
+
+  useEffect(() => {
+    if (!timerActive) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000); // jede Sekunde runterzählen
+
+    return () => clearInterval(interval);
+  }, [timerActive]);
 
   //load token and id safely if not in a use effect we get an error when reloading the page 
   useEffect(() => {
@@ -108,6 +128,12 @@ export default function LobbyPage() {
             `/lobby/${id}/players/status`,
             { Authorization: `Bearer ${token}` }
         );
+        const createdAt = new Date(lobbyInfo.createdAt).getTime();
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - createdAt) / 1000);
+        const remaining = Math.max(0, 600 - elapsedSeconds); // 10 minutes = 600s
+
+        setTimeLeft(remaining);
         setTotalPlayers(statusRes.totalPlayers);
         setReadyPlayers(statusRes.readyPlayers);
 
@@ -166,6 +192,11 @@ export default function LobbyPage() {
           console.log("Custom words updated:", updatedCustomWords);
           setCustomWords(updatedCustomWords);
         });
+          // Auto-close timeout listener
+          await wsS.subscribe(`/topic/lobby/${id}/close`, () => {
+                message.info("Lobby was closed due to inactivity");
+                router.replace('/mainpage?message=Lobby%20closed%20due%20to%20inactivity');
+              });
 
       } catch (connectionErr) {
         console.error("WebSocket was not able to connect:", connectionErr);
@@ -321,7 +352,11 @@ export default function LobbyPage() {
          </div>
 
           <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
-
+          {timeLeft !== null && timeLeft > 0 && (
+            <p className="text-sm text-white mt-2">
+              Lobby will close in <b>{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</b> min
+            </p>
+          )}
           <div className="!mt-2 flex flex-col gap-2 items-center">
             <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
               {ready ? "Ready ✔" : "Click to Ready"}
