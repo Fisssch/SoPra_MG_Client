@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import classNames from 'classnames';
 import { webSocketService } from '../../api/webSocketService';
+import { useApi } from "@/hooks/useApi";
 
 
 type Card = {
@@ -25,6 +26,7 @@ type GameData = {
 const GamePage: React.FC = () => {
   const params = useParams();
   const gameId = params.id;
+  const apiService = useApi();
   
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -45,18 +47,19 @@ const GamePage: React.FC = () => {
     return;
   }
     try {
-      console.log("sending hint to gameId:", gameId);
-      await fetch(`http://localhost:8080/game/${gameId}/hint`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          hint: hintText,
-          wordsCount: hintNumber
-        }),
+      console.log("Sending hint with payload:", {
+        hint: hintText,
+        wordsCount: hintNumber,
+  
       });
+      
+      await apiService.put (`/game/${gameId}/hint`, {
+        hint: hintText,
+        wordsCount: hintNumber,
+      }, {
+          'Authorization': `Bearer ${token}`,
+      });
+      console.log("Hint sent successfully");
   
       setHintText('');
       setHintNumber(0);
@@ -72,30 +75,14 @@ const GamePage: React.FC = () => {
       console.error("Missing token or team in localStorage.");
       return;
     }
-  
     try {
-      console.log("Sending guess with payload:", {
-        wordStr: word,
-        teamColor: team,
-      });
-  
-      const res = await fetch(`http://localhost:8080/game/${gameId}/guess`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          wordStr: word,
-          teamColor: team,
-        }),
-      });
-  
-      if (!res.ok) {
-        const errorMessage = await res.text(); // Try to read the error response body
-        throw new Error(`Guess failed: ${res.status} - ${errorMessage}`);
-      }
-  
+    await apiService.put(`/game/${gameId}/guess`, {
+      wordStr: word,  
+      teamColor: team,
+    }, {
+      'Authorization': `Bearer ${token}`,
+    });
+   
       // Update the guessed card locally
       setGameData((prevGameData) => {
         if (!prevGameData) return prevGameData;
@@ -128,24 +115,18 @@ const GamePage: React.FC = () => {
       setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
 
       try {
-        const res = await fetch(`http://localhost:8080/game/${gameId}/start`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
+        const res = await apiService.post(`/game/${gameId}/start`, {
             startingTeam: 'RED',
-            gameMode: 'NORMAL',
+            gameMode: 'CLASSIC',
             theme: 'default',
-          }),
+          }, {
+            'Authorization': `Bearer ${token}`,
+
         });
 
-        if (!res.ok) throw new Error(`Error: ${res.statusText}`);
-        const data = await res.json();
-        setGameData(data);
-      } catch (err) {
-        setError((err as Error).message);
+        setGameData(res.data);
+      } catch (err: any) {
+        setError(err?.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
