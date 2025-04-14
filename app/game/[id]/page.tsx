@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import classNames from 'classnames';
 import { webSocketService } from '../../api/webSocketService';
 import { useApi } from "@/hooks/useApi";
 
@@ -22,6 +21,11 @@ type GameData = {
   winningTeam: string | null;
   gameMode: string;
 };
+
+type makeGuessDTO = {
+  teamColor: 'RED' | 'BLUE'; 
+  word: string;
+}; 
 
 const GamePage: React.FC = () => {
   const params = useParams();
@@ -110,7 +114,12 @@ const GamePage: React.FC = () => {
       return;
     }
       const storedColor = localStorage.getItem("playerTeam");
-      setTeamColor(storedColor?.toUpperCase());
+      const color = storedColor?.toUpperCase();
+      
+      if (color === "RED" || color === "BLUE"){
+        setTeamColor(color); 
+      }
+
       const role = localStorage.getItem("isSpymaster"); // say it's "true"
       setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
 
@@ -124,7 +133,7 @@ const GamePage: React.FC = () => {
 
         });
 
-        setGameData(res.data);
+        setGameData(res.data as GameData);
       } catch (err: any) {
         setError(err?.response?.data?.message || err.message);
       } finally {
