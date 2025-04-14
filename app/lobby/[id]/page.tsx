@@ -35,7 +35,7 @@ export default function LobbyPage() {
   const apiService = useApi();
 
   const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
-  const [timerActive, setTimerActive] = useState<boolean>(true);
+ // const [timerActive, setTimerActive] = useState<boolean>(true);
 
   const [role, setRole] = useState<string | null>(null);
   const [teamColor, setTeamColor] = useState<string | null>(null);
@@ -63,7 +63,7 @@ export default function LobbyPage() {
   const wsS = new webSocketService();
 
   useEffect(() => {
-    if (!timerActive) return;
+    //if (!timerActive) return;
 
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
@@ -76,7 +76,7 @@ export default function LobbyPage() {
     }, 1000); // jede Sekunde runterzählen
 
     return () => clearInterval(interval);
-  }, [timerActive]);
+  }, []);
 
   //load token and id safely if not in a use effect we get an error when reloading the page 
   useEffect(() => {
