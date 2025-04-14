@@ -151,28 +151,28 @@ const GamePage: React.FC = () => {
         // Subscribe to game board updates
         await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
           console.log("Received updated board:", updatedBoard);
-          setGameData((prevGameData) => ({
-            ...prevGameData,
-            board: updatedBoard,
-          }));
+          setGameData((prevGameData) => {
+            if (!prevGameData) return prevGameData; // Handle null case
+            return {
+              ...prevGameData,
+              board: updatedBoard, // Update the board
+            };
+          });
         });
   
         // Subscribe to team turn updates
         await ws.subscribe(`/topic/game/${gameId}/turn`, (newTurn: { teamTurn: 'RED' | 'BLUE' }) => {
           console.log("Received new turn:", newTurn);
-          setGameData((prevGameData) => ({
-            ...prevGameData,
-            teamTurn: newTurn.teamTurn,
-          }));
+          setGameData((prevGameData) => {
+            if (!prevGameData) return prevGameData; // Handle null case
+            return {
+              ...prevGameData,
+              teamTurn: newTurn.teamTurn, // Update the team turn
+            };
+          });
         });
   
         // Subscribe to hint updates
-        await ws.subscribe(`/topic/game/${gameId}/hint`, (receivedHint: { hint: string; wordsCount: number }) => {
-          console.log("Received hint via WebSocket:", receivedHint);
-          setCurrentHint(receivedHint);
-        });
-  
-        // Subscribe to guesses
         await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
           console.log("Card guessed:", guess);
         });
