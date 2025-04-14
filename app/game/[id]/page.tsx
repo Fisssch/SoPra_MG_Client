@@ -145,9 +145,12 @@ const GamePage: React.FC = () => {
     fetchGame().then(async () => {
       try {
         await ws.connect();
-        await ws.subscribe(`/topic/game/${gameId}`, (updatedGame: GameData) => {
-          console.log("Received update:", updatedGame);
-          setGameData(updatedGame);
+        await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
+          console.log("Received updated board:", updatedBoard);
+          setGameData((prevGameData) => ({
+            ...prevGameData,
+            board: updatedBoard,
+          }));
         });
         await ws.subscribe(`/topic/game/${gameId}/hint`, (receivedHint: { hint: string; wordsCount: number }) => {
           console.log(" Received hint via WebSocket:", receivedHint);
