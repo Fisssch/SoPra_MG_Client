@@ -94,8 +94,8 @@ reason).
 
 ## Contributions Week 3 - 04.04.25 to 10.04.25
 
-| **Student**        | **Date** | **Link to Commit**                                                                                               | **Description**                                            | **Relevance**                                                                                        |
-| ------------------ |----------|------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+| ----------- | -------- | -------------------|-----------------| ------------- |
 | **[Silvan Wyss](https://github.com/Fisssch)** | 08.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/e350c6f4ac3ec50d3ef2a76da74ed4da2be26341)           | Fixed a bug with the websockets not working properly in the deployed version (on google cloud). | It is quite important for our game, that websockets work.                                            |
 |                    | 08.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/1a9f7f7fc1d87d70efd6e9e0a918d072d7085799)           | Fixed multiple bugs within the game logic and also searched for not yet discovered bugs and fixed them as well. | We would prefer it if our game didn't too many bugs.                                                 |
 |                    | 09.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/534c7eb5b51fe85928870720f2e095fd2cc173c3)           | Refactored / extended a few tests and wrote many new tests. | We want to achieve the required code coverage.                                                       |
