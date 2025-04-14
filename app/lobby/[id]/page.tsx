@@ -81,13 +81,13 @@ export default function LobbyPage() {
         setRole(roleRes.role);
         localStorage.setItem("isSpymaster", String(roleRes.role === "SPYMASTER"));
 
-        const teamRes = await apiService.get<PlayerTeamDTO>(
-          `/lobby/${id}/team/${userId}`,
-          { Authorization: `Bearer ${token}` }
-        );
-        const usersTeam = teamRes.color.toLowerCase();
-        setTeamColor(usersTeam);
-        localStorage.setItem("playerTeam", usersTeam);
+                const teamRes = await apiService.get<PlayerTeamDTO>(
+                    `/lobby/${id}/team/${userId}`,
+                    { Authorization: `Bearer ${token}` }
+                );
+                const usersTeam = teamRes.color.toUpperCase();
+                setTeamColor(usersTeam);
+                localStorage.setItem("playerTeam", usersTeam);
 
         const readyRes = await apiService.get<ReadyStatusDTO>(
           `/lobby/${id}/status/${userId}`,
