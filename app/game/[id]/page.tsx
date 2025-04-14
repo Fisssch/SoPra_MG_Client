@@ -159,6 +159,11 @@ const GamePage: React.FC = () => {
             };
           });
         });
+              // Subscribe to hint updates
+      await ws.subscribe(`/topic/game/${gameId}/hint`, (hint: { hint: string; wordsCount: number }) => {
+        console.log("Received new hint:", hint);
+        setCurrentHint(hint);
+      });
   
         // Subscribe to team turn updates
         await ws.subscribe(`/topic/game/${gameId}/turn`, (newTurn: { teamTurn: 'RED' | 'BLUE' }) => {
@@ -245,7 +250,7 @@ const GamePage: React.FC = () => {
               <div className="flex items-center gap-4 mt-2">
                 <input
                   type="text"
-                  placeholder="Enter hint"
+                  placeholder="Gib einen Hinweis ein"
                   className="text-black px-4 py-3 rounded w-64 text-lg"
                   value={hintText}
                   onChange={(e) => setHintText(e.target.value)}
@@ -345,6 +350,10 @@ const GamePage: React.FC = () => {
                   !isSpymaster &&
                   teamColor === gameData.teamTurn
                 ) {
+                  if (!currentHint) {
+                    alert("Warte zuerst auf den Hinweis!");
+                    return;
+                  }
                   handleGuess(card.word);
                 }
               }}
