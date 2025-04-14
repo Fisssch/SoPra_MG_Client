@@ -131,9 +131,26 @@ export default function LobbyPage() {
 
         // Ready/Start
         try {
-          await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
+          await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
             if (shouldStart) {
-              router.push(`/game/${id}`);
+              try {
+                const mytoken = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+                await apiService.post(
+                  `/game/${id}/start`,
+                  {
+                    startingTeam: 'RED',
+                    gameMode: 'CLASSIC',
+                    theme: 'default',
+                  },
+                  {
+                    Authorization: `Bearer ${mytoken}`,
+                  }
+                );
+                router.push(`/game/${id}`);
+              } catch (error) {
+                console.error("Error starting the game:", error);
+                alert("Failed to start the game. Please try again.");
+              }
             }
           });
         } catch (startErr) {

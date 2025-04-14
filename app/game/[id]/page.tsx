@@ -240,7 +240,7 @@ const GamePage: React.FC = () => {
             // Spymaster sees the input fields to provide a hint
             <div className="flex flex-col items-center gap-2 mt-6">
               <p className="text-4xl font-bold mb-4">
-                Your turn, enter a hint and a number
+                Du bist dran, gib ein Hinweis und eine Zahl an!
               </p>
               <div className="flex items-center gap-4 mt-2">
                 <input
@@ -261,14 +261,14 @@ const GamePage: React.FC = () => {
                   onClick={sendHint}
                   className="bg-green-600 px-6 py-3 rounded text-lg font-semibold text-white"
                 >
-                  Give Hint
+                  Hinweis absenden
                 </button>
               </div>
             </div>
           ) : (
             // Message displayed after the hint is submitted
             <p className="text-4xl font-bold text-white mt-6">
-              Hint submitted! Waiting for the field operatives...
+              Hinweis abgegeben! Warte auf die Reaktion des anderen Teams...
             </p>
           )
         )
