@@ -125,7 +125,7 @@ export default function LobbyPage() {
         setGameMode(lobbyInfo.gameMode);
 
         const statusRes = await apiService.get<LobbyPlayerStatusDTO>(
-            `/lobby/${id}/players/status`,
+            `/lobby/${id}/players`,
             { Authorization: `Bearer ${token}` }
         );
         const createdAt = new Date(lobbyInfo.createdAt).getTime();
