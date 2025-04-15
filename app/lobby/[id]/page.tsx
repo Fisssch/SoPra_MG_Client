@@ -55,6 +55,9 @@ export default function LobbyPage() {
   const [customWords, setCustomWords] = useState<string[]>([]); 
   const [newCustomWord, setNewCustomWord] = useState<string>('');
 
+  const [theme, setTheme] = useState<string>('');
+  const [newTheme, setNewTheme] = useState<string>('');
+
   const wsS = new webSocketService();
 
   //load token and id safely if not in a use effect we get an error when reloading the page 
@@ -115,6 +118,11 @@ export default function LobbyPage() {
         });
         setCustomWords(existingWords);
 
+        const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
+          Authorization: `Bearer ${token}`,
+        });
+        setTheme(themeRes.theme);
+
       } catch (error) {
         console.error("Error loading player info:", error);
         alert("Player info could not be loaded.");
@@ -173,19 +181,34 @@ export default function LobbyPage() {
             setTotalPlayers(status.totalPlayers);
             setReadyPlayers(status.readyPlayers);
           });
-          } catch (countErr) {
+        } catch (countErr) {
             console.error("WebSocket error with count of players:", countErr);
-          }
+        }
 
         //own words 
-        await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
-          console.log("Custom words updated:", updatedCustomWords);
-          setCustomWords(updatedCustomWords);
-        });
+        try {
+          await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
+            console.log("Custom words updated:", updatedCustomWords);
+            setCustomWords(updatedCustomWords);
+          });
+        } catch (customWordsErr) {
+          console.error("WebSocket error in customWords:", customWordsErr);
+        }
+
+        //theme
+        try {
+          await wsS.subscribe(`/topic/lobby/${id}/theme`, (receivedTheme: string) => {
+            console.log("Received updated theme:", receivedTheme);
+            setTheme(receivedTheme);
+          });
+        } catch (themeErr) {
+          console.error("Websocket error in theme:", themeErr);
+        }
 
       } catch (connectionErr) {
         console.error("WebSocket was not able to connect:", connectionErr);
       }
+
     })();
 
     return () => {
@@ -269,6 +292,19 @@ export default function LobbyPage() {
     }
   };
 
+  const handleSetTheme = async () => {
+    if (!newTheme.trim()) return;
+    try {
+      await apiService.put(`/lobby/${id}/theme`, { theme: newTheme }, {
+        Authorization: `Bearer ${token}`
+      });
+      setNewTheme(''); // clear the input after sending
+    } catch (error) {
+      console.error("Failed to set theme:", error);
+      alert("Failed to set theme.");
+    }
+  };
+
   const handleLeaveLobby = async () => {
     try {
       await apiService.delete(`/lobby/${id}/${userId}`, {
@@ -312,7 +348,7 @@ export default function LobbyPage() {
           <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
           <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
           <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
-          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
+          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p> 
 
           <div className="!mt-2 flex flex-col gap-2 items-center">
             <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
@@ -385,6 +421,44 @@ export default function LobbyPage() {
             <p className="text-xs mt-2 text-white">{customWords.length} / 25 words added</p>
           </Card>
         )}
+
+        {gameMode === 'THEME' && (
+          <Card
+            className="p-6 text-center"
+            style={{ width: '100%', maxWidth: 400 }}
+            title={<h2 className="text-xl font-bold text-white">Theme</h2>}
+          >
+            <div className="flex flex-col items-center gap-4">
+              {/* Input field */}
+              <input
+                type="text"
+                placeholder="Enter a theme"
+                value={newTheme}
+                onChange={(e) => setNewTheme(e.target.value)}
+                className="p-2 rounded text-black w-64"
+                style={{ backgroundColor: '#333', color: 'white' }}
+              />
+              
+              {/* Submit button */}
+              <Button 
+                type="primary" 
+                onClick={handleSetTheme}
+                disabled={!newTheme.trim()} // Disable if input is empty
+                style ={{color: 'white'}}
+                className="w-32"
+              >
+                Set Theme
+              </Button>
+
+              {/* show the current theme */}
+              {theme && (
+                <p className="text-white text-sm mt-2">Current Theme: <strong>{theme}</strong></p>
+              )}
+            </div>
+          </Card>
+        )}
+
+
       </div>
 
         {/* Role Modal */}
@@ -468,6 +542,13 @@ export default function LobbyPage() {
                 block
             >
               Own Words
+            </Button>
+            <Button
+                type={selectedGameMode === "THEME" ? "primary" : "default"}
+                onClick={() => setSelectedGameMode("THEME")}
+                block
+            >
+              Theme
             </Button>
 
             <div className="mt-4 flex gap-3">
