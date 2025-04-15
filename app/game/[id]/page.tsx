@@ -42,6 +42,7 @@ const GamePage: React.FC = () => {
   const ws = new webSocketService();
   const [isSpymaster, setIsSpymaster] = useState(false);
   const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
+  const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
 
 
   const sendHint = async () => {
@@ -67,6 +68,7 @@ const GamePage: React.FC = () => {
   
       setHintText('');
       setHintNumber(0);
+      setHintSubmitted(true); // Mark hint as submitted
     } catch (err) {
       console.error('Error sending hint:', err);
     }
@@ -124,10 +126,13 @@ const GamePage: React.FC = () => {
       setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
 
       try {
+        //get gamemode & startingteam first
+        const storedGameMode = localStorage.getItem("gameMode") ?? "CLASSIC";
+        const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
+
         const res = await apiService.post(`/game/${gameId}/start`, {
-            startingTeam: 'RED',
-            gameMode: 'CLASSIC',
-            theme: 'default',
+            startingTeam: storedStartingTeam,
+            gameMode: storedGameMode.toUpperCase()
           }, {
             'Authorization': `Bearer ${token}`,
 
@@ -145,18 +150,37 @@ const GamePage: React.FC = () => {
     fetchGame().then(async () => {
       try {
         await ws.connect();
-        await ws.subscribe(`/topic/game/${gameId}`, (updatedGame: GameData) => {
-          console.log("Received update:", updatedGame);
-          setGameData(updatedGame);
+  
+        // Subscribe to game board updates
+        await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
+          console.log("Received updated board:", updatedBoard);
+          setGameData((prevGameData) => {
+            if (!prevGameData) return prevGameData; // Handle null case
+            return {
+              ...prevGameData,
+              board: updatedBoard, // Update the board
+            };
+          });
         });
-        await ws.subscribe(`/topic/game/${gameId}/hint`, (receivedHint: { hint: string; wordsCount: number }) => {
-          console.log(" Received hint via WebSocket:", receivedHint);
-          setCurrentHint(receivedHint);
-        });
+              // Subscribe to hint updates
+      await ws.subscribe(`/topic/game/${gameId}/hint`, (hint: { hint: string; wordsCount: number }) => {
+        console.log("Received new hint:", hint);
+        setCurrentHint(hint);
+      });
+  
+        // Subscribe to guess updates 
         await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
-          console.log(" Card guessed:", guess);
-          // Optionally: You could highlight the guessed card, or just let the board auto-update via gameData
+          console.log("Card guessed:", guess);
+          setGameData((prevGameData) => {
+            if (!prevGameData) return prevGameData; // Handle null case
+            return {
+              ...prevGameData,
+              teamTurn: guess.teamColor, // Update the team turn
+            };
+          });
         });
+  
+        // Subscribe to game completion
         await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
           alert(`Game over! Team ${winningTeam} wins!`);
         });
@@ -170,6 +194,13 @@ const GamePage: React.FC = () => {
       ws.disconnect();
     };
   }, [gameId]);
+
+  useEffect(() => {
+    if (gameData?.teamTurn) {
+      setHintSubmitted(false); // Reset hintSubmitted when the team turn changes
+      setCurrentHint(null); // Clear the current hint when the team turn changes
+    }
+  }, [gameData?.teamTurn]);
 
   if (loading) {
     return (
@@ -208,34 +239,41 @@ const GamePage: React.FC = () => {
             </h1>
           )
         ) : (
-          // Spymaster sees the input fields to provide a hint
-          <div className="flex flex-col items-center gap-2 mt-6">
-            <p className="text-4xl font-bold mb-4">
-              Your turn, enter a hint and a number
-            </p>
-            <div className="flex items-center gap-4 mt-2">
-              <input
-                type="text"
-                placeholder="Enter hint"
-                className="text-black px-4 py-3 rounded w-64 text-lg"
-                value={hintText}
-                onChange={(e) => setHintText(e.target.value)}
-              />
-              <input
-                type="number"
-                placeholder="# words"
-                className="text-black px-2 py-3 rounded w-20 text-lg text-center"
-                value={hintNumber}
-                onChange={(e) => setHintNumber(Number(e.target.value))}
-              />
-              <button
-                onClick={sendHint}
-                className="bg-green-600 px-6 py-3 rounded text-lg font-semibold text-white"
-              >
-                Give Hint
-              </button>
+          !hintSubmitted ? (
+            // Spymaster sees the input fields to provide a hint
+            <div className="flex flex-col items-center gap-2 mt-6">
+              <p className="text-4xl font-bold mb-4">
+                Du bist dran, gib ein Hinweis und eine Zahl an!
+              </p>
+              <div className="flex items-center gap-4 mt-2">
+                <input
+                  type="text"
+                  placeholder="Gib einen Hinweis ein"
+                  className="text-black px-4 py-3 rounded w-64 text-lg"
+                  value={hintText}
+                  onChange={(e) => setHintText(e.target.value)}
+                />
+                <input
+                  type="number"
+                  placeholder="# words"
+                  className="text-black px-2 py-3 rounded w-20 text-lg text-center"
+                  value={hintNumber}
+                  onChange={(e) => setHintNumber(Number(e.target.value))}
+                />
+                <button
+                  onClick={sendHint}
+                  className="bg-green-600 px-6 py-3 rounded text-lg font-semibold text-white"
+                >
+                  Hinweis absenden
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            // Message displayed after the hint is submitted
+            <p className="text-4xl font-bold text-white mt-6">
+              Hinweis abgegeben! Warte auf die Reaktion des anderen Teams...
+            </p>
+          )
         )
       ) : (
         // Opposing team sees "it's the other team's turn"
@@ -310,6 +348,10 @@ const GamePage: React.FC = () => {
                   !isSpymaster &&
                   teamColor === gameData.teamTurn
                 ) {
+                  if (!currentHint) {
+                    alert("Warte zuerst auf den Hinweis!");
+                    return;
+                  }
                   handleGuess(card.word);
                 }
               }}

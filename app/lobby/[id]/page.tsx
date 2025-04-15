@@ -104,8 +104,12 @@ export default function LobbyPage() {
         );
         setLobbyCode(lobbyInfo.lobbyCode);
         localStorage.setItem("lobbyCode", lobbyInfo.lobbyCode.toString());
-        setGameMode(lobbyInfo.gameMode);
 
+        //game mode
+        setGameMode(lobbyInfo.gameMode);
+        localStorage.setItem("gameMode", lobbyInfo.gameMode);
+
+        //player count
         const statusRes = await apiService.get<LobbyPlayerStatusDTO>(
             `/lobby/${id}/players`,
             { Authorization: `Bearer ${token}` }
@@ -113,11 +117,13 @@ export default function LobbyPage() {
         setTotalPlayers(statusRes.totalPlayers);
         setReadyPlayers(statusRes.readyPlayers);
 
+        //custom words
         const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
           Authorization: `Bearer ${token}`
         });
         setCustomWords(existingWords);
 
+        //theme
         const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
           Authorization: `Bearer ${token}`,
         });
@@ -139,9 +145,27 @@ export default function LobbyPage() {
 
         // Ready/Start
         try {
-          await wsS.subscribe(`/topic/lobby/${id}/start`, (shouldStart: boolean) => {
+          await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
             if (shouldStart) {
-              router.push(`/game/${id}`);
+              try {
+                const mytoken = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+                const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
+                localStorage.setItem('startingTeam', startingTeam);
+                await apiService.post(
+                  `/game/${id}/start`,
+                  {
+                    startingTeam: startingTeam,
+                    gameMode: gameMode?.toUpperCase() ?? 'CLASSIC'
+                  },
+                  {
+                    Authorization: `Bearer ${mytoken}`,
+                  }
+                );
+                router.push(`/game/${id}`);
+              } catch (error) {
+                console.error("Error starting the game:", error);
+                alert("Failed to start the game. Please try again.");
+              }
             }
           });
         } catch (startErr) {
@@ -152,7 +176,8 @@ export default function LobbyPage() {
         try {
           await wsS.subscribe(`/topic/lobby/${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
             setGameMode(lobbyDto.gameMode);           // global
-            setSelectedGameMode(lobbyDto.gameMode);   // lokal
+            setSelectedGameMode(lobbyDto.gameMode);   // lokal 
+            localStorage.setItem("gameMode", lobbyDto.gameMode);
           });
         } catch (modeErr) {
           console.error("WebSocket error in gamemode:", modeErr);
