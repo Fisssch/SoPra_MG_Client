@@ -126,10 +126,13 @@ const GamePage: React.FC = () => {
       setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
 
       try {
+        //get gamemode & startingteam first
+        const storedGameMode = localStorage.getItem("gameMode") ?? "CLASSIC";
+        const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
+
         const res = await apiService.post(`/game/${gameId}/start`, {
-            startingTeam: 'RED',
-            gameMode: 'CLASSIC',
-            theme: 'default',
+            startingTeam: storedStartingTeam,
+            gameMode: storedGameMode.toUpperCase()
           }, {
             'Authorization': `Bearer ${token}`,
 
@@ -165,21 +168,16 @@ const GamePage: React.FC = () => {
         setCurrentHint(hint);
       });
   
-        // Subscribe to team turn updates
-        await ws.subscribe(`/topic/game/${gameId}/turn`, (newTurn: { teamTurn: 'RED' | 'BLUE' }) => {
-          console.log("Received new turn:", newTurn);
+        // Subscribe to guess updates 
+        await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
+          console.log("Card guessed:", guess);
           setGameData((prevGameData) => {
             if (!prevGameData) return prevGameData; // Handle null case
             return {
               ...prevGameData,
-              teamTurn: newTurn.teamTurn, // Update the team turn
+              teamTurn: guess.teamColor, // Update the team turn
             };
           });
-        });
-  
-        // Subscribe to hint updates
-        await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
-          console.log("Card guessed:", guess);
         });
   
         // Subscribe to game completion
