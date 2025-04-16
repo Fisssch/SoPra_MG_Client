@@ -235,6 +235,15 @@ export default function LobbyPage() {
 				} catch (themeErr) {
 					console.error('Websocket error in theme:', themeErr);
 				}
+
+				// all players ready but not good to start
+				try {
+					await wsS.subscribe(`/topic/lobby/${id}/readyError`, (reason: string) => {
+						alert(`Could not start game: ${reason}`);
+					});
+				} catch (readyErr) {
+					console.error('Websocket error in readyError:', readyErr);
+				}
 			} catch (connectionErr) {
 				console.error('WebSocket was not able to connect:', connectionErr);
 			}
