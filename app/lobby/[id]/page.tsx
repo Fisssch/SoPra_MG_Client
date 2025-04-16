@@ -377,8 +377,8 @@ export default function LobbyPage() {
 
 
   const backgroundColor =
-    teamColor === 'red' ? '#ff6161' :
-      teamColor === 'blue' ? '#61b5ff' :
+    teamColor === 'RED' ? '#ff6161' :
+      teamColor === 'BLUE' ? '#61b5ff' :
         '#333';
 
   function formatEnum(value?: string) {
@@ -418,8 +418,6 @@ export default function LobbyPage() {
           </div>
           <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
 
-
-          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
           {timeLeft !== null && timeLeft > 0 && (
             <p className="text-sm text-white mt-2">
               Lobby will close in <b>{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</b> min
