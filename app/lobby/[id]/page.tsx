@@ -389,7 +389,7 @@ export default function LobbyPage() {
 		}
 	};
 
-	const backgroundColor = teamColor === 'red' ? '#ff6161' : teamColor === 'blue' ? '#61b5ff' : '#333';
+	const backgroundColor = teamColor === 'RED' ? '#ff6161' : teamColor === 'BLUE' ? '#61b5ff' : '#333';
 
 	function formatEnum(value?: string) {
 		if (!value) return '...';
