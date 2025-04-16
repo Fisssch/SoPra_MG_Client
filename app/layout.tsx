@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import { ConfigProvider, theme } from 'antd';
+import { ConfigProvider, theme, App as AntdApp } from 'antd';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import '@/styles/globals.css';
 
@@ -56,10 +56,16 @@ export default function RootLayout({
 								labelColor: '#fff',
 								algorithm: theme.defaultAlgorithm, // specify a specifc algorithm instead of true/false
 							},
+							Message: {
+								colorText: '#000', // black text for readability
+								colorBgContainer: '#ffffff', // white background
+							},
 							Card: {},
 						},
 					}}>
-					<AntdRegistry>{children}</AntdRegistry>
+					<AntdRegistry>
+						<AntdApp>{children}</AntdApp>
+					</AntdRegistry>
 				</ConfigProvider>
 			</body>
 		</html>

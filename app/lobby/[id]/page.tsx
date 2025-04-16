@@ -4,7 +4,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { Button, Card, Modal, message } from 'antd';
+import { App, Button, Card, Modal, message } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
 
@@ -33,6 +33,7 @@ export default function LobbyPage() {
 	const router = useRouter();
 	const { id } = useParams();
 	const apiService = useApi();
+	const { message } = App.useApp();
 
 	const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
 	// const [timerActive, setTimerActive] = useState<boolean>(true);
