@@ -336,6 +336,18 @@ export default function LobbyPage() {
 		}
 	};
 
+	const handleRemoveCustomWord = async (wordToRemove: string) => {
+		try {
+			await apiService.delete(`/lobby/${id}/customWord`, { word: wordToRemove }, {
+				Authorization: `Bearer ${token}`,
+			});
+			setCustomWords(prevWords => prevWords.filter(word => word !== wordToRemove));
+		} catch (error) {
+			console.error("Error removing custom word:", error);
+			alert("Failed to remove custom word.");
+		}
+	};
+
 	const handleSetTheme = async () => {
 		if (!newTheme.trim()) return;
 		try {
@@ -471,7 +483,8 @@ export default function LobbyPage() {
 					<Card
 						className='p-6 text-center'
 						style={{ width: '100%', maxWidth: 400 }}
-						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}>
+						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}
+					>
 						<div className='mb-4 flex flex-col items-center gap-2 mb-10'>
 							{customWords.length === 0 ? (
 								<p className='text-white'>No words added yet.</p>
@@ -480,8 +493,15 @@ export default function LobbyPage() {
 									{customWords.map((word, index) => (
 										<div
 											key={index}
-											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'>
+											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'
+										>
 											{word}
+											<button
+                							onClick={() => handleRemoveCustomWord(word)}
+                							className="text-red-600 font-bold ml-1"
+              								>
+											×
+											</button>
 										</div>
 									))}
 								</div>

@@ -147,7 +147,11 @@ export class ApiService {
    * @param endpoint - The API endpoint (e.g. "/users/123").
    * @returns JSON data of type T.
    */
-  public async delete<T>(endpoint: string, customHeaders?: HeadersInit): Promise<T> {
+  public async delete<T>(
+    endpoint: string, 
+    data?: unknown,
+    customHeaders?: HeadersInit
+    ): Promise< {data: T; headers: Headers}> {
     const url = `${this.baseURL}${endpoint}`;
     const headers = {
       ...this.defaultHeaders,
@@ -157,11 +161,14 @@ export class ApiService {
     const res = await fetch(url, {
       method: "DELETE",
       headers,
+      body: data!== undefined ? JSON.stringify(data) : undefined,
     });
 
-    return this.processResponse<T>(
+    const responseData = await this.processResponse<T>(
       res,
       "An error occurred while deleting the data.\n",
     );
+
+    return { data: responseData, headers: res.headers };
   }
 }
