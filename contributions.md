@@ -142,6 +142,7 @@ reason).
 |                    | 16.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/1937f55990987a1acb00dbabf36f162b13db09ed) | Now communicating problems when all players are ready via websocket. | We want that when all players are ready but some conditions are not satisfied, that an error is shown to the players. |
 |                    | 16.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/52e59b1d76ad8d4cb78daf79e9a9b5edbce71dad) | When a player leaves the lobby page he is automatically removed from the lobby. | We want to have correct information about who is in the lobby and also want to be able to delete the lobby once no player is in said lobby. |
 |                    | 16.04.25 | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/commit/149e9f53694a62f978f057b1d1c645bada4e0714) | When all players in the lobby are ready but some requirements are not yet met, an error is displayed. | We want the players to know why a game isn't starting even though all players in the lobby are ready. |
+|                    | 16.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/commit/182e7f9870f1766896d59efb1e64fb8f6d028ef5) | Bugfix for auto leave lobby upon leaving the page. | We want the player to be automatically removed from the lobby once he leaves the page. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
