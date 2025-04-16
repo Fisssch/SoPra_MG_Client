@@ -8,24 +8,24 @@ import { useRouter } from 'next/navigation';
 
 
 type Card = {
-  word: string;
-  color: 'RED' | 'BLUE' | 'NEUTRAL' | 'BLACK';
-  guessed: boolean;
+	word: string;
+	color: 'RED' | 'BLUE' | 'NEUTRAL' | 'BLACK';
+	guessed: boolean;
 };
 
 type GameData = {
-  id: number;
-  board: Card[];
-  teamTurn: 'RED' | 'BLUE';
-  status: string;
-  startingTeam: 'RED' | 'BLUE';
-  winningTeam: string | null;
-  gameMode: string;
+	id: number;
+	board: Card[];
+	teamTurn: 'RED' | 'BLUE';
+	status: string;
+	startingTeam: 'RED' | 'BLUE';
+	winningTeam: string | null;
+	gameMode: string;
 };
 
 type makeGuessDTO = {
-  teamColor: 'RED' | 'BLUE';
-  word: string;
+	teamColor: 'RED' | 'BLUE';
+	word: string;
 };
 
 const GamePage: React.FC = () => {
@@ -43,11 +43,10 @@ const GamePage: React.FC = () => {
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
 
-  const ws = new webSocketService();
-  const [isSpymaster, setIsSpymaster] = useState(false);
-  const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
-  const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
-
+	const ws = new webSocketService();
+	const [isSpymaster, setIsSpymaster] = useState(false);
+	const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
+	const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
 
   const sendHint = async () => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -129,13 +128,13 @@ const GamePage: React.FC = () => {
         setHintSubmitted(submitted);
       }
 
-      const role = localStorage.getItem("isSpymaster"); // say it's "true"
-      setIsSpymaster(role === "true"); // becomes setIsSpymaster(true)
+			const role = localStorage.getItem('isSpymaster'); // say it's "true"
+			setIsSpymaster(role === 'true'); // becomes setIsSpymaster(true)
 
-      try {
-        //get gamemode & startingteam first
-        const storedGameMode = localStorage.getItem("gameMode") ?? "CLASSIC";
-        const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
+			try {
+				//get gamemode & startingteam first
+				const storedGameMode = localStorage.getItem('gameMode') ?? 'CLASSIC';
+				const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
 
         const res = await apiService.post(`/game/${gameId}/start`, {
           startingTeam: storedStartingTeam,
@@ -145,13 +144,13 @@ const GamePage: React.FC = () => {
 
         });
 
-        setGameData(res.data as GameData);
-      } catch (err: any) {
-        setError(err?.response?.data?.message || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+				setGameData(res.data as GameData);
+			} catch (err: any) {
+				setError(err?.response?.data?.message || err.message);
+			} finally {
+				setLoading(false);
+			}
+		};
 
     // Fetch initial game data and subscribe to updates
     fetchGame().then(async () => {
@@ -197,11 +196,10 @@ const GamePage: React.FC = () => {
       }
     });
 
-    // Cleanup on unmount
-    return () => {
-      ws.disconnect();
-    };
-  }, [gameId]);
+		return () => {
+			ws.disconnect();
+		};
+	}, [gameId]);
 
   useEffect(() => {
     if (gameData?.teamTurn) {
