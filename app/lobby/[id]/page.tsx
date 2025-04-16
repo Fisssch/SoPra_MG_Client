@@ -325,10 +325,23 @@ export default function LobbyPage() {
 		}
 	};
 
+	const MAX_CUSTOM_WORD_LENGTH = 15;
 	const handleAddCustomWord = async () => {
-		if (!newCustomWord.trim()) return;
+		const trimmedWord = newCustomWord.trim();
+
+		if (!trimmedWord) return;
+
+		if (trimmedWord.length > MAX_CUSTOM_WORD_LENGTH) {
+			alert(`Word is too long (max ${MAX_CUSTOM_WORD_LENGTH} characters).`);
+			return;
+		}
+
 		try {
-			await apiService.put(`/lobby/${id}/customWord`, { word: newCustomWord }, { Authorization: `Bearer ${token}` });
+			await apiService.put(
+				`/lobby/${id}/customWord`,
+				{ word: trimmedWord },
+				{ Authorization: `Bearer ${token}` }
+			);
 			setNewCustomWord('');
 		} catch (error) {
 			console.error('Error adding custom word:', error);
@@ -495,10 +508,11 @@ export default function LobbyPage() {
 											key={index}
 											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'
 										>
-											{word}
+											<span>{word}</span>
 											<button
                 							onClick={() => handleRemoveCustomWord(word)}
-                							className="text-red-600 font-bold ml-1"
+                							className="text-red-500 hover:text-red-700 font-bold ml-1 p-0 m-0 bg-transparent border-none outline-none"
+      										style={{ lineHeight: '1' }}
               								>
 											×
 											</button>
