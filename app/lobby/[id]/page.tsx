@@ -64,7 +64,6 @@ export default function LobbyPage() {
 	const [newTheme, setNewTheme] = useState<string>('');
 
 	const wsS = new webSocketService();
-	const [isNavigationToGame, setIsNavigationToGame] = useState<boolean>(false);
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -99,6 +98,7 @@ export default function LobbyPage() {
 			}
 
 			try {
+				localStorage.setItem('_preventLeave', 'false');
 				const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
 				setRole(roleRes.role);
 				localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
@@ -173,7 +173,7 @@ export default function LobbyPage() {
 										Authorization: `Bearer ${mytoken}`,
 									},
 								);
-								setIsNavigationToGame(true);
+								localStorage.setItem('_preventLeave', 'true');
 								router.push(`/game/${id}`);
 							} catch (error) {
 								console.error('Error starting the game:', error);
@@ -251,7 +251,8 @@ export default function LobbyPage() {
 
 		return () => {
 			try {
-				if (!isNavigationToGame) handleLeave(); // Clean up on unmount
+				const notPreventLeave = localStorage.getItem('_preventLeave') === 'false';
+				if (notPreventLeave) handleLeave(); // Clean up on unmount
 			} catch (err) {
 				console.error('Error leaving lobby:', err);
 			}
@@ -353,17 +354,22 @@ export default function LobbyPage() {
 	};
 
 	const handleLeave = async () => {
-		await apiService.delete(`/lobby/${id}/${userId}`, {
-			Authorization: `Bearer ${token}`,
-		});
+		const playerId = localStorage.getItem('id')?.replace(/^"|"$/g, '');
+		const playerToken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
+		if (playerId && playerToken)
+			await apiService.delete(`/lobby/${id}/${playerId}`, {
+				Authorization: `Bearer ${playerToken}`,
+			});
 		localStorage.removeItem('isSpymaster');
 		localStorage.removeItem('playerTeam');
 		localStorage.removeItem('lobbyCode');
+		localStorage.removeItem('_preventLeave');
 	};
 
 	const handleLeaveLobby = async () => {
 		try {
-			handleLeave();
+			localStorage.setItem('_preventLeave', 'true');
+			await handleLeave();
 			router.replace('/mainpage');
 		} catch (error) {
 			console.error('Error leaving lobby:', error);
@@ -425,14 +431,7 @@ export default function LobbyPage() {
 							{readyPlayers}/{totalPlayers}
 						</b>
 					</p>
-
-					<p>
-						Players Ready:{' '}
-						<b>
-							{readyPlayers}/{totalPlayers}
-						</b>
-					</p>
-					{timeLeft !== null && timeLeft > 0 && (
+					{timeLeft && timeLeft > 0 && (
 						<p className='text-sm text-white mt-2'>
 							Lobby will close in{' '}
 							<b>
