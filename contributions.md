@@ -132,9 +132,23 @@ reason).
 
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
+## Contributions Week 4 - 11.04.25 to 17.04.25
 
-_Continue with the same table format as above._
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+| ----------- | -------- | -------------------|-----------------| ------------- |
+| **[Silvan Wyss](https://github.com/Fisssch)** | 15.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/3985487c08bb7354b375525c94dfa611666427e8) | Made some changes to the implementation to add missing elements / prevent potential bugs. | We want to have a correctly working implementation. |
+|                    | 16.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/9d5aae72a493892933b089c6c93e8a10d67786b9) | Made some changes to the implementation to add missing elements / prevent potential bugs. | We want to have a correctly working implementation. |
+|                    | 16.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/a2f5186eb585b4373e7a530ec3b8e56d3a82333d) | Resolved merge conflicts. | If merge conflicts aren't fixed, it's hard to merge and our program can't be improved. |
+|                    | 16.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/1937f55990987a1acb00dbabf36f162b13db09ed) | Now communicating problems when all players are ready via websocket. | We want that when all players are ready but some conditions are not satisfied, that an error is shown to the players. |
+|                    | 16.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/0afd750f4226f3d24e97c5a5dd140649739cf64e) | When a player leaves the lobby page he is automatically removed from the lobby. | We want to have correct information about who is in the lobby and also want to be able to delete the lobby once no player is in said lobby. |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
 
 ---
 
