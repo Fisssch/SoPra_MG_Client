@@ -352,9 +352,9 @@ export default function LobbyPage() {
 
 	const handleRemoveCustomWord = async (wordToRemove: string) => {
 		try {
-			await apiService.delete(`/lobby/${id}/customWord`, { word: wordToRemove }, {
+			await apiService.put(`/lobby/${id}/customWord/remove`, { word: wordToRemove }, {
 				Authorization: `Bearer ${token}`,
-			});
+			  });
 			setCustomWords(prevWords => prevWords.filter(word => word !== wordToRemove));
 		} catch (error) {
 			console.error("Error removing custom word:", error);
