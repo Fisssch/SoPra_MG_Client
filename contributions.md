@@ -145,8 +145,14 @@ reason).
 |                    | 16.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/commit/182e7f9870f1766896d59efb1e64fb8f6d028ef5) | Bugfix for auto leave lobby upon leaving the page. | We want the player to be automatically removed from the lobby once he leaves the page. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | 11.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/99eaca2a6baa5466520a09fe20c6fe421d3c425f) | Changed the structure of the requests to the backend and other stuff in order for the deployment to work. | It is crucial that the deployment on Vercel works. |
+|                    | 14.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/20dfd6807d6d78f70bb9736dd0a46c3d470c96a7) | Added a websocket for the gameboard in order to update the gameboard correctly. | Its important that every player sees the correct gameboard all the time and in real time. |
+|                    | 14.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/e5684995693afd79b70608a873b0ba0dfdec5ce9) | Implemented a solution that the teamturn also gets displayed directly in realtime to the users via websocket. | Important for the game logic that every player has the right methods to make guesses or give hints at the correct time. |
+|                    | 14.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/13cbd6c298f43de3c0d1e28ddd34895345afdf5b) | fixed gamestart bug so that all players get  the same words after the gamestart | Its important that all the players see the correctly loaded board right away and don't have to reload it on game start. |
+|                    | 14.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/3d4ba059b424c76866cb382b771304b4bb6ffb92) | Added better error messages and fixed vercel deployment problems. | User should see correct error messages when trying to do unallowed stuff. |
+|                    | 14.04.25 | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/commit/30b1b29d60f89d3fbf6cbfef1cad233f57ffc01e) | Player now can only make a guess after the hint is given and not upfront. | Player should first wait for the spymaster to make a guess before he can guess. |
+|                    | 14.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Server/commit/c6b8fdaa122038383d8b136c4396b987bac09f33) | Implemented the websocket for the gameboard on the server side. | Websocket should always send the new gameboard after the gameboard changes caused by guesses of the players. |
+
 | **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
