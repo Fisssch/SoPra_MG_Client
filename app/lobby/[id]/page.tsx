@@ -4,8 +4,9 @@ import "@ant-design/v5-patch-for-react-19";
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { Button, Card, Modal } from 'antd';
+import { Button, Card, Modal, message } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
+import { CopyOutlined } from '@ant-design/icons';
 
 interface PlayerRoleDTO {
   role: string;
@@ -21,6 +22,7 @@ interface LobbyInfoDTO {
   lobbyName: string;
   gameMode: string;
   lobbyCode: number;
+  createdAt: string;
 }
 interface LobbyPlayerStatusDTO {
   totalPlayers: number;
@@ -31,6 +33,9 @@ export default function LobbyPage() {
   const router = useRouter();
   const { id } = useParams();
   const apiService = useApi();
+
+  const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
+ // const [timerActive, setTimerActive] = useState<boolean>(true);
 
   const [role, setRole] = useState<string | null>(null);
   const [teamColor, setTeamColor] = useState<string | null>(null);
@@ -59,6 +64,22 @@ export default function LobbyPage() {
   const [newTheme, setNewTheme] = useState<string>('');
 
   const wsS = new webSocketService();
+
+  useEffect(() => {
+    //if (!timerActive) return;
+
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000); // jede Sekunde runterzählen
+
+    return () => clearInterval(interval);
+  }, []);
 
   //load token and id safely if not in a use effect we get an error when reloading the page 
   useEffect(() => {
@@ -114,6 +135,12 @@ export default function LobbyPage() {
             `/lobby/${id}/players`,
             { Authorization: `Bearer ${token}` }
         );
+        const createdAt = new Date(lobbyInfo.createdAt).getTime();
+        const now = Date.now();
+        const elapsedSeconds = Math.floor((now - createdAt) / 1000);
+        const remaining = Math.max(0, 600 - elapsedSeconds); // 10 minutes = 600s
+
+        setTimeLeft(remaining);
         setTotalPlayers(statusRes.totalPlayers);
         setReadyPlayers(statusRes.readyPlayers);
 
@@ -193,7 +220,7 @@ export default function LobbyPage() {
             console.error("WebSocket error with count of players:", countErr);
         }
 
-        //own words 
+        // custom words
         try {
           await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
             console.log("Custom words updated:", updatedCustomWords);
@@ -203,7 +230,17 @@ export default function LobbyPage() {
           console.error("WebSocket error in customWords:", customWordsErr);
         }
 
-        //theme
+        // Auto-close timeout listener
+        try {
+          await wsS.subscribe(`/topic/lobby/${id}/close`, () => {
+            message.info("Lobby was closed due to inactivity");
+            router.replace('/mainpage?message=Lobby%20closed%20due%20to%20inactivity');
+          });
+        } catch (closeErr) {
+          console.error("WebSocket error on close:", closeErr);
+        }
+
+        // theme
         try {
           await wsS.subscribe(`/topic/lobby/${id}/theme`, (receivedTheme: string) => {
             console.log("Received updated theme:", receivedTheme);
@@ -212,7 +249,6 @@ export default function LobbyPage() {
         } catch (themeErr) {
           console.error("Websocket error in theme:", themeErr);
         }
-
       } catch (connectionErr) {
         console.error("WebSocket was not able to connect:", connectionErr);
       }
@@ -327,6 +363,18 @@ export default function LobbyPage() {
       alert("Could not leave the lobby.");
     }
   };
+   const handleCopyLobbyCode = async () => {
+     if (lobbyCode !== null) {
+       try {
+         await navigator.clipboard.writeText(lobbyCode.toString());
+         message.success("Lobby code copied!");
+       } catch (err) {
+         console.error("Failed to copy lobby code:", err);
+         message.error("Could not copy the code.");
+       }
+     }
+   };
+
 
   const backgroundColor =
     teamColor === 'red' ? '#ff6161' :
@@ -355,9 +403,28 @@ export default function LobbyPage() {
           <p>Your Role: <b>{formatEnum(role ?? "")}</b></p>
           <p>Your Team: <b>{formatEnum(teamColor ?? "")}</b></p>
           <p>Gamemode: <b>{formatEnum(gameMode ?? "")}</b></p>
-          <p>Lobby Code: <b>{lobbyCode ?? "..."}</b></p>
-          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p> 
+          
+          <div className="flex items-center gap-2 justify-center mt-2">
+            <span>Lobby Code:</span>
+            {lobbyCode && (
+              <Button
+                size="small"
+                type="default"
+                onClick={handleCopyLobbyCode}
+              >
+                {lobbyCode} <CopyOutlined />
+              </Button>
+            )}
+          </div>
+          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
 
+
+          <p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
+          {timeLeft !== null && timeLeft > 0 && (
+            <p className="text-sm text-white mt-2">
+              Lobby will close in <b>{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</b> min
+            </p>
+          )}
           <div className="!mt-2 flex flex-col gap-2 items-center">
             <Button size="small" className="w-48 h-8 text-sm" onClick={handleReadyToggle}>
               {ready ? "Ready ✔" : "Click to Ready"}
