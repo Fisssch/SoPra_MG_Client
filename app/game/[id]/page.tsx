@@ -33,7 +33,8 @@ const GamePage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const gameId = params.id as string;
-  const apiService = useApi();
+  const apiService = useApi(); 
+  const ws = new webSocketService();
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ const GamePage: React.FC = () => {
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
 
-	const ws = new webSocketService();
+
 	const [isSpymaster, setIsSpymaster] = useState(false);
 	const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
 	const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
@@ -190,7 +191,7 @@ const GamePage: React.FC = () => {
         // Subscribe to game completion
         await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
           localStorage.setItem("winningTeam", winningTeam);
-          router.push(`/result/${gameId}`);
+          router.replace(`/result/${gameId}`);
         });
       } catch (e) {
         console.error("WebSocket connection failed:", e);
