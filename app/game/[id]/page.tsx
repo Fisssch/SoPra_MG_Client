@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { webSocketService } from '../../api/webSocketService';
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from 'next/navigation';
+import { App, message } from 'antd';
 
 
 type Card = {
@@ -35,6 +36,8 @@ const GamePage: React.FC = () => {
   const gameId = params.id as string;
   const apiService = useApi(); 
   const ws = new webSocketService();
+  const { message } = App.useApp();
+
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +80,25 @@ const GamePage: React.FC = () => {
 
     } catch (err) {
       console.error('Error sending hint:', err);
+    
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof err.message === 'string' &&
+        'status' in err &&
+        typeof (err as any).status === 'number'
+      ) {
+        const status = (err as any).status;
+        const messageText = (err as any).message;
+    
+        if (status === 400 && messageText.includes("Hint cannot be empty")) {
+          message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
+          return;
+        }
+      }
+    
+      message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
   const handleGuess = async (word: string) => {

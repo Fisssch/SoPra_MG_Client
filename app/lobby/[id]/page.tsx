@@ -240,7 +240,7 @@ export default function LobbyPage() {
 				// all players ready but not good to start
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/readyError`, (reason: string) => {
-						alert(`Could not start game: ${reason}`);
+						message.error(`Could not start game: ${reason}`);
 					});
 				} catch (readyErr) {
 					console.error('Websocket error in readyError:', readyErr);
@@ -284,8 +284,15 @@ export default function LobbyPage() {
 				);
 				setRole(selectedRole);
 				localStorage.setItem('isSpymaster', String(selectedRole === 'SPYMASTER'));
-			} catch (error) {
-				console.error('Error changing role:', error);
+			} catch (err: any) {
+				const status = err?.status;
+				const msg = err?.message || '';
+			  
+				if (status === 409 && msg.includes("spymaster")) {
+				  message.error("Dieses Team hat bereits einen Spymaster.");
+				} else {
+				  message.error("Ein Fehler ist aufgetreten beim Rollenwechsel.");
+				}
 			}
 		}
 		setIsRoleModalOpen(false);
