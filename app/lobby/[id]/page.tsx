@@ -1,12 +1,13 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { App, Button, Card, Modal, message } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
+
 
 interface PlayerRoleDTO {
 	role: string;
@@ -90,63 +91,59 @@ export default function LobbyPage() {
 		}
 	}, []);
 
+	const fetchPlayerInfo = useCallback(async () => {
+		if (!token || !userId || !id) {
+			router.replace('/?message=Missing session data');
+			return;
+		}
+	
+		try {
+			localStorage.setItem('_preventLeave', 'false');
+	
+			const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
+			setRole(roleRes.role);
+			localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
+	
+			const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, { Authorization: `Bearer ${token}` });
+			const usersTeam = teamRes.color.toUpperCase();
+			setTeamColor(usersTeam);
+			localStorage.setItem('playerTeam', usersTeam);
+	
+			const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
+			setReady(readyRes.ready);
+	
+			const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, { Authorization: `Bearer ${token}` });
+			setLobbyCode(lobbyInfo.lobbyCode);
+			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
+			setGameMode(lobbyInfo.gameMode);
+			localStorage.setItem('gameMode', lobbyInfo.gameMode);
+	
+			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
+			const createdAt = new Date(lobbyInfo.createdAt).getTime();
+			const now = Date.now();
+			const remaining = Math.max(0, 600 - Math.floor((now - createdAt) / 1000));
+			setTimeLeft(remaining);
+			setTotalPlayers(statusRes.totalPlayers);
+			setReadyPlayers(statusRes.readyPlayers);
+	
+			const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
+				Authorization: `Bearer ${token}`,
+			});
+			setCustomWords(existingWords);
+	
+			const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
+				Authorization: `Bearer ${token}`,
+			});
+			setTheme(themeRes.theme);
+	
+		} catch (error) {
+			console.error('Error loading player info:', error);
+			alert('Player info could not be loaded.');
+		}
+	}, [token, userId, id]);
+
 	useEffect(() => {
 		if (!token || !userId || !id) return;
-		const fetchPlayerInfo = async () => {
-			if (!token || !userId || !id) {
-				router.replace('/?message=Missing session data');
-				return;
-			}
-
-			try {
-				localStorage.setItem('_preventLeave', 'false');
-				const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
-				setRole(roleRes.role);
-				localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
-
-				const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, { Authorization: `Bearer ${token}` });
-				const usersTeam = teamRes.color.toUpperCase();
-				setTeamColor(usersTeam);
-				localStorage.setItem('playerTeam', usersTeam);
-
-				const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
-				setReady(readyRes.ready);
-
-				const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, { Authorization: `Bearer ${token}` });
-				setLobbyCode(lobbyInfo.lobbyCode);
-				localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
-
-				//game mode
-				setGameMode(lobbyInfo.gameMode);
-				localStorage.setItem('gameMode', lobbyInfo.gameMode);
-
-				//player count
-				const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
-				const createdAt = new Date(lobbyInfo.createdAt).getTime();
-				const now = Date.now();
-				const elapsedSeconds = Math.floor((now - createdAt) / 1000);
-				const remaining = Math.max(0, 600 - elapsedSeconds); // 10 minutes = 600s
-
-				setTimeLeft(remaining);
-				setTotalPlayers(statusRes.totalPlayers);
-				setReadyPlayers(statusRes.readyPlayers);
-
-				//custom words
-				const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
-					Authorization: `Bearer ${token}`,
-				});
-				setCustomWords(existingWords);
-
-				//theme
-				const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
-					Authorization: `Bearer ${token}`,
-				});
-				setTheme(themeRes.theme);
-			} catch (error) {
-				console.error('Error loading player info:', error);
-				alert('Player info could not be loaded.');
-			}
-		};
 
 		fetchPlayerInfo();
 	}, [id, token, userId]);
@@ -306,9 +303,9 @@ export default function LobbyPage() {
 					{ color: selectedTeam },
 					{
 						Authorization: `Bearer ${token}`,
-					},
+					}
 				);
-				setTeamColor(selectedTeam);
+				await fetchPlayerInfo(); 
 				localStorage.setItem('playerTeam', selectedTeam);
 			} catch (error) {
 				console.error('Error changing team:', error);
