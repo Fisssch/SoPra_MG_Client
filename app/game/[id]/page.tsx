@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { webSocketService } from '../../api/webSocketService';
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from 'next/navigation';
+import { App } from 'antd';
 
 
 type Card = {
@@ -33,7 +34,10 @@ const GamePage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const gameId = params.id as string;
-  const apiService = useApi();
+  const apiService = useApi(); 
+  const ws = new webSocketService();
+  const { message } = App.useApp();
+
 
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +48,7 @@ const GamePage: React.FC = () => {
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
 
-	const ws = new webSocketService();
+
 	const [isSpymaster, setIsSpymaster] = useState(false);
 	const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
 	const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
@@ -76,6 +80,25 @@ const GamePage: React.FC = () => {
 
     } catch (err) {
       console.error('Error sending hint:', err);
+    
+      if (
+        typeof err === 'object' &&
+        err !== null &&
+        'message' in err &&
+        typeof err.message === 'string' &&
+        'status' in err &&
+        typeof (err as any).status === 'number'
+      ) {
+        const status = (err as any).status;
+        const messageText = (err as any).message;
+    
+        if (status === 400 && messageText.includes("Hint cannot be empty")) {
+          message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
+          return;
+        }
+      }
+    
+      message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
   const handleGuess = async (word: string) => {
@@ -190,7 +213,7 @@ const GamePage: React.FC = () => {
         // Subscribe to game completion
         await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
           localStorage.setItem("winningTeam", winningTeam);
-          router.push(`/result/${gameId}`);
+          router.replace(`/result/${gameId}`);
         });
       } catch (e) {
         console.error("WebSocket connection failed:", e);

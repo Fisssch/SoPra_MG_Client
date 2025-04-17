@@ -9,6 +9,7 @@ import {useEffect, useState} from "react";
 export default function Result() {
     const router = useRouter();
     const [authorized, setAuthorized] = useState<boolean | null>(null);
+    const [winningTeam, setWinningTeam] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -17,6 +18,10 @@ export default function Result() {
         } else {
             setAuthorized(true);
         }
+        //getting winning team and lobby id 
+        const storedWinningTeam = localStorage.getItem("winningTeam");
+        if (storedWinningTeam) setWinningTeam(storedWinningTeam);
+
     }, []);
 
     if (authorized === null) {
@@ -54,7 +59,8 @@ export default function Result() {
     return (
         <div className="min-h-screen bg-[#a34d3f] text-white relative flex flex-col items-center px-4 pt-16">
 
-            <h1 className="text-8xl font-extrabold mt-32! mb-32!">Team ... has won!</h1>
+            <h1 className="text-8xl font-extrabold mt-32! mb-32!">
+                Team {winningTeam?.toUpperCase()} has won!</h1>
 
             <div className="flex gap-6">
                 <Button
