@@ -4,7 +4,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { Button, Card, Modal, message } from 'antd';
+import { App, Button, Card, Modal } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
 
@@ -33,6 +33,7 @@ export default function LobbyPage() {
 	const router = useRouter();
 	const { id } = useParams();
 	const apiService = useApi();
+	const { message } = App.useApp();
 
 	const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
 	// const [timerActive, setTimerActive] = useState<boolean>(true);
@@ -325,14 +326,39 @@ export default function LobbyPage() {
 		}
 	};
 
+	const MAX_CUSTOM_WORD_LENGTH = 15;
 	const handleAddCustomWord = async () => {
-		if (!newCustomWord.trim()) return;
+		const trimmedWord = newCustomWord.trim();
+
+		if (!trimmedWord) return;
+
+		if (trimmedWord.length > MAX_CUSTOM_WORD_LENGTH) {
+			alert(`Word is too long (max ${MAX_CUSTOM_WORD_LENGTH} characters).`);
+			return;
+		}
+
 		try {
-			await apiService.put(`/lobby/${id}/customWord`, { word: newCustomWord }, { Authorization: `Bearer ${token}` });
+			await apiService.put(
+				`/lobby/${id}/customWord`,
+				{ word: trimmedWord },
+				{ Authorization: `Bearer ${token}` }
+			);
 			setNewCustomWord('');
 		} catch (error) {
 			console.error('Error adding custom word:', error);
 			alert('Failed to add custom word.');
+		}
+	};
+
+	const handleRemoveCustomWord = async (wordToRemove: string) => {
+		try {
+			await apiService.put(`/lobby/${id}/customWord/remove`, { word: wordToRemove }, {
+				Authorization: `Bearer ${token}`,
+			  });
+			setCustomWords(prevWords => prevWords.filter(word => word !== wordToRemove));
+		} catch (error) {
+			console.error("Error removing custom word:", error);
+			alert("Failed to remove custom word.");
 		}
 	};
 
@@ -471,7 +497,8 @@ export default function LobbyPage() {
 					<Card
 						className='p-6 text-center'
 						style={{ width: '100%', maxWidth: 400 }}
-						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}>
+						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}
+					>
 						<div className='mb-4 flex flex-col items-center gap-2 mb-10'>
 							{customWords.length === 0 ? (
 								<p className='text-white'>No words added yet.</p>
@@ -480,8 +507,16 @@ export default function LobbyPage() {
 									{customWords.map((word, index) => (
 										<div
 											key={index}
-											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'>
-											{word}
+											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'
+										>
+											<span>{word}</span>
+											<button
+                							onClick={() => handleRemoveCustomWord(word)}
+                							className="text-red-500 hover:text-red-700 font-bold ml-1 p-0 m-0 bg-transparent border-none outline-none"
+      										style={{ lineHeight: '1' }}
+              								>
+											×
+											</button>
 										</div>
 									))}
 								</div>
