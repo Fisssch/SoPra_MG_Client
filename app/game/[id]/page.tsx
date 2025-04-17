@@ -6,26 +6,25 @@ import { webSocketService } from '../../api/webSocketService';
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from 'next/navigation';
 
-
 type Card = {
-	word: string;
-	color: 'RED' | 'BLUE' | 'NEUTRAL' | 'BLACK';
-	guessed: boolean;
+    word: string;
+    color: 'RED' | 'BLUE' | 'NEUTRAL' | 'BLACK';
+    guessed: boolean;
 };
 
 type GameData = {
-	id: number;
-	board: Card[];
-	teamTurn: 'RED' | 'BLUE';
-	status: string;
-	startingTeam: 'RED' | 'BLUE';
-	winningTeam: string | null;
-	gameMode: string;
+    id: number;
+    board: Card[];
+    teamTurn: 'RED' | 'BLUE';
+    status: string;
+    startingTeam: 'RED' | 'BLUE';
+    winningTeam: string | null;
+    gameMode: string;
 };
 
 type makeGuessDTO = {
-	teamColor: 'RED' | 'BLUE';
-	word: string;
+    teamColor: 'RED' | 'BLUE';
+    word: string;
 };
 
 const GamePage: React.FC = () => {
@@ -43,10 +42,12 @@ const GamePage: React.FC = () => {
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
 
-  const ws = new webSocketService();
+  const ws = useRef(new webSocketService()).current;
+  const initializedRef = useRef(false);
+
   const [isSpymaster, setIsSpymaster] = useState(false);
-  const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED'); // default fallback
-  const [hintSubmitted, setHintSubmitted] = useState(false); // New state to track hint submission
+  const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED');
+  const [hintSubmitted, setHintSubmitted] = useState(false);
 
   const clearGameLocalStorage = (gameId: string) => {
     localStorage.removeItem(`currentHint_${gameId}`);
@@ -83,7 +84,6 @@ const GamePage: React.FC = () => {
       setHintNumber(0);
       localStorage.setItem(getHintKey(gameId, teamColor), "true");
       setHintSubmitted(true);
-
     } catch (err) {
       console.error('Error sending hint:', err);
     }
@@ -119,8 +119,10 @@ const GamePage: React.FC = () => {
     }
   };
 
-
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     const fetchGame = async () => {
       const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
       if (!token) {
@@ -128,9 +130,9 @@ const GamePage: React.FC = () => {
         setLoading(false);
         return;
       }
+
       const storedColor = localStorage.getItem("playerTeam");
       const color = storedColor?.toUpperCase();
-
       if (color === "RED" || color === "BLUE") {
         setTeamColor(color);
         const submitted = localStorage.getItem(getHintKey(gameId, color)) === "true";
@@ -161,39 +163,24 @@ const GamePage: React.FC = () => {
       }
     };
 
-    // Fetch initial game data and subscribe to updates
-    fetchGame().then(async () => {
+    const subscribeToUpdates = async () => {
       try {
         await ws.connect();
 
         // Subscribe to game board updates
         await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
-          console.log("Received updated board:", updatedBoard);
-          setGameData((prevGameData) => {
-            if (!prevGameData) return prevGameData; // Handle null case
-            return {
-              ...prevGameData,
-              board: updatedBoard, // Update the board
-            };
-          });
+          setGameData((prev) => prev ? { ...prev, board: updatedBoard } : prev);
         });
+
         // Subscribe to hint updates
-        await ws.subscribe(`/topic/game/${gameId}/hint`, (hint: { hint: string; wordsCount: number }) => {
-          console.log("Received new hint:", hint);
+        await ws.subscribe(`/topic/game/${gameId}/hint`, (hint) => {
           setCurrentHint(hint);
-          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify(hint)); // ⬅️ hier speichern!
+          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify(hint));
         });
 
         // Subscribe to guess updates
         await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
-          console.log("Card guessed:", guess);
-          setGameData((prevGameData) => {
-            if (!prevGameData) return prevGameData; // Handle null case
-            return {
-              ...prevGameData,
-              teamTurn: guess.teamColor, // Update the team turn
-            };
-          });
+          setGameData((prev) => prev ? { ...prev, teamTurn: guess.teamColor } : prev);
         });
 
         // Subscribe to game completion
@@ -205,16 +192,17 @@ const GamePage: React.FC = () => {
       } catch (e) {
         console.error("WebSocket connection failed:", e);
       }
-    });
+    };
+
+    fetchGame().then(subscribeToUpdates);
 
     return () => {
       ws.disconnect();
     };
-  }, [gameId]);
+  }, [apiService, gameId, router, getHintKey, ws]);
 
   useEffect(() => {
     if (!gameData?.teamTurn) return;
-
     const currentTeam = gameData.teamTurn;
     const previousTeam = previousTeamRef.current;
 
@@ -224,7 +212,6 @@ const GamePage: React.FC = () => {
     }
 
     if (previousTeam !== currentTeam) {
-      // ECHTER Teamwechsel → Hinweis zurücksetzen
       localStorage.removeItem(`currentHint_${gameId}`);
       localStorage.removeItem(getHintKey(gameId, "RED"));
       localStorage.removeItem(getHintKey(gameId, "BLUE"));
@@ -237,17 +224,15 @@ const GamePage: React.FC = () => {
 
   useEffect(() => {
     if (!gameData) return;
-
     const storedHint = localStorage.getItem(`currentHint_${gameId}`);
-
     if (storedHint) {
       try {
         const parsedHint = JSON.parse(storedHint);
 
         // Nur löschen, wenn ICH Spymaster BIN und MEIN Team dran ist (neuer Zug beginnt)
         if (gameData.teamTurn === teamColor && isSpymaster) {
-          // Entferne den alten Hint, damit ich einen neuen geben kann
           localStorage.removeItem(`currentHint_${gameId}`);
+          // Entferne den alten Hint, damit ich einen neuen geben kann
           setCurrentHint(null);
         } else {
           // Gegnerisches Team oder Field Operative oder noch alter Zug → zeig den aktuellen Hint
@@ -436,5 +421,4 @@ const GamePage: React.FC = () => {
         </div>
     );
   };
-
 export default GamePage;
