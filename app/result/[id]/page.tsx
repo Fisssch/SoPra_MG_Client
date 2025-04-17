@@ -18,7 +18,7 @@ export default function Result() {
         } else {
             setAuthorized(true);
         }
-        //getting winning team and lobby id 
+        //getting winning team and lobby id
         const storedWinningTeam = localStorage.getItem("winningTeam");
         if (storedWinningTeam) setWinningTeam(storedWinningTeam);
 
@@ -28,56 +28,74 @@ export default function Result() {
         return null;
     }
 
-    const handleLogout = async () => {
+    const handleLeaveLobbyAndGoHome = async () => {
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+        const lobbyId = localStorage.getItem("lobbyId");
+        const playerId = localStorage.getItem("playerId");
 
-        if (!token) {
-            console.error("Missing token or username");
-            return;
-        }
-
-        try {
-            const response = await fetch('/users/logout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            });
-
-            if (response.ok) {
-                localStorage.clear();
-                router.push('/');
-            } else {
-                console.error('Logout failed:', response.statusText);
+        if (token && lobbyId && playerId) {
+            try {
+                await fetch(`/lobby/${lobbyId}/${playerId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                console.log("Spieler aus der Lobby entfernt.");
+            } catch (error) {
+                console.warn("Konnte Spieler nicht aus der Lobby entfernen (vielleicht war er schon raus):", error);
             }
-        } catch (error) {
-            console.error('Error during logout:', error);
         }
-    }
+
+        const keysToRemove = [
+            "lobbyId",
+            "playerId",
+            "winningTeam",
+        ];
+
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("hintSubmitted_")) {
+                localStorage.removeItem(key);
+            }
+        });
+
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+
+        router.push("/mainpage");
+    };
+
+    const handleBackToLobby = () => {
+        const lobbyId = localStorage.getItem("lobbyId")?.replace(/^"|"$/g, "");
+        if (lobbyId) {
+            router.push(`/lobby/${lobbyId}`);
+        } else {
+            alert("Lobby not found.");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#a34d3f] text-white relative flex flex-col items-center px-4 pt-16">
 
             <h1 className="text-8xl font-extrabold mt-32! mb-32!">
-                Team {winningTeam?.toUpperCase()} has won!</h1>
+                Team {winningTeam ? winningTeam.charAt(0).toUpperCase() + winningTeam.slice(1).toLowerCase() : ""} has won!
+            </h1>
 
             <div className="flex gap-6">
                 <Button
                     type="default"
                     size="large"
                     className="bg-white text-black font-medium rounded-md px-6 py-2"
-                    onClick={() => router.push('/mainpage')}
+                    onClick={handleBackToLobby}
                 >
-                    Back to Home
+                    Back to Lobby
                 </Button>
 
                 <Button
                     type="primary"
                     size="large"
-                    onClick={handleLogout}
-                    >
-                    Logout
+                    onClick={handleLeaveLobbyAndGoHome}
+                >
+                    Back to Mainpage
                 </Button>
             </div>
         </div>
