@@ -10,7 +10,6 @@ export default function Result() {
     const router = useRouter();
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [winningTeam, setWinningTeam] = useState<string | null>(null);
-	const [lobbyId, setLobbyId] = useState<string | null>(null);
 
     useEffect(() => {
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -22,8 +21,6 @@ export default function Result() {
         //getting winning team and lobby id 
         const storedWinningTeam = localStorage.getItem("winningTeam");
         if (storedWinningTeam) setWinningTeam(storedWinningTeam);
-		const storedLobbyId = localStorage.getItem("lobbyId");
-	    if (storedLobbyId) setLobbyId(storedLobbyId);
 
     }, []);
 

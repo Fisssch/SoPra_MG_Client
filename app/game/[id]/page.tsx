@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { webSocketService } from '../../api/webSocketService';
 import { useApi } from "@/hooks/useApi";
 import { useRouter } from 'next/navigation';
-import { App, message } from 'antd';
+import { App } from 'antd';
 
 
 type Card = {
