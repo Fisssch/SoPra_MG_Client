@@ -4,7 +4,7 @@ import '@ant-design/v5-patch-for-react-19';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { App, Button, Card, Modal, message } from 'antd';
+import { App, Button, Card, Modal } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
 
