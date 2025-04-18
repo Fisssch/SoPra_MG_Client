@@ -1,11 +1,13 @@
 'use client';
 
+import "@ant-design/v5-patch-for-react-19";
 import { useRouter } from 'next/navigation';
 import { Button, Input } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { App } from "antd";
 
 interface LobbyResponseDTO {
   id: number;
@@ -28,6 +30,7 @@ export default function Home() {
   const apiService = useApi();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [lobbyCode, setLobbyCode] = useState<string>("");
+  const { message } = App.useApp();
 
   const { set: setLobbyId } = useLocalStorage<string>("lobbyId", "");
 
@@ -82,7 +85,12 @@ export default function Home() {
       router.push(`/lobby/${lobby.id}`);
     } catch (error: any) {
       console.error("Join/Create lobby error:", error);
-      alert("Could not join or create a lobby.");
+      
+      if (error?.status === 400 || error?.message?.includes("Lobby with code")) {
+        message.error("Ungültiger Lobby-Code. Bitte überprüfe deine Eingabe.");
+      } else {
+        message.error("Konnte der Lobby nicht beitreten oder sie erstellen.");
+      }
     }
   };
 

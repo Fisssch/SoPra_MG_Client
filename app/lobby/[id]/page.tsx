@@ -1,12 +1,13 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { Button, Card, Modal, message } from 'antd';
+import { App, Button, Card, Modal } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
+
 
 interface PlayerRoleDTO {
 	role: string;
@@ -33,6 +34,7 @@ export default function LobbyPage() {
 	const router = useRouter();
 	const { id } = useParams();
 	const apiService = useApi();
+	const { message } = App.useApp();
 
 	const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
 	// const [timerActive, setTimerActive] = useState<boolean>(true);
@@ -89,63 +91,59 @@ export default function LobbyPage() {
 		}
 	}, []);
 
+	const fetchPlayerInfo = useCallback(async () => {
+		if (!token || !userId || !id) {
+			router.replace('/?message=Missing session data');
+			return;
+		}
+	
+		try {
+			localStorage.setItem('_preventLeave', 'false');
+	
+			const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
+			setRole(roleRes.role);
+			localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
+	
+			const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, { Authorization: `Bearer ${token}` });
+			const usersTeam = teamRes.color.toUpperCase();
+			setTeamColor(usersTeam);
+			localStorage.setItem('playerTeam', usersTeam);
+	
+			const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
+			setReady(readyRes.ready);
+	
+			const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, { Authorization: `Bearer ${token}` });
+			setLobbyCode(lobbyInfo.lobbyCode);
+			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
+			setGameMode(lobbyInfo.gameMode);
+			localStorage.setItem('gameMode', lobbyInfo.gameMode);
+	
+			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
+			const createdAt = new Date(lobbyInfo.createdAt).getTime();
+			const now = Date.now();
+			const remaining = Math.max(0, 600 - Math.floor((now - createdAt) / 1000));
+			setTimeLeft(remaining);
+			setTotalPlayers(statusRes.totalPlayers);
+			setReadyPlayers(statusRes.readyPlayers);
+	
+			const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
+				Authorization: `Bearer ${token}`,
+			});
+			setCustomWords(existingWords);
+	
+			const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
+				Authorization: `Bearer ${token}`,
+			});
+			setTheme(themeRes.theme);
+	
+		} catch (error) {
+			console.error('Error loading player info:', error);
+			alert('Player info could not be loaded.');
+		}
+	}, [token, userId, id]);
+
 	useEffect(() => {
 		if (!token || !userId || !id) return;
-		const fetchPlayerInfo = async () => {
-			if (!token || !userId || !id) {
-				router.replace('/?message=Missing session data');
-				return;
-			}
-
-			try {
-				localStorage.setItem('_preventLeave', 'false');
-				const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
-				setRole(roleRes.role);
-				localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
-
-				const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, { Authorization: `Bearer ${token}` });
-				const usersTeam = teamRes.color.toUpperCase();
-				setTeamColor(usersTeam);
-				localStorage.setItem('playerTeam', usersTeam);
-
-				const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
-				setReady(readyRes.ready);
-
-				const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, { Authorization: `Bearer ${token}` });
-				setLobbyCode(lobbyInfo.lobbyCode);
-				localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
-
-				//game mode
-				setGameMode(lobbyInfo.gameMode);
-				localStorage.setItem('gameMode', lobbyInfo.gameMode);
-
-				//player count
-				const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
-				const createdAt = new Date(lobbyInfo.createdAt).getTime();
-				const now = Date.now();
-				const elapsedSeconds = Math.floor((now - createdAt) / 1000);
-				const remaining = Math.max(0, 600 - elapsedSeconds); // 10 minutes = 600s
-
-				setTimeLeft(remaining);
-				setTotalPlayers(statusRes.totalPlayers);
-				setReadyPlayers(statusRes.readyPlayers);
-
-				//custom words
-				const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
-					Authorization: `Bearer ${token}`,
-				});
-				setCustomWords(existingWords);
-
-				//theme
-				const themeRes = await apiService.get<{ theme: string }>(`/lobby/${id}/theme`, {
-					Authorization: `Bearer ${token}`,
-				});
-				setTheme(themeRes.theme);
-			} catch (error) {
-				console.error('Error loading player info:', error);
-				alert('Player info could not be loaded.');
-			}
-		};
 
 		fetchPlayerInfo();
 	}, [id, token, userId]);
@@ -239,7 +237,7 @@ export default function LobbyPage() {
 				// all players ready but not good to start
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/readyError`, (reason: string) => {
-						alert(`Could not start game: ${reason}`);
+						message.error(`Could not start game: ${reason}`);
 					});
 				} catch (readyErr) {
 					console.error('Websocket error in readyError:', readyErr);
@@ -283,8 +281,15 @@ export default function LobbyPage() {
 				);
 				setRole(selectedRole);
 				localStorage.setItem('isSpymaster', String(selectedRole === 'SPYMASTER'));
-			} catch (error) {
-				console.error('Error changing role:', error);
+			} catch (err: any) {
+				const status = err?.status;
+				const msg = err?.message || '';
+			  
+				if (status === 409 && msg.includes("spymaster")) {
+				  message.error("Dieses Team hat bereits einen Spymaster.");
+				} else {
+				  message.error("Ein Fehler ist aufgetreten beim Rollenwechsel.");
+				}
 			}
 		}
 		setIsRoleModalOpen(false);
@@ -298,9 +303,9 @@ export default function LobbyPage() {
 					{ color: selectedTeam },
 					{
 						Authorization: `Bearer ${token}`,
-					},
+					}
 				);
-				setTeamColor(selectedTeam);
+				await fetchPlayerInfo(); 
 				localStorage.setItem('playerTeam', selectedTeam);
 			} catch (error) {
 				console.error('Error changing team:', error);
@@ -325,14 +330,39 @@ export default function LobbyPage() {
 		}
 	};
 
+	const MAX_CUSTOM_WORD_LENGTH = 15;
 	const handleAddCustomWord = async () => {
-		if (!newCustomWord.trim()) return;
+		const trimmedWord = newCustomWord.trim();
+
+		if (!trimmedWord) return;
+
+		if (trimmedWord.length > MAX_CUSTOM_WORD_LENGTH) {
+			alert(`Word is too long (max ${MAX_CUSTOM_WORD_LENGTH} characters).`);
+			return;
+		}
+
 		try {
-			await apiService.put(`/lobby/${id}/customWord`, { word: newCustomWord }, { Authorization: `Bearer ${token}` });
+			await apiService.put(
+				`/lobby/${id}/customWord`,
+				{ word: trimmedWord },
+				{ Authorization: `Bearer ${token}` }
+			);
 			setNewCustomWord('');
 		} catch (error) {
 			console.error('Error adding custom word:', error);
 			alert('Failed to add custom word.');
+		}
+	};
+
+	const handleRemoveCustomWord = async (wordToRemove: string) => {
+		try {
+			await apiService.put(`/lobby/${id}/customWord/remove`, { word: wordToRemove }, {
+				Authorization: `Bearer ${token}`,
+			  });
+			setCustomWords(prevWords => prevWords.filter(word => word !== wordToRemove));
+		} catch (error) {
+			console.error("Error removing custom word:", error);
+			alert("Failed to remove custom word.");
 		}
 	};
 
@@ -471,7 +501,8 @@ export default function LobbyPage() {
 					<Card
 						className='p-6 text-center'
 						style={{ width: '100%', maxWidth: 400 }}
-						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}>
+						title={<h2 className='text-xl font-bold text-white'>Custom Words</h2>}
+					>
 						<div className='mb-4 flex flex-col items-center gap-2 mb-10'>
 							{customWords.length === 0 ? (
 								<p className='text-white'>No words added yet.</p>
@@ -480,8 +511,16 @@ export default function LobbyPage() {
 									{customWords.map((word, index) => (
 										<div
 											key={index}
-											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'>
-											{word}
+											className='px-3 py-1 rounded border border-gray-300 bg-gray-200 text-black text-sm hover:bg-gray-300 transition-colors'
+										>
+											<span>{word}</span>
+											<button
+                							onClick={() => handleRemoveCustomWord(word)}
+                							className="text-red-500 hover:text-red-700 font-bold ml-1 p-0 m-0 bg-transparent border-none outline-none"
+      										style={{ lineHeight: '1' }}
+              								>
+											×
+											</button>
 										</div>
 									))}
 								</div>
