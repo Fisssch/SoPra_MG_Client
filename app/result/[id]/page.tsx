@@ -4,12 +4,16 @@ import "@ant-design/v5-patch-for-react-19";
 import { useRouter } from "next/navigation";
 import { Button } from "antd";
 import {useEffect, useState} from "react";
+import { useApi } from '@/hooks/useApi';
+
 
 
 export default function Result() {
     const router = useRouter();
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [winningTeam, setWinningTeam] = useState<string | null>(null);
+    const apiService = useApi();
+
 
     useEffect(() => {
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -30,17 +34,16 @@ export default function Result() {
 
     const handleLeaveLobbyAndGoHome = async () => {
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-        const lobbyId = localStorage.getItem("lobbyId");
-        const playerId = localStorage.getItem("playerId");
+        const lobbyId = localStorage.getItem("lobbyId")?.replace(/^"|"$/g, "");
+        const playerId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
 
+        console.log("HELLO1")
         if (token && lobbyId && playerId) {
+            console.log("HELLO2");
             try {
-                await fetch(`/lobby/${lobbyId}/${playerId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
+                await apiService.delete(`/lobby/${lobbyId}/${playerId}`, {
+                    Authorization: `Bearer ${token}`,
+                  });
                 console.log("Spieler aus der Lobby entfernt.");
             } catch (error) {
                 console.warn("Konnte Spieler nicht aus der Lobby entfernen (vielleicht war er schon raus):", error);
