@@ -28,6 +28,12 @@ interface LobbyInfoDTO {
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
 	readyPlayers: number;
+	players: {
+		username: string;
+		role: string;
+		teamColor: string;
+		ready: boolean;
+	}[];
 }
 
 export default function LobbyPage() {
@@ -58,6 +64,7 @@ export default function LobbyPage() {
 
 	const [totalPlayers, setTotalPlayers] = useState<number>(0);
 	const [readyPlayers, setReadyPlayers] = useState<number>(0);
+	//const [lobbyPlayers, setLobbyPlayers] = useState<LobbyPlayerStatusDTO['players']>([]);
 
 	const [customWords, setCustomWords] = useState<string[]>([]);
 	const [newCustomWord, setNewCustomWord] = useState<string>('');
@@ -125,6 +132,7 @@ export default function LobbyPage() {
 			setTimeLeft(remaining);
 			setTotalPlayers(statusRes.totalPlayers);
 			setReadyPlayers(statusRes.readyPlayers);
+			//setLobbyPlayers(statusRes.players); 
 	
 			const existingWords = await apiService.get<string[]>(`/lobby/${id}/customWords`, {
 				Authorization: `Bearer ${token}`,
@@ -199,6 +207,7 @@ export default function LobbyPage() {
 					await wsS.subscribe(`/topic/lobby/${id}/playerStatus`, (status: LobbyPlayerStatusDTO) => {
 						setTotalPlayers(status.totalPlayers);
 						setReadyPlayers(status.readyPlayers);
+						//setLobbyPlayers(status.players); 
 					});
 				} catch (countErr) {
 					console.error('WebSocket error with count of players:', countErr);
