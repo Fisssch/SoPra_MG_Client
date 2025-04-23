@@ -55,7 +55,12 @@ const UserProfile: React.FC = () => {
     }
 
     return (
-        <div className="page-background" style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center", padding: "1rem" }}>
+        <div
+            className="min-h-screen flex items-center justify-center text-white text-center px-4 py-12"
+            style={{
+                background: 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)'
+            }}
+        >
             <div className="card-container" style={{ width: "100%", maxWidth: "500px" }}>
                 {error && (
                     <Alert
@@ -81,25 +86,21 @@ const UserProfile: React.FC = () => {
                         </p>
                         <p><strong>Black Card Guesses:</strong> {user.blackCardGuesses}</p>
 
-                        <div style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            marginTop: "20px"
-                        }}>
-                            <Button type="primary" onClick={() => router.push("/users")}>
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                gap: "10px",
+                                marginTop: "20px",
+                            }}
+                        >
+                            <Button type="primary" onClick={() => router.push("/users")} style={{ width: "100%" }}>
                                 Back to Users
                             </Button>
-                        </div>
-                        <div style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            marginTop: "20px"
-                        }}>
-                        <Button onClick={() => router.push('/mainpage')} type="default">
-                            Back to Home
-                        </Button>
+                            <Button type="default" onClick={() => router.push("/mainpage")} style={{ width: "100%" }}>
+                                Back to Home
+                            </Button>
                         </div>
                     </Card>
                 )}
