@@ -59,10 +59,6 @@ const GamePage: React.FC = () => {
     localStorage.removeItem(`hintSubmitted_${gameId}_RED`);
     localStorage.removeItem(`hintSubmitted_${gameId}_BLUE`);
     localStorage.removeItem(`gameStartedOnce_${gameId}`);
-    localStorage.removeItem("playerTeam");
-    localStorage.removeItem("isSpymaster");
-    localStorage.removeItem("gameMode");
-    localStorage.removeItem("startingTeam");
   };
 
   const sendHint = async () => {
@@ -268,6 +264,45 @@ const GamePage: React.FC = () => {
     }
   }, [gameData?.teamTurn, teamColor, gameId, isSpymaster]);
 
+  const initialGradient = 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)';
+  const redTeamGradient = `linear-gradient(to right, #8b0000 0%, #a30000 10%, #ff4d4d 30%, #ff9999 50%, #ff4d4d 70%, #a30000 90%, #8b0000 100%)`;
+  const blueTeamGradient = `linear-gradient(to right, #0a2a3a 0%, #367d9f 10%, #6eb8d6 30%, #a4d9f5 50%, #6eb8d6 70%, #367d9f 90%, #0a2a3a 100%)`;
+
+  const [backgroundStyle, setBackgroundStyle] = useState<React.CSSProperties>({
+    backgroundImage: initialGradient,
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    transition: 'background 1.5s ease-in-out',
+  });
+
+  useEffect(() => {
+    if (teamColor === 'RED' || teamColor === 'BLUE') {
+      const newGradient = teamColor === 'RED' ? redTeamGradient : blueTeamGradient;
+      const startPos = '100% 0';
+      const endPos = '0% 0';
+
+      // 1. Sofort: Reset-Startposition (ohne Transition!)
+      setBackgroundStyle({
+        backgroundImage: `${newGradient}, ${initialGradient}`,
+        backgroundPosition: startPos,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        transition: 'none', // Kein Übergang hier
+      });
+
+      // 2. Leicht verzögert: Übergang starten
+      setTimeout(() => {
+        setBackgroundStyle({
+          backgroundImage: `${newGradient}, ${initialGradient}`,
+          backgroundPosition: endPos,
+          backgroundSize: 'cover',
+          backgroundRepeat: 'no-repeat',
+          transition: 'background-position 1.5s ease-in-out',
+        });
+      }, 30); // 30ms sorgt zuverlässig für Trigger
+    }
+  }, [teamColor]);
+
   if (loading) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-800 text-white">
@@ -280,12 +315,7 @@ const GamePage: React.FC = () => {
   if (!gameData) return <div className="p-6 text-red-600">Failed to load game data.</div>;
 
     return (
-        <div
-            className="min-h-screen text-white px-4 py-6 "
-            style={{
-              backgroundColor: teamColor === 'BLUE' ? '#5587b2' : '#a44c3e',
-            }}
-        >
+        <div className="min-h-screen text-white px-4 py-6" style={backgroundStyle}>
           {/* Turn-based message / hint input */}
           <div className="text-center mb-6 mt-6 pt-5!">
             {/* Turn-based message */}
@@ -311,20 +341,24 @@ const GamePage: React.FC = () => {
                           <p className="text-4xl font-bold mb-4">
                             Du bist dran, gib ein Hinweis und eine Zahl an!
                           </p>
-                          <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center gap-2 mt-2!">
                             <input
                                 type="text"
                                 placeholder="Gib einen Hinweis ein"
-                                className="text-black px-4 py-3 rounded w-64 text-lg"
+                                className="bg-[rgba(70,90,110,0.55)] text-white px-4 py-3 rounded w-64 text-lg"
                                 value={hintText}
                                 onChange={(e) => setHintText(e.target.value)}
                             />
                             <input
                                 type="number"
                                 placeholder="# words"
-                                className="text-black px-2 py-3 rounded w-20 text-lg text-center"
+                                className="bg-[rgba(70,90,110,0.55)] text-white px-2 py-3 rounded w-20 text-lg text-center"
                                 value={hintNumber}
-                                onChange={(e) => setHintNumber(Number(e.target.value))}
+                                onChange={(e) => {
+                                  const val = Number(e.target.value);
+                                  if (val >= 0) setHintNumber(val);
+                                }}
+                                min={0}
                             />
                             <button
                                 onClick={sendHint}
