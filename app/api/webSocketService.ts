@@ -13,10 +13,14 @@ export class webSocketService {
 
     webSocketService.client = new Client();
     webSocketService.instance = this;
+
   }
 
-  public async connect() {
-    if (webSocketService.client.active) return;
+  public async connect(retries: number = 0): Promise<void> {
+    //new
+    if (webSocketService.client && webSocketService.client.active) {
+      await webSocketService.client.deactivate(); 
+    }
 
     const websocketUrl = getWebSocketDomain();
 
@@ -27,15 +31,33 @@ export class webSocketService {
       onStompError: this.onStompError,
     });
 
-    webSocketService.client.activate();
+    const connectedPromise = new Promise<void>((resolve, reject) => {
+      webSocketService.client.onConnect = () => {
+        console.log('Connected to websocket');
+        resolve();
+      };
 
-    let i = 0;
-    while (!webSocketService.client.connected) {
-      if (i++ > 30) throw new Error('Could not connect to websocket');
-      await new Promise(resolve => setTimeout(resolve, 100));
+      webSocketService.client.onStompError = (frame: IFrame) => {
+        reject(new Error(`STOMP error: ${frame.headers['message']}`));
+      };
+    });
+
+    //new
+    setTimeout(() => {
+      webSocketService.client.activate();
+    }, 250); // Delay a bit to let server cleanup finish
+    //new
+    try {
+      await connectedPromise;
+    } catch (err) {
+      console.warn(`WebSocket failed to connect (retry ${retries})`, err);
+  
+      if (retries < 10) {
+        setTimeout(() => this.connect(retries + 1), 1000); 
+      } else {
+        console.error('WebSocket failed after multiple retries.');
+      }
     }
-
-    console.log('Connected to websocket');
   }
 
   public async subscribe(destination: string, callback: (message: any) => void) {
