@@ -82,7 +82,7 @@ export default function Home() {
         { Authorization: `Bearer ${token}` }
       );
 
-      router.push(`/lobby/${lobby.id}`);
+      window.location.href = `/lobby/${lobby.id}`;
     } catch (error: any) {
       console.error("Join/Create lobby error:", error);
       
@@ -95,7 +95,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#a34d3f] text-white relative flex flex-col items-center px-4 pt-16">
+      <div
+          className="h-screen flex flex-col items-center justify-center text-white text-center px-4"
+          style={{
+            background: 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)'
+          }}
+      >
       <div className="absolute top-4 right-4">
         <Button
           shape="circle"
@@ -105,9 +110,21 @@ export default function Home() {
         />
       </div>
 
-      <h1 className="text-8xl font-extrabold mt-32! mb-16">Codenames+</h1>
+        <h1
+            className="text-8xl font-bold mt-[50px] text-center mb-5!"
+            style={{
+              color: 'white',
+              WebkitTextStroke: '2px transparent',
+              background: 'linear-gradient(to right, #00b4d8, #ff1e00)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'white',
+            }}
+        >
+          Codenames+
+        </h1>
 
-      <div className="w-full max-w-sm mb-6">
+      <div className="w-full max-w-sm mb-6!">
         <Input
           placeholder="Enter Lobby Code (optional)"
           value={lobbyCode}
