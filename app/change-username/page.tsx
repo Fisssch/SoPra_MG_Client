@@ -3,7 +3,7 @@
 import "@ant-design/v5-patch-for-react-19";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { App, Form, Input, Button, message } from "antd";
+import { Form, Input, Button, message } from "antd";
 import { useApi } from "@/hooks/useApi";
 
 const EditUsername: React.FC = () => {
@@ -50,10 +50,16 @@ const EditUsername: React.FC = () => {
     }
 
     return (
-        <App>
-            <div className="page-background">
-                <div className="login-container">
-                    <h2 className="text-3xl font-semibold text-center mb-6 text-black">Change Username</h2>
+            <div
+                className="min-h-screen flex items-center justify-center text-white text-center px-4 py-12"
+                style={{
+                    background: 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)'
+                }}
+            >
+                <div className="login-container"
+                     style = {{maxWidth: "325px", boxShadow: "0 8px 24px rgba(0, 0, 0, 1)",}}
+                >
+                    <h2 className="text-3xl font-semibold text-center mb-4 text-black">Change Username</h2>
 
                     <Form
                         name="edit-username"
@@ -62,8 +68,11 @@ const EditUsername: React.FC = () => {
                         layout="vertical"
                     >
                         <Form.Item
-                            label={<span className="text-black">New Username</span>}
+                            label={
+                                <div className="text-black text-center mb-1">New Username</div>
+                            }
                             required
+                            style={{ display: "flex", justifyContent: "center" }}
                         >
                             <Input
                                 placeholder="Enter new username"
@@ -74,17 +83,19 @@ const EditUsername: React.FC = () => {
                         </Form.Item>
 
                         <Form.Item>
-                            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    style={{ flex: 1 }}
+                                    style={{ width: "70%" }}
+                                    size = "middle"
                                 >
                                     Save Username
                                 </Button>
                                 <Button
                                     onClick={() => router.back()}
-                                    style={{ flex: 1 }}
+                                    style={{ width: "70%" }}
+                                    size = "middle"
                                 >
                                     Cancel
                                 </Button>
@@ -93,7 +104,6 @@ const EditUsername: React.FC = () => {
                     </Form>
                 </div>
             </div>
-        </App>
     );
 };
 
