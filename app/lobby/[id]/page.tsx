@@ -557,28 +557,41 @@ export default function LobbyPage() {
     				</span>
 					<span
 						onClick={() => !ready && setIsRoleModalOpen(true)}
-						className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
 					>
 						Change Role
     				</span>
 					<span
 						onClick={() => !ready && setIsTeamModalOpen(true)}
-						className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
 					>
       					Change Team
     				</span>
 					<span
-						onClick={() => setIsGameModeModalOpen(true)}
-						className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors"
+						onClick={() => !ready && setIsGameModeModalOpen(true)}
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
 					>
       					Change GameMode
 					</span>
-					<span onClick={handleCopyLobbyCode} className="flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors">
+					<span
+						onClick={handleCopyLobbyCode}
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
+					>
 						Copy Lobby Code <CopyOutlined />
 					</span>
 					<span
 						onClick={handleLeaveLobby}
-						className="flex items-center gap-2 text-red-400 cursor-pointer hover:text-red-600 transition-colors"
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'text-red-400 cursor-pointer hover:text-red-600 transition-colors'
+						}`}
 					>
       					Leave Lobby
     				</span>
@@ -591,8 +604,8 @@ export default function LobbyPage() {
 					<Card
 						className='p-8 text-white rounded-2xl shadow-2xl border border-white/20'
 						style={{
-							backgroundColor: 'rgba(100, 100, 100, 0.2)', // leichtes, durchsichtiges Grau
-							backdropFilter: 'blur(6px)', // optional: Glassmorphismus-Effekt
+							backgroundColor: 'rgba(100, 100, 100, 0.2)',
+							backdropFilter: 'blur(6px)',
 						}}
 					>
 						{/* Game Lobby Info */}
