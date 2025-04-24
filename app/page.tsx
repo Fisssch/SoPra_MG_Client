@@ -83,28 +83,9 @@ export default function Home() {
 			</Button>
 		  </div>
 
-		  {/* Spacer row */}
-		  <div className="h-10" />
+		  
 
-		  {/* Second row: Other buttons */}
-		  <div className="flex flex-wrap justify-center gap-4">
-			<Button
-			  type="primary"
-			  color="red"
-			  variant="solid"
-			  onClick={() => globalThis.open('https://vercel.com/new', '_blank', 'noopener,noreferrer')}
-			  target="_blank"
-			  rel="noopener noreferrer"
-			>
-			  Deploy now
-			</Button>
-			<Button onClick={connectWS} type="primary" variant="solid">
-			  Connect
-			</Button>
-			<Button onClick={changeGameMode} type="primary" variant="solid">
-			  Change game mode
-			</Button>
-		  </div>
+	
 		</div>
 	  );
 	}
