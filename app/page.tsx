@@ -3,12 +3,10 @@ import '@ant-design/v5-patch-for-react-19';
 import { useRouter } from 'next/navigation';
 import { Button } from 'antd';
 import { webSocketService } from './api/webSocketService';
-import { useApi } from './hooks/useApi';
 import { useEffect } from 'react';
 
 export default function Home() {
 	const wsS = new webSocketService();
-	let isNormal = true;
 
 	useEffect(() => {
 		return () => {
@@ -17,24 +15,6 @@ export default function Home() {
 	}, []);
 
 	const router = useRouter();
-	const apiService = useApi();
-
-	const connectWS = async () => {
-		try {
-			await wsS.connect();
-		} catch (e) {
-			console.log(e);
-			return;
-		}
-		await wsS.subscribe('/topic/lobby', lobby => {
-			alert('New game mode: ' + lobby.gameMode);
-		});
-	};
-
-	const changeGameMode = async () => {
-		isNormal = !isNormal;
-		await apiService.put('/lobby/12', isNormal ? 'TIMED' : 'NORMAL');
-	};
 
 	return (
 		<div
@@ -72,20 +52,25 @@ export default function Home() {
 				Please register or log in first
 			</h1>
 
-
 		  {/* First row: Register / Sign in */}
-		  <div className="flex gap-4 mt-8!">
-			<Button type="primary" size="large" onClick={() => router.push("/register")}>
-			  Register
-			</Button>
-			<Button type="default" size="large" onClick={() => router.push("/login")}>
-			  Sign in
-			</Button>
-		  </div>
-
-		  
-
-	
+			<div className="flex flex-col items-center gap-2! mt-4! w-full max-w-sm">
+				<Button
+					type="primary"
+					size="large"
+					style={{width: '60%' }}
+					onClick={() => router.push("/login")}
+				>
+					Sign in
+				</Button>
+				<Button
+					type="default"
+					size="large"
+					style={{width: '60%' }}
+					onClick={() => router.push("/register")}
+				>
+					Register
+				</Button>
+			</div>
 		</div>
 	  );
 	}
