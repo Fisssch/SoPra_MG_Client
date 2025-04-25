@@ -3,8 +3,9 @@
 import "@ant-design/v5-patch-for-react-19";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { App, Form, Input, Button, message } from "antd";
+import { Form, Input, Button, message } from "antd";
 import { useApi } from "@/hooks/useApi";
+import { calculateHash } from "@/utils/hash";
 
 const EditPassword: React.FC = () => {
     const router = useRouter();
@@ -15,6 +16,7 @@ const EditPassword: React.FC = () => {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -33,11 +35,15 @@ const EditPassword: React.FC = () => {
         if (!userId || !token) return;
 
         try {
+
+            const hashedOldPassword = await calculateHash(oldPassword);
+            const hashedNewPassword = await calculateHash(newPassword);
+
             await apiService.put<void>(
                 `/users/${userId}/password`,
                 {
-                    oldPassword: oldPassword,
-                    newPassword: newPassword,
+                    oldPassword: hashedOldPassword,
+                    newPassword: hashedNewPassword,
                 },
                 {
                     Authorization: `Bearer ${token}`,
@@ -56,10 +62,26 @@ const EditPassword: React.FC = () => {
     }
 
     return (
-        <App>
-            <div className="page-background">
-                <div className="login-container">
-                    <h2 className="text-3xl font-semibold text-center mb-6 text-black">Change Password</h2>
+            <div
+                className="min-h-screen flex items-center justify-center text-white text-center px-4 py-12"
+                style={{
+                    background:
+                        "linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)",
+                }}
+            >
+                <div
+                    className="login-container"
+                    style={{
+                        maxWidth: "325px",
+                        width: "100%",
+                        margin: "0 auto",
+                        padding: "2rem",
+                        backgroundColor: "white",
+                        borderRadius: "12px",
+                        boxShadow: "0 8px 24px rgba(0, 0, 0, 1)",
+                    }}
+                >
+                    <h2 className="text-3xl font-semibold text-center mb-4 text-black">Change Password</h2>
 
                     <Form
                         name="edit-password"
@@ -68,8 +90,9 @@ const EditPassword: React.FC = () => {
                         layout="vertical"
                     >
                         <Form.Item
-                            label={<span className="text-black">Old Password</span>}
+                            label={<div className="text-black text-center mb-1">Old Password</div>}
                             required
+                            style={{ display: "flex", justifyContent: "center" }}
                         >
                             <Input.Password
                                 placeholder="Enter current password"
@@ -80,8 +103,9 @@ const EditPassword: React.FC = () => {
                         </Form.Item>
 
                         <Form.Item
-                            label={<span className="text-black">New Password</span>}
+                            label={<div className="text-black text-center mb-1">New Password</div>}
                             required
+                            style={{ display: "flex", justifyContent: "center" }}
                         >
                             <Input.Password
                                 placeholder="Enter new password"
@@ -92,17 +116,19 @@ const EditPassword: React.FC = () => {
                         </Form.Item>
 
                         <Form.Item>
-                            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
                                 <Button
                                     type="primary"
                                     htmlType="submit"
-                                    style={{ flex: 1 }}
+                                    style={{ width: "70%" }}
+                                    size="middle"
                                 >
                                     Save Password
                                 </Button>
                                 <Button
                                     onClick={() => router.back()}
-                                    style={{ flex: 1 }}
+                                    style={{ width: "70%" }}
+                                    size="middle"
                                 >
                                     Cancel
                                 </Button>
@@ -111,7 +137,6 @@ const EditPassword: React.FC = () => {
                     </Form>
                 </div>
             </div>
-        </App>
     );
 };
 

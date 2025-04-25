@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
-import { Button, Card, Table } from "antd";
+import { Button, Card, Table, Badge, Tooltip } from "antd";
 import type { TableProps } from "antd"; // antd component library allows imports of types
 // Optionally, you can import a CSS module or file for additional styling:
 // import "@/styles/views/Dashboard.scss";
@@ -23,6 +23,14 @@ const columns: TableProps<User>["columns"] = [
     title: "Online Status",
     dataIndex: "onlineStatus",
     key: "onlineStatus",
+    render: (status: string) => (
+        <Tooltip title={status}>
+          <Badge
+              color={status === "ONLINE" ? "#52c41a" : "#ffffff"}
+              text={status}
+          />
+        </Tooltip>
+    ),
   },
 ];
 
@@ -44,34 +52,24 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const handleLogout = async () => {
-    let token = localStorage.getItem('token');
-
+    let token = localStorage.getItem("token");
 
     if (!token) {
-      console.error('Missing token or username');
+      console.error("Missing token");
       return;
     }
 
-    token = token.replace(/^"|"$/g, ''); // Removes leading and trailing quotes
-    console.log("Token being sent to logout:", token); // Debugging output
+    token = token.replace(/^"|"$/g, "");
 
     try {
-      const response = await fetch('/users/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      await apiService.post("/users/logout", null, {
+        Authorization: `Bearer ${token}`,
       });
 
-      if (response.ok) {
-        localStorage.clear();
-        router.push('/');
-      } else {
-        console.error('Logout failed:', response.statusText);
-      }
+      localStorage.clear();
+      router.push("/");
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -101,12 +99,23 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-      <div className="page-background">
+      <div
+          className="min-h-screen flex items-center justify-center text-white text-center px-4 py-12"
+          style={{
+            background:
+                "linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)",
+          }}
+      >
         <div className="card-container">
           <Card
               title="Overview of users"
               loading={!users}
               className="dashboard-container"
+              style={{
+                width: "325px",
+                minHeight: "600px",
+                margin: "0 auto",
+              }}
           >
             {users && (
                 <>
@@ -115,6 +124,7 @@ const Dashboard: React.FC = () => {
                       columns={columns}
                       dataSource={users}
                       rowKey="id"
+                      pagination={{ pageSize: 5 }}
                       onRow={(row) => ({
                         onClick: () => router.push(`/users/${row.id}`),
                         style: { cursor: "pointer" },
@@ -123,22 +133,16 @@ const Dashboard: React.FC = () => {
                   <div style={{
                     display: "flex",
                     flexDirection: "column",
+                    gap: "10px",
                     alignItems: "center",
-                    marginTop: "20px"
+                    marginTop: "1px",
                   }}>
-                    <Button onClick={handleLogout} type="primary">
+                    <Button onClick={handleLogout} type="primary" style={{ width: "70%" }}>
                       Logout
                     </Button>
-                  </div>
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    marginTop: "20px"
-                  }}>
-                  <Button onClick={() => router.push('/mainpage')} type="default">
-                    Back to Home
-                  </Button>
+                    <Button onClick={() => router.push('/mainpage')} type="default" style={{ width: "70%" }}>
+                      Back to Home
+                    </Button>
                   </div>
                 </>
             )}

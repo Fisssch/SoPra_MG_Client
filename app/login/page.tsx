@@ -8,6 +8,8 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Form, Input } from "antd";
+import { calculateHash } from "@/utils/hash";
+import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
 interface UserDTO {
   username: string;
@@ -21,8 +23,8 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const { set: setToken } = useLocalStorage<string>("token", "");
-  const { set: setUserId } = useLocalStorage<string>("id", "");
+  const {set: setToken} = useLocalStorage<string>("token", "");
+  const {set: setUserId} = useLocalStorage<string>("id", "");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -35,7 +37,12 @@ const Login: React.FC = () => {
   const handleLogin = async (values: UserDTO) => {
     setLoading(true);
     try {
-      const { data: user, headers } = await apiService.post<User>("/users/login", values);
+      const hashedPassword = await calculateHash(values.password);
+
+      const { data: user, headers } = await apiService.post<User>("/users/login", {
+        username: values.username,
+        password: hashedPassword,
+      });
 
       const authHeader = headers.get("Authorization");
       if (authHeader?.startsWith("Bearer ")) {
@@ -59,12 +66,13 @@ const Login: React.FC = () => {
     router.push("/");
   };
 
-  const handleSignUp = () => {
-    router.push("/register");
-  };
-
   return (
-      <div className="page-background">
+      <div
+          className="min-h-screen flex items-center justify-center text-white text-center px-4 py-12"
+          style={{
+            background: 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)'
+          }}
+      >
         <div className="login-container">
           {message && (
               <div
@@ -79,6 +87,9 @@ const Login: React.FC = () => {
                 {message}
               </div>
           )}
+
+          <h2 className="text-2xl font-semibold text-black mb-1!">Login to your account</h2>
+
           <Form
               form={form}
               name="login"
@@ -102,25 +113,33 @@ const Login: React.FC = () => {
               <Input.Password
                   placeholder="Enter password"
                   className="bg-white text-black"
+                  iconRender={(visible) =>
+                      visible ? (
+                          <EyeOutlined style={{ color: "#ffffff" }} />
+                      ) : (
+                          <EyeInvisibleOutlined style={{ color: "#ffffff" }} />
+                      )
+                  }
               />
             </Form.Item>
 
             <Form.Item>
-              <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-                <Button type="primary" htmlType="submit" loading={loading} style={{ flex: 1 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
+                <Button type="primary" htmlType="submit" loading={loading} style={{ width: "70%"}}>
                   Login
                 </Button>
-                <Button onClick={handleBackToStart} className="back-button" style={{ flex: 1 }}>
+                <Button onClick={handleBackToStart} className="back-button" style={{ width: "70%", fontSize: "0.95rem",}}>
                   Back to Start Page
                 </Button>
               </div>
             </Form.Item>
           </Form>
 
-          <div className="mt-4 text-center">
-            <Button type="default" onClick={handleSignUp}>
-              Sign up
-            </Button>
+          <div className="text-center mt-2">
+            <p className="text-xs text-black mb-1">You don&apos;t have an account?</p>
+            <a href="/register" className="text-blue-600 hover:underline font-medium text-sm">
+              Sign up here
+            </a>
           </div>
         </div>
       </div>

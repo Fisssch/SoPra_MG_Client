@@ -46,34 +46,24 @@ export default function Profile() {
   }, []);
 
   const handleLogout = async () => {
-    let token = localStorage.getItem('token');
-
+    let token = localStorage.getItem("token");
 
     if (!token) {
-      console.error('Missing token or username');
+      console.error("Missing token");
       return;
     }
 
-    token = token.replace(/^"|"$/g, ''); // Removes leading and trailing quotes
-    console.log("Token being sent to logout:", token); // Debugging output
+    token = token.replace(/^"|"$/g, "");
 
     try {
-      const response = await fetch('/users/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+      await apiService.post("/users/logout", null, {
+        Authorization: `Bearer ${token}`,
       });
 
-      if (response.ok) {
-        localStorage.clear();
-        router.push('/');
-      } else {
-        console.error('Logout failed:', response.statusText);
-      }
+      localStorage.clear();
+      router.push("/");
     } catch (error) {
-      console.error('Error during logout:', error);
+      console.error("Logout failed:", error);
     }
   };
 
@@ -90,21 +80,49 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#a34d3f] text-white flex flex-col items-center justify-center px-4">
-      <h1 className="text-7xl font-bold mb-10!">User profile options</h1>
+      <div
+          className="h-screen flex flex-col items-center justify-center text-white text-center px-4"
+          style={{
+            background: 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 50%,#8cc9d7 70%, #367d9f 90%, #1a425a 100%)'
+          }}
+      >
+        <h1
+            className="text-7xl font-bold mt-[50px] text-center mb-5!"
+            style={{
+              color: 'white',
+              WebkitTextStroke: '2px transparent',
+              background: 'linear-gradient(to right, #00b4d8, #ff1e00)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'white',
+            }}
+        >
+        User profile options
+        </h1>
+
       {user && (
-          <h1 className="text-3xl font-bold mb-10!">
+          <h1
+              className="text-4xl font-medium text-center tracking-tight mb-10!"
+              style={{
+                color: 'white',
+                WebkitTextStroke: '1px transparent',
+                background: 'linear-gradient(to right, #00b4d8, #ff1e00)',
+                WebkitBackgroundClip: 'text',
+                backgroundClip: 'text',
+                WebkitTextFillColor: 'white',
+              }}
+          >
             Logged in as: {user.username}
           </h1>
       )}
-      <div className="flex flex-col gap-6 w-full max-w-xs">
-        <Button type="primary" size="large" onClick={handleLogout}>
+      <div className="flex flex-col items-center gap-3! w-full max-w-xs">
+        <Button type="primary" size= "middle" style={{ width: 250 }} onClick={handleLogout}>
           Logout
         </Button>
-        <Button type="default" size="large" onClick={handleChangeUsername}>
+        <Button type="default" size="middle" style={{ width: 250 }} onClick={handleChangeUsername}>
           Change Username
         </Button>
-        <Button type="default" size="large" onClick={handleChangePassword}>
+        <Button type="default" size="middle" style={{ width: 250 }} onClick={handleChangePassword}>
           Change Password
         </Button>
       </div>
