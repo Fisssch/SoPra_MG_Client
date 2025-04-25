@@ -173,11 +173,16 @@ reason).
 |                    | 17.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/pull/93/commits/f0efed63caa418619d60653370bd65d9c165f477) | If you where field operative or in the enemy team and you reloaded/ refreshed the side, then you were not able to see the hint anymore, which were given. | This bugfix is important so that the game works correctly.                                                                                                                        |
 |                    | 17.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/93/commits/a19f5fd28c5d0bba4915ffd9b000d65f857613f4) | If you click a card as a field operative all other players should see the card you picked, which was not the case. Only if you reloaded the page you were able to see it. From that point on you were able to see every card which was choosen by the field operative in real time but only if you reloaded. The card count of the teams also did not change. There war a issue with the websocket. | This bugfix was very important so that the game works correctly, because without that you were not able to see picked cards and how many cards your team has to find unless you would have reloaded the page. |
 |                    | 18.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/94/commits/3a403901fc2dd868cdb320aaeb01a02d8b70c1c7) | The end page now shows the correct winner of the game and also navigates to the mainpage or back to the lobby. | This is important because after the game you want to know who won as well as have the option to back to the lobby and play another round. Or you want to go back to the mainpage. |
+
 ---
 
 ## Contributions Week 5 (Optional) - 18.04.25 to 25.04.25
-| **Student**        | **Date** | **Link to Commit**                                                                                              | **Description**                                                                      | **Relevance**                  |
+
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
 |--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 25.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/4317b1e3b68c05e1cf458c9ed369fa52f15601ea) | Partially fixed api key not working on deployed version. | The game doesn't work without an api key. |
+|                    | 25.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/82c4cd35e78abc5fd8ae8e758c1da93134aca30d) | Partially fixed api key not working on deployed version. | The game doesn't work without an api key. |
+|                    | 25.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/e253c80f6178704df56ea7cfc7449d1d1a7b09ca) | Fixed api key not working on deployed version. | The game doesn't work without an api key. |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 23.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b0923ab2f8f764238e380a133f10f6b1ed171fb9) | Visuel changed the cover page                                                        | more appealing for the players |
 |                    | 23.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/785e0bc9763c84e332d5b2ebee08043d1c3a9d50) | Visuel changed the login and register page. Also added a hash function for security. | more appealing for the players |
 |                    | 23.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b2454a2b3738bd60090a492d0d06f7841bdca20d) | Visuel changed the main page.                                                        | more appealing for the players |
@@ -187,9 +192,6 @@ reason).
 |                    | 23.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/e1fd748d8e08911c225367c9e42dcb54662affd5) | Visuel changed the game page.                                                        | more appealing for the players |
 |                    | 23.04.25 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/8b5485506f6b1d682996a020e3739b5f73e839fc) | Visuel changed the result page.                                                      | more appealing for the players |
 |                    | 23.04.25 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b5562a6a08bc659fd8468122fbd3e2931ec45fef) | Visuel changed the buttons of cover page.                                            | more appealing for the players |
-
-
----
 
 ---
 
