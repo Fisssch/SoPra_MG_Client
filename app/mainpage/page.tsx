@@ -150,6 +150,14 @@ export default function Home() {
         >
           View all users
         </Button>
+        <Button
+    type="default"
+    size="large"
+    className="bg-white text-black font-medium rounded-md px-6 py-2"
+    onClick={() => router.push('/rules')}
+  >
+    Rules
+  </Button>
       </div>
     </div>
   );
