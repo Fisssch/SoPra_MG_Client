@@ -46,6 +46,7 @@ const GamePage: React.FC = () => {
   const [currentHint, setCurrentHint] = useState<{ hint: string; wordsCount: number } | null>(null);
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
+  const [remainingGuesses, setRemainingGuesses] = useState<number | null>(null);
 
   const ws = useRef(new webSocketService()).current;
   const initializedRef = useRef(false);
@@ -188,14 +189,31 @@ const GamePage: React.FC = () => {
         await ws.connect();
 
         // Subscribe to game board updates
-        await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
-          setGameData((prev) => prev ? { ...prev, board: updatedBoard } : prev);
-        });
+        // Subscribe to game board updates
+      await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
+        console.log("Received updated board and remaining guesses:", payload);
+        const { updatedBoard, guessesLeft } = payload;
+
+        // Update the game board
+        setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
+
+        // Update remaining guesses
+        setRemainingGuesses(guessesLeft);
+      });
 
         // Subscribe to hint updates
-        await ws.subscribe(`/topic/game/${gameId}/hint`, (hint) => {
-          setCurrentHint(hint);
-          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify(hint));
+        await ws.subscribe(`/topic/game/${gameId}/hint`, (payload: { hint: string; wordsCount: number; guessesLeft: number }) => {
+          console.log("Received hint payload:", payload);
+          const { hint, wordsCount, guessesLeft } = payload;
+        
+          // Update the current hint
+          setCurrentHint({ hint, wordsCount });
+        
+          // Update remaining guesses
+          setRemainingGuesses(guessesLeft);
+        
+          // Store the hint in localStorage
+          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify({ hint, wordsCount }));
         });
 
         // Subscribe to guess updates
@@ -389,6 +407,15 @@ const GamePage: React.FC = () => {
                     Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
                   </p>
                 </div>
+            )}
+
+            {/* Remaining guesses display */}
+            {teamColor === gameData.teamTurn && !isSpymaster && currentHint && (
+              <div className="text-center mt-4">
+                <p className="text-2xl font-semibold italic">
+                  Verbleibende Versuche: <strong>{remainingGuesses}</strong>
+                </p>
+              </div>
             )}
           </div>
 
