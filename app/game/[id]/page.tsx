@@ -140,6 +140,24 @@ const GamePage: React.FC = () => {
     }
   };
 
+  const handleEndTurn = async () => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    if (!token) {
+      console.error("No token found when trying to end turn.");
+      return;
+    }
+    try {
+      // Make a PUT request to the backend to end the turn
+      await apiService.put(`/game/${gameId}/endTurn`, {}, {
+        'Authorization': `Bearer ${token}`,
+      });
+      console.log("Turn ended successfully.");
+    } catch (err) {
+      console.error("Error ending turn:", err);
+      message.error("Zug konnte nicht beendet werden.");
+    }
+  };
+
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -226,6 +244,16 @@ const GamePage: React.FC = () => {
           localStorage.setItem("winningTeam", winningTeam);
           clearGameLocalStorage(gameId);
           router.replace(`/result/${gameId}`);
+        });
+        await ws.subscribe(`/topic/game/${gameId}/turn`, (payload: { teamTurn: 'RED' | 'BLUE' }) => {
+          console.log("Turn ended. Switching to the next team:", payload.teamTurn);
+        
+          // Reset local state if needed
+          // Update the gameData state with the new teamTurn
+          setGameData((prev) => (prev ? { ...prev, teamTurn: payload.teamTurn } : prev));
+          setHintSubmitted(false);
+          setCurrentHint(null);
+          setRemainingGuesses(null);
         });
       } catch (e) {
         console.error("WebSocket connection failed:", e);
@@ -412,9 +440,15 @@ const GamePage: React.FC = () => {
             {/* Remaining guesses display */}
             {teamColor === gameData.teamTurn && !isSpymaster && currentHint && (
               <div className="text-center mt-4">
-                <p className="text-2xl font-semibold italic">
-                  Verbleibende Versuche: <strong>{remainingGuesses}</strong>
+                <p className="text-2xl font-semibold italic ">
+                  Verbleibende Versuche: <strong >{remainingGuesses}</strong>
                 </p>
+                <button
+                  onClick={handleEndTurn}
+                  className="mt-4 bg-red-600 px-6 py-3 rounded text-lg font-semibold text-white hover:bg-red-700 transition-all"
+                >
+                  Zug beenden
+                </button>
               </div>
             )}
           </div>
