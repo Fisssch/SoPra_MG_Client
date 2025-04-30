@@ -1,13 +1,12 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { App, Button, Card, Modal } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
 import { CopyOutlined } from '@ant-design/icons';
-
 
 interface PlayerRoleDTO {
 	role: string;
@@ -40,12 +39,16 @@ interface ExtendedLobbyStatusDTO {
 	readyPlayers: number;
 	players: LobbyPlayer[];
 }
+interface ChatMessageDTO {
+	sender: string;
+	message: string;
+}
 
 export default function LobbyPage() {
 	const router = useRouter();
-	const {id} = useParams();
+	const { id } = useParams();
 	const apiService = useApi();
-	const {message} = App.useApp();
+	const { message } = App.useApp();
 
 	const [timeLeft, setTimeLeft] = useState<number>(600); // 600 Sekunden = 10 Minuten
 	// const [timerActive, setTimerActive] = useState<boolean>(true);
@@ -76,11 +79,19 @@ export default function LobbyPage() {
 	const [theme, setTheme] = useState<string>('');
 	const [newTheme, setNewTheme] = useState<string>('');
 
+	const [globalChat, setGlobalChat] = useState<string[]>([]);
+	const [teamChat, setTeamChat] = useState<string[]>([]);
+
+	// Chat panel state
+	const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+	const [chatMessage, setChatMessage] = useState<string>('');
+	const [activeChat, setActiveChat] = useState<'global' | 'team'>('global');
+
 	const [lobbyPlayers, setLobbyPlayers] = useState<LobbyPlayer[]>([]);
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	const wsS = new webSocketService();
+	const wsS = useMemo(() => new webSocketService(), []);
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -115,25 +126,32 @@ export default function LobbyPage() {
 		try {
 			localStorage.setItem('_preventLeave', 'false');
 
-			const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, {Authorization: `Bearer ${token}`});
+			const roleRes = await apiService.get<PlayerRoleDTO>(`/lobby/${id}/role/${userId}`, { Authorization: `Bearer ${token}` });
 			setRole(roleRes.role);
 			localStorage.setItem('isSpymaster', String(roleRes.role === 'SPYMASTER'));
 
-			const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, {Authorization: `Bearer ${token}`});
+			const teamRes = await apiService.get<PlayerTeamDTO>(`/lobby/${id}/team/${userId}`, { Authorization: `Bearer ${token}` });
 			const usersTeam = teamRes.color.toUpperCase();
 			setTeamColor(usersTeam);
 			localStorage.setItem('playerTeam', usersTeam);
+			try {
+				await wsS.subscribe(`/topic/lobby/${id}/chat/team/${usersTeam}`, (messageDto: ChatMessageDTO) => {
+					setTeamChat(prevChat => [...prevChat, `${messageDto.sender}: ${messageDto.message}`]);
+				});
+			} catch (readyErr) {
+				console.error('Websocket error in team chat:', readyErr);
+			}
 
-			const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, {Authorization: `Bearer ${token}`});
+			const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
 			setReady(readyRes.ready);
 
-			const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, {Authorization: `Bearer ${token}`});
+			const lobbyInfo = await apiService.get<LobbyInfoDTO>(`/lobby/${id}`, { Authorization: `Bearer ${token}` });
 			setLobbyCode(lobbyInfo.lobbyCode);
 			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
 			setGameMode(lobbyInfo.gameMode);
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
 
-			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, {Authorization: `Bearer ${token}`});
+			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
 			const createdAt = new Date(lobbyInfo.createdAt).getTime();
 			const now = Date.now();
 			const remaining = Math.max(0, 600 - Math.floor((now - createdAt) / 1000));
@@ -150,7 +168,6 @@ export default function LobbyPage() {
 				Authorization: `Bearer ${token}`,
 			});
 			setTheme(themeRes.theme);
-
 		} catch (error) {
 			console.error('Error loading player info:', error);
 			alert('Player info could not be loaded.');
@@ -171,6 +188,32 @@ export default function LobbyPage() {
 			fetchPlayerInfo();
 		}
 	}, [token, userId, id]);
+
+	// Subscribe to team chat when team color changes
+	useEffect(() => {
+		// Subscribe to team chat when we have a team
+		const subscribeToTeamChat = async () => {
+			if (teamColor) {
+				try {
+					await wsS.subscribe(`/topic/lobby/${id}/chat/team/${teamColor}`, (messageDto: ChatMessageDTO) => {
+						setTeamChat(prevChat => [...prevChat, `${messageDto.sender}: ${messageDto.message}`]);
+					});
+				} catch (error) {
+					console.error('Error subscribing to team chat:', error);
+				}
+			}
+		};
+
+		setTeamChat([]); // Clear the chat when changing teams
+		subscribeToTeamChat();
+
+		// Clean up subscription when team changes
+		return () => {
+			if (teamColor) {
+				wsS.unsubscribe(`/topic/lobby/${id}/chat/team/${teamColor}`).catch(err => console.error('Error unsubscribing from team chat:', err));
+			}
+		};
+	}, [teamColor, id, wsS]);
 
 	useEffect(() => {
 		(async () => {
@@ -224,7 +267,7 @@ export default function LobbyPage() {
 						username: player.username,
 						role: player.role,
 						team: player.team,
-						ready: player.ready
+						ready: player.ready,
 					}));
 					setLobbyPlayers(mappedPlayers);
 					setTotalPlayers(status.totalPlayers);
@@ -269,6 +312,14 @@ export default function LobbyPage() {
 				} catch (readyErr) {
 					console.error('Websocket error in readyError:', readyErr);
 				}
+
+				try {
+					await wsS.subscribe(`/topic/lobby/${id}/chat/global`, (messageDto: ChatMessageDTO) => {
+						setGlobalChat(prevChat => [...prevChat, `${messageDto.sender}: ${messageDto.message}`]);
+					});
+				} catch (readyErr) {
+					console.error('Websocket error in global chat:', readyErr);
+				}
 			} catch (connectionErr) {
 				console.error('WebSocket was not able to connect:', connectionErr);
 			}
@@ -288,7 +339,7 @@ export default function LobbyPage() {
 	const handleReadyToggle = async () => {
 		try {
 			const newReady = !ready;
-			await apiService.put<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, {ready: newReady}, {Authorization: `Bearer ${token}`});
+			await apiService.put<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { ready: newReady }, { Authorization: `Bearer ${token}` });
 			setReady(newReady);
 		} catch (error) {
 			console.error('Ready toggle failed:', error);
@@ -301,21 +352,22 @@ export default function LobbyPage() {
 			try {
 				await apiService.put(
 					`/lobby/${id}/role/${userId}`,
-					{role: selectedRole},
+					{ role: selectedRole },
 					{
 						Authorization: `Bearer ${token}`,
 					},
 				);
 				setRole(selectedRole);
 				localStorage.setItem('isSpymaster', String(selectedRole === 'SPYMASTER'));
-			} catch (err: any) {
-				const status = err?.status;
-				const msg = err?.message || '';
+			} catch (err) {
+				const error = err as { status?: number; message?: string };
+				const status = error?.status;
+				const msg = error?.message || '';
 
-				if (status === 409 && msg.includes("spymaster")) {
-					message.error("Dieses Team hat bereits einen Spymaster.");
+				if (status === 409 && msg.includes('spymaster')) {
+					message.error('Dieses Team hat bereits einen Spymaster.');
 				} else {
-					message.error("Ein Fehler ist aufgetreten beim Rollenwechsel.");
+					message.error('Ein Fehler ist aufgetreten beim Rollenwechsel.');
 				}
 			}
 		}
@@ -327,10 +379,10 @@ export default function LobbyPage() {
 			try {
 				await apiService.put(
 					`/lobby/${id}/team/${userId}`,
-					{color: selectedTeam},
+					{ color: selectedTeam },
 					{
 						Authorization: `Bearer ${token}`,
-					}
+					},
 				);
 				await fetchPlayerInfo();
 				localStorage.setItem('playerTeam', selectedTeam);
@@ -369,11 +421,7 @@ export default function LobbyPage() {
 		}
 
 		try {
-			await apiService.put(
-				`/lobby/${id}/customWord`,
-				{word: trimmedWord},
-				{Authorization: `Bearer ${token}`}
-			);
+			await apiService.put(`/lobby/${id}/customWord`, { word: trimmedWord }, { Authorization: `Bearer ${token}` });
 			setNewCustomWord('');
 		} catch (error) {
 			console.error('Error adding custom word:', error);
@@ -383,13 +431,17 @@ export default function LobbyPage() {
 
 	const handleRemoveCustomWord = async (wordToRemove: string) => {
 		try {
-			await apiService.put(`/lobby/${id}/customWord/remove`, {word: wordToRemove}, {
-				Authorization: `Bearer ${token}`,
-			});
+			await apiService.put(
+				`/lobby/${id}/customWord/remove`,
+				{ word: wordToRemove },
+				{
+					Authorization: `Bearer ${token}`,
+				},
+			);
 			setCustomWords(prevWords => prevWords.filter(word => word !== wordToRemove));
 		} catch (error) {
-			console.error("Error removing custom word:", error);
-			alert("Failed to remove custom word.");
+			console.error('Error removing custom word:', error);
+			alert('Failed to remove custom word.');
 		}
 	};
 
@@ -398,7 +450,7 @@ export default function LobbyPage() {
 		try {
 			await apiService.put(
 				`/lobby/${id}/theme`,
-				{theme: newTheme},
+				{ theme: newTheme },
 				{
 					Authorization: `Bearer ${token}`,
 				},
@@ -421,6 +473,22 @@ export default function LobbyPage() {
 		localStorage.removeItem('playerTeam');
 		localStorage.removeItem('lobbyCode');
 		localStorage.removeItem('_preventLeave');
+	};
+
+	const handleSendChatMessage = async () => {
+		if (!chatMessage.trim()) return;
+
+		try {
+			if (activeChat === 'global') {
+				await apiService.post(`/lobby/${id}/chat?chatType=global`, chatMessage, { Authorization: `Bearer ${token}` });
+			} else if (activeChat === 'team' && teamColor) {
+				await apiService.post(`/lobby/${id}/chat?chatType=team`, chatMessage, { Authorization: `Bearer ${token}` });
+			}
+			setChatMessage('');
+		} catch (error) {
+			message.error('Could not send the message.');
+			console.error(`Error sending ${activeChat} message:`, error);
+		}
 	};
 
 	const handleLeaveLobby = async () => {
@@ -485,8 +553,6 @@ export default function LobbyPage() {
 		}
 	}, [teamColor]);
 
-
-
 	function formatEnum(value?: string) {
 		if (!value) return '...';
 		return value
@@ -496,22 +562,13 @@ export default function LobbyPage() {
 			.join(' ');
 	}
 
-	const TeamTable = ({
-						   title,
-						   players,
-					   }: {
-		title: string;
-		players: LobbyPlayer[];
-		color: 'RED' | 'BLUE';
-	}) => {
-
+	const TeamTable = ({ title, players }: { title: string; players: LobbyPlayer[]; color: 'RED' | 'BLUE' }) => {
 		return (
 			<div className='mb-6'>
 				<h3 className='text-lg font-bold text-white mb-2'>{title}</h3>
 
 				{/* Header-Zeile */}
-				<div
-					className="grid grid-cols-2 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
+				<div className='grid grid-cols-2 gap-x-1 text-white text-base items-center border-t border-white/30 py-2'>
 					<span className='text-left'>Username</span>
 					<span className='text-left pl-1'>Role</span>
 				</div>
@@ -522,19 +579,12 @@ export default function LobbyPage() {
 						<p className='text-white text-sm italic'>No players in this team.</p>
 					) : (
 						players.map((player, index) => (
-							<div
-								key={index}
-								className={`grid grid-cols-2 text-white text-sm items-center border-t border-white/30`}
-							>
+							<div key={index} className={`grid grid-cols-2 text-white text-sm items-center border-t border-white/30`}>
 								{/* Spalte 1: Username */}
-								<div className='px-2 py-2 text-left'>
-									{player.username}
-								</div>
+								<div className='px-2 py-2 text-left'>{player.username}</div>
 
 								{/* Spalte 2: Rolle */}
-								<div className='px-2 py-2 text-left'>
-									{formatEnum(player.role)}
-								</div>
+								<div className='px-2 py-2 text-left'>{formatEnum(player.role)}</div>
 							</div>
 						))
 					)}
@@ -546,55 +596,52 @@ export default function LobbyPage() {
 	return (
 		<div className='min-h-screen w-full flex text-white' style={backgroundStyle}>
 			{/* Sidebar */}
-			<div className="w-50 bg-[#111827] p-6 text-white flex flex-col gap-6 shadow-xl border-r border-white/10">
-				<h2 className="text-xl font-bold text-white tracking-wide pt-5! px-2!">Menu</h2>
-				<nav className="flex flex-col gap-4 text-sm px-2!">
-    				<span
-						onClick={handleReadyToggle}
-						className="flex items-center gap-2 cursor-pointer hover:text-green-400 transition-colors"
-					>
+			<div className='w-50 bg-[#111827] p-6 text-white flex flex-col gap-6 shadow-xl border-r border-white/10'>
+				<h2 className='text-xl font-bold text-white tracking-wide pt-5! px-2!'>Menu</h2>
+				<nav className='flex flex-col gap-4 text-sm px-2!'>
+					<span onClick={handleReadyToggle} className='flex items-center gap-2 cursor-pointer hover:text-green-400 transition-colors'>
 						{ready ? '✅ Ready' : ' Set Ready'}
-    				</span>
+					</span>
 					<span
 						onClick={() => !ready && setIsRoleModalOpen(true)}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
 							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}
-					>
+						}`}>
 						Change Role
-    				</span>
+					</span>
 					<span
 						onClick={() => !ready && setIsTeamModalOpen(true)}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
 							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}
-					>
-      					Change Team
-    				</span>
+						}`}>
+						Change Team
+					</span>
 					<span
 						onClick={() => !ready && setIsGameModeModalOpen(true)}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
 							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}
-					>
-      					Change GameMode
+						}`}>
+						Change GameMode
 					</span>
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
 							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}
-					>
+						}`}>
 						Copy Lobby Code <CopyOutlined />
+					</span>
+					<span
+						onClick={() => setIsChatOpen(!isChatOpen)}
+						className='flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors'>
+						{isChatOpen ? 'Hide Chat' : 'Show Chat'}
 					</span>
 					<span
 						onClick={handleLeaveLobby}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
 							ready ? 'text-gray-500 cursor-not-allowed' : 'text-red-400 cursor-pointer hover:text-red-600 transition-colors'
-						}`}
-					>
-      					Leave Lobby
-    				</span>
+						}`}>
+						Leave Lobby
+					</span>
 				</nav>
 			</div>
 
@@ -606,20 +653,35 @@ export default function LobbyPage() {
 						style={{
 							backgroundColor: 'rgba(100, 100, 100, 0.2)',
 							backdropFilter: 'blur(6px)',
-						}}
-					>
+						}}>
 						{/* Game Lobby Info */}
 						<div className='mb-6!'>
 							<h2 className='text-2xl font-bold mt-0! mb-2'>Game Lobby</h2>
-							<p>Your Role: <b>{formatEnum(role ?? '')}</b></p>
-							<p>Your Team: <b>{formatEnum(teamColor ?? '')}</b></p>
-							<p>Gamemode: <b>{formatEnum(gameMode ?? '')}</b></p>
-							<p>Lobby Code: <b>{lobbyCode}</b></p>
-							<p>Players Ready: <b>{readyPlayers}/{totalPlayers}</b></p>
+							<p>
+								Your Role: <b>{formatEnum(role ?? '')}</b>
+							</p>
+							<p>
+								Your Team: <b>{formatEnum(teamColor ?? '')}</b>
+							</p>
+							<p>
+								Gamemode: <b>{formatEnum(gameMode ?? '')}</b>
+							</p>
+							<p>
+								Lobby Code: <b>{lobbyCode}</b>
+							</p>
+							<p>
+								Players Ready:{' '}
+								<b>
+									{readyPlayers}/{totalPlayers}
+								</b>
+							</p>
 							{timeLeft && timeLeft > 0 && (
 								<p className='text-sm mt-2'>
-									Lobby will close
-									in <b>{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</b> min
+									Lobby will close in{' '}
+									<b>
+										{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+									</b>{' '}
+									min
 								</p>
 							)}
 						</div>
@@ -627,8 +689,8 @@ export default function LobbyPage() {
 						{/* Team Info */}
 						<div className='text-2xl flex flex-col gap-2 mb-4'>
 							<h2 className='text-2xl font-bold mb-1!'>Teams</h2>
-							<TeamTable title='Red Team' players={redTeamPlayers} color='RED'/>
-							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE'/>
+							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
+							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
 						</div>
 
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
@@ -649,9 +711,7 @@ export default function LobbyPage() {
 										className='p-2 rounded text-white bg-[#333] w-64'
 										disabled={customWords.length >= 25}
 									/>
-									<p className='text-sm text-white'>
-										{customWords.length} / 25 words added
-									</p>
+									<p className='text-sm text-white'>{customWords.length} / 25 words added</p>
 								</div>
 
 								{/* Anzeige der hinzugefügten Wörter */}
@@ -662,13 +722,11 @@ export default function LobbyPage() {
 										{customWords.map((word, index) => (
 											<div
 												key={index}
-												className='flex items-center justify-between px-4! py-1! rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm shadow-sm transition-all'
-											>
+												className='flex items-center justify-between px-4! py-1! rounded-lg border border-white/30 bg-white/10 backdrop-blur-sm text-white text-sm shadow-sm transition-all'>
 												<span>{formatEnum(word)} </span>
 												<span
 													onClick={() => handleRemoveCustomWord(word)}
-													className='ml-1! cursor-pointer text-white hover:text-red-500 transition-colors font-bold'
-												>
+													className='ml-1! cursor-pointer text-white hover:text-red-500 transition-colors font-bold'>
 													x
 												</span>
 											</div>
@@ -677,7 +735,6 @@ export default function LobbyPage() {
 								)}
 							</div>
 						)}
-
 
 						{/* Theme */}
 						{gameMode === 'THEME' && (
@@ -708,26 +765,104 @@ export default function LobbyPage() {
 				</div>
 			</div>
 
+			{/* Chat Panel */}
+			{isChatOpen && (
+				<div
+					className='absolute right-0 bottom-0 w-80 h-96 bg-gray-900/90 backdrop-blur-sm shadow-xl border border-white/20 rounded-tl-lg flex flex-col'
+					style={{ zIndex: 100, backgroundColor: 'rgba(17, 24, 39, 0.9)' }}>
+					{/* Chat Header */}
+					<div className='flex justify-between items-center p-2 border-b border-white/20'>
+						<div className='flex space-x-2'>
+							<button
+								onClick={() => setActiveChat('global')}
+								className={`px-3 py-1 rounded ${
+									activeChat === 'global' ? 'bg-orange-500 text-white' : 'text-white/70 hover:text-white'
+								}`}>
+								Global
+							</button>
+							<button
+								onClick={() => setActiveChat('team')}
+								className={`px-3 py-1 rounded ${
+									activeChat === 'team' ? 'bg-blue-500 text-white' : 'text-white/70 hover:text-white'
+								}`}>
+								Team
+							</button>
+						</div>
+						<button onClick={() => setIsChatOpen(false)} className='text-white/70 hover:text-white text-xl'>
+							×
+						</button>
+					</div>
+
+					{/* Chat Messages */}
+					<div className='flex-1 overflow-auto p-3 space-y-2'>
+						{activeChat === 'global' ? (
+							globalChat.length > 0 ? (
+								globalChat.map((msg, index) => (
+									<div
+										key={index}
+										className='text-white text-sm p-2 rounded shadow-md'
+										style={{ backgroundColor: 'rgba(234, 88, 12, 0.3)' }}>
+										{msg}
+									</div>
+								))
+							) : (
+								<div className='text-white/50 text-center text-sm'>No global messages yet</div>
+							)
+						) : teamChat.length > 0 ? (
+							teamChat.map((msg, index) => (
+								<div
+									key={index}
+									className='text-white text-sm p-2 rounded shadow-md'
+									style={{ backgroundColor: 'rgba(59, 130, 246, 0.3)' }}>
+									{msg}
+								</div>
+							))
+						) : (
+							<div className='text-white/50 text-center text-sm'>No team messages yet</div>
+						)}
+					</div>
+
+					{/* Message Input */}
+					<div className='p-2 border-t border-white/20 flex'>
+						<input
+							type='text'
+							value={chatMessage}
+							onChange={e => setChatMessage(e.target.value)}
+							onKeyDown={e => {
+								if (e.key === 'Enter') handleSendChatMessage();
+							}}
+							placeholder={`Type ${activeChat} message...`}
+							className='flex-1 bg-gray-800 text-white p-2 rounded-l outline-none'
+						/>
+						<button onClick={handleSendChatMessage} className='bg-blue-500 hover:bg-blue-600 text-white px-4 rounded-r'>
+							Send
+						</button>
+					</div>
+				</div>
+			)}
+
 			{/* Modals */}
 			<Modal
 				open={isRoleModalOpen}
 				onCancel={() => setIsRoleModalOpen(false)}
 				footer={null}
 				centered
-				title={<div className="text-center text-black text-lg font-semibold">Choose Role</div>}
-			>
+				title={<div className='text-center text-black text-lg font-semibold'>Choose Role</div>}>
 				<div className='flex flex-col items-center gap-4'>
-					<Button type={selectedRole === 'SPYMASTER' ? 'primary' : 'default'}
-							onClick={() => setSelectedRole('SPYMASTER')} block>
+					<Button type={selectedRole === 'SPYMASTER' ? 'primary' : 'default'} onClick={() => setSelectedRole('SPYMASTER')} block>
 						Spymaster
 					</Button>
-					<Button type={selectedRole === 'FIELD_OPERATIVE' ? 'primary' : 'default'}
-							onClick={() => setSelectedRole('FIELD_OPERATIVE')} block>
+					<Button
+						type={selectedRole === 'FIELD_OPERATIVE' ? 'primary' : 'default'}
+						onClick={() => setSelectedRole('FIELD_OPERATIVE')}
+						block>
 						Field Operative
 					</Button>
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
-						<Button type='primary' onClick={handleRoleChange}>Confirm</Button>
+						<Button type='primary' onClick={handleRoleChange}>
+							Confirm
+						</Button>
 					</div>
 				</div>
 			</Modal>
@@ -737,67 +872,60 @@ export default function LobbyPage() {
 				onCancel={() => setIsTeamModalOpen(false)}
 				footer={null}
 				centered
-				title={<div className="text-center text-black text-lg font-semibold">Choose Team</div>}
-			>
+				title={<div className='text-center text-black text-lg font-semibold'>Choose Team</div>}>
 				<div className='flex flex-col items-center gap-4'>
 					<Button
 						type={selectedTeam === 'red' ? 'primary' : 'default'}
 						style={{
-							background: selectedTeam === 'red'
-								? 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 80%)'
-								: undefined,
+							background: selectedTeam === 'red' ? 'linear-gradient(to right, #8b0000 0%, #a30000 10%, #c7adc4 80%)' : undefined,
 							borderColor: '#8b0000',
 							color: selectedTeam === 'red' ? 'white' : '#8b0000',
 						}}
 						onClick={() => setSelectedTeam('red')}
-						block
-					>
+						block>
 						Team Red
 					</Button>
 
 					<Button
 						type={selectedTeam === 'blue' ? 'primary' : 'default'}
 						style={{
-							background: selectedTeam === 'blue'
-								? 'linear-gradient(to right, #1a425a 0%, #367d9f 10%, #8cc9d7 80%)'
-								: undefined,
+							background: selectedTeam === 'blue' ? 'linear-gradient(to right, #1a425a 0%, #367d9f 10%, #8cc9d7 80%)' : undefined,
 							borderColor: '#1a425a',
 							color: selectedTeam === 'blue' ? 'white' : '#1a425a',
 						}}
 						onClick={() => setSelectedTeam('blue')}
-						block
-					>
+						block>
 						Team Blue
 					</Button>
 
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsTeamModalOpen(false)}>Cancel</Button>
-						<Button type='primary' onClick={handleTeamChange}>Confirm</Button>
+						<Button type='primary' onClick={handleTeamChange}>
+							Confirm
+						</Button>
 					</div>
 				</div>
 			</Modal>
 
-			<Modal open={isGameModeModalOpen} onCancel={() => setIsGameModeModalOpen(false)} footer={null} centered
-				   title="Choose Game Mode">
+			<Modal open={isGameModeModalOpen} onCancel={() => setIsGameModeModalOpen(false)} footer={null} centered title='Choose Game Mode'>
 				<div className='flex flex-col items-center gap-4'>
-					<Button type={selectedGameMode === 'CLASSIC' ? 'primary' : 'default'}
-							onClick={() => setSelectedGameMode('CLASSIC')} block>
+					<Button type={selectedGameMode === 'CLASSIC' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('CLASSIC')} block>
 						Classic
 					</Button>
-					<Button type={selectedGameMode === 'OWN_WORDS' ? 'primary' : 'default'}
-							onClick={() => setSelectedGameMode('OWN_WORDS')} block>
+					<Button type={selectedGameMode === 'OWN_WORDS' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('OWN_WORDS')} block>
 						Own Words
 					</Button>
-					<Button type={selectedGameMode === 'THEME' ? 'primary' : 'default'}
-							onClick={() => setSelectedGameMode('THEME')} block>
+					<Button type={selectedGameMode === 'THEME' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('THEME')} block>
 						Theme
 					</Button>
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
-						<Button type='primary' onClick={handleGameModeChange}>Confirm</Button>
+						<Button type='primary' onClick={handleGameModeChange}>
+							Confirm
+						</Button>
 					</div>
 				</div>
 			</Modal>
 		</div>
 	);
-};
+}
