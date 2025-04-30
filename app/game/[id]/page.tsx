@@ -87,7 +87,6 @@ const GamePage: React.FC = () => {
       localStorage.setItem(getHintKey(gameId, teamColor), "true");
       setHintSubmitted(true);
     } catch (err) {
-      console.error('Error sending hint:', err);
     
       if (
         typeof err === 'object' &&
@@ -508,7 +507,7 @@ const GamePage: React.FC = () => {
                               teamColor === gameData.teamTurn
                           ) {
                             if (!currentHint) {
-                              alert("Warte zuerst auf den Hinweis!");
+                              message.warning("Warte zuerst auf den Hinweis!");
                               return;
                             }
                             handleGuess(card.word);
