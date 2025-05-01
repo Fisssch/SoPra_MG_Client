@@ -1,12 +1,12 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import {useEffect, useState, useCallback, useMemo, useRef} from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
-import { App, Button, Card, Modal } from 'antd';
+import { App, Button, Card, Modal, Popover } from 'antd';
 import { webSocketService } from '@/api/webSocketService';
-import { CopyOutlined } from '@ant-design/icons';
+import { CopyOutlined, InfoCircleOutlined, CloseOutlined } from '@ant-design/icons';
 
 interface PlayerRoleDTO {
 	role: string;
@@ -86,6 +86,7 @@ export default function LobbyPage() {
 	const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 	const [chatMessage, setChatMessage] = useState<string>('');
 	const [activeChat, setActiveChat] = useState<'global' | 'team'>('global');
+	const bottomRef = useRef<HTMLDivElement | null>(null);
 
 	const [lobbyPlayers, setLobbyPlayers] = useState<LobbyPlayer[]>([]);
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
@@ -189,7 +190,6 @@ export default function LobbyPage() {
 		}
 	}, [token, userId, id]);
 
-	// Subscribe to team chat when team color changes
 	useEffect(() => {
 		// Subscribe to team chat when we have a team
 		const subscribeToTeamChat = async () => {
@@ -377,6 +377,12 @@ export default function LobbyPage() {
 	const handleTeamChange = async () => {
 		if (selectedTeam && selectedTeam !== teamColor) {
 			try {
+				// Erst alten Chat unsubscriben
+				if (teamColor) {
+					await wsS.unsubscribe(`/topic/lobby/${id}/chat/team/${teamColor}`);
+				}
+
+				// Teamwechsel an Backend schicken
 				await apiService.put(
 					`/lobby/${id}/team/${userId}`,
 					{ color: selectedTeam },
@@ -384,14 +390,23 @@ export default function LobbyPage() {
 						Authorization: `Bearer ${token}`,
 					},
 				);
+
 				await fetchPlayerInfo();
 				localStorage.setItem('playerTeam', selectedTeam);
+
+				// Chat leeren und auf neuen Teamchat subscriben
+				setTeamChat([]);
+
+				await wsS.subscribe(`/topic/lobby/${id}/chat/team/${selectedTeam}`, (messageDto: ChatMessageDTO) => {
+					setTeamChat(prevChat => [...prevChat, `${messageDto.sender}: ${messageDto.message}`]);
+				});
 			} catch (error) {
 				console.error('Error changing team:', error);
 			}
 		}
 		setIsTeamModalOpen(false);
 	};
+
 
 	const handleGameModeChange = async () => {
 		if (selectedGameMode && selectedGameMode !== gameMode) {
@@ -553,6 +568,10 @@ export default function LobbyPage() {
 		}
 	}, [teamColor]);
 
+	useEffect(() => {
+		bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+	}, [globalChat, teamChat]);
+
 	function formatEnum(value?: string) {
 		if (!value) return '...';
 		return value
@@ -629,11 +648,6 @@ export default function LobbyPage() {
 							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
 						}`}>
 						Copy Lobby Code <CopyOutlined />
-					</span>
-					<span
-						onClick={() => setIsChatOpen(!isChatOpen)}
-						className='flex items-center gap-2 cursor-pointer hover:text-blue-400 transition-colors'>
-						{isChatOpen ? 'Hide Chat' : 'Show Chat'}
 					</span>
 					<span
 						onClick={handleLeaveLobby}
@@ -765,78 +779,92 @@ export default function LobbyPage() {
 				</div>
 			</div>
 
-			{/* Chat Panel */}
+			{/* Chat */}
 			{isChatOpen && (
 				<div
-					className='absolute right-0 bottom-0 w-80 h-96 bg-gray-900/90 backdrop-blur-sm shadow-xl border border-white/20 rounded-tl-lg flex flex-col'
-					style={{ zIndex: 100, backgroundColor: 'rgba(17, 24, 39, 0.9)' }}>
+					className="absolute right-1 bottom-1 w-80 h-96 bg-[#1f2937]/95 backdrop-blur-md shadow-2xl border border-white/10 rounded-xl flex flex-col overflow-hidden"
+					style={{ zIndex: 100 }}
+				>
 					{/* Chat Header */}
-					<div className='flex justify-between items-center p-2 border-b border-white/20'>
-						<div className='flex space-x-2'>
+					<div className="flex justify-between items-center px-1! py-1! bg-[#111827] border-b border-white/10!">
+						<div className="flex space-x-2!">
 							<button
 								onClick={() => setActiveChat('global')}
-								className={`px-3 py-1 rounded ${
-									activeChat === 'global' ? 'bg-orange-500 text-white' : 'text-white/70 hover:text-white'
-								}`}>
+								style={{ all: 'unset', cursor: 'pointer', padding: '4px 6px' }}
+								className={`text-sm rounded transition-colors
+									${activeChat === 'global'
+										? 'text-white! font-bold!'
+										: 'text-white/60! hover:text-white! hover:text-white'}
+								`}
+							>
 								Global
 							</button>
+
 							<button
 								onClick={() => setActiveChat('team')}
-								className={`px-3 py-1 rounded ${
-									activeChat === 'team' ? 'bg-blue-500 text-white' : 'text-white/70 hover:text-white'
-								}`}>
+								style={{ all: 'unset', cursor: 'pointer', padding: '4px 6px' }}
+								className={`text-sm rounded transition-colors
+									${activeChat === 'team'
+										? 'text-white! font-bold!'
+										: 'text-white/60! hover:text-white! hover:text-white'}
+								`}
+							>
 								Team
 							</button>
 						</div>
-						<button onClick={() => setIsChatOpen(false)} className='text-white/70 hover:text-white text-xl'>
+						<button
+							onClick={() => setIsChatOpen(false)}
+							className="text-white/60 text-sm px-2! py-1! rounded! bg-white/5 hover:bg-white/10! hover:text-red-500! transition-colors"
+							style={{ all: 'unset', cursor: 'pointer' }}
+						>
 							×
 						</button>
 					</div>
 
 					{/* Chat Messages */}
-					<div className='flex-1 overflow-auto p-3 space-y-2'>
+					<div className="flex-1 overflow-y-auto px-2! py-1! space-y-2! text-sm break-words">
 						{activeChat === 'global' ? (
 							globalChat.length > 0 ? (
 								globalChat.map((msg, index) => (
 									<div
 										key={index}
-										className='text-white text-sm p-2 rounded shadow-md'
-										style={{ backgroundColor: 'rgba(234, 88, 12, 0.3)' }}>
-										{msg}
+										className=" text-white p-2"
+
+									>
+										{msg.replace(/"([^"]*)"/g, '$1')}
 									</div>
 								))
 							) : (
-								<div className='text-white/50 text-center text-sm'>No global messages yet</div>
+								<div className="text-white/40 text-center">No global messages yet</div>
 							)
 						) : teamChat.length > 0 ? (
 							teamChat.map((msg, index) => (
 								<div
 									key={index}
-									className='text-white text-sm p-2 rounded shadow-md'
-									style={{ backgroundColor: 'rgba(59, 130, 246, 0.3)' }}>
-									{msg}
+									className="text-white p-2"
+								>
+									{msg.replace(/"([^"]*)"/g, '$1')}
 								</div>
 							))
 						) : (
-							<div className='text-white/50 text-center text-sm'>No team messages yet</div>
+							<div className="text-white/40 text-center">No team messages yet</div>
 						)}
+						{/* Scroll target */}
+						<div ref={bottomRef} />
 					</div>
 
 					{/* Message Input */}
-					<div className='p-2 border-t border-white/20 flex'>
+					<div className="border-t border-white/10 p-1! bg-[#111827] flex items-center gap-2">
 						<input
-							type='text'
+							type="text"
 							value={chatMessage}
-							onChange={e => setChatMessage(e.target.value)}
-							onKeyDown={e => {
+							onChange={(e) => setChatMessage(e.target.value)}
+							onKeyDown={(e) => {
 								if (e.key === 'Enter') handleSendChatMessage();
 							}}
 							placeholder={`Type ${activeChat} message...`}
-							className='flex-1 bg-gray-800 text-white p-2 rounded-l outline-none'
+							className="flex-1 bg-gray-800 text-white placeholder-white/50 p-2 rounded-md text-sm outline-none"
 						/>
-						<button onClick={handleSendChatMessage} className='bg-blue-500 hover:bg-blue-600 text-white px-4 rounded-r'>
-							Send
-						</button>
 					</div>
 				</div>
 			)}
@@ -847,16 +875,99 @@ export default function LobbyPage() {
 				onCancel={() => setIsRoleModalOpen(false)}
 				footer={null}
 				centered
+				closeIcon={
+					<CloseOutlined
+						className={
+							`transition-colors duration-200 text-gray-400 hover:${
+								teamColor === 'RED'
+									? 'text-red-500!'
+									: teamColor === 'BLUE'
+										? 'text-blue-500!'
+										: 'text-gray-500!'
+							}`
+						}
+						style={{ fontSize: '18px' }}
+					/>
+				}
 				title={<div className='text-center text-black text-lg font-semibold'>Choose Role</div>}>
 				<div className='flex flex-col items-center gap-4'>
-					<Button type={selectedRole === 'SPYMASTER' ? 'primary' : 'default'} onClick={() => setSelectedRole('SPYMASTER')} block>
-						Spymaster
+					<Button
+						type={selectedRole === 'SPYMASTER' ? 'primary' : 'default'}
+						onClick={() => setSelectedRole('SPYMASTER')}
+						block
+						className="flex items-center justify-start gap-2"
+					>
+						<span>Spymaster</span>
+						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+							<Popover
+								title="Spymaster"
+								trigger="click"
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+										maxWidth: '260px',
+										whiteSpace: 'normal',
+										fontSize: '13px',
+										lineHeight: '1.4',
+									},
+								}}
+								content={
+									<span>
+      									As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to words belonging to the other team or, even worse, the assassin word (black card)S!
+    								</span>
+								}
+							>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED'
+											? 'hover:text-red-500!'
+											: teamColor === 'BLUE'
+												? 'hover:text-blue-500!'
+												: 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
 					</Button>
 					<Button
 						type={selectedRole === 'FIELD_OPERATIVE' ? 'primary' : 'default'}
 						onClick={() => setSelectedRole('FIELD_OPERATIVE')}
-						block>
-						Field Operative
+						block
+						className="flex items-center justify-start gap-2"
+					>
+						<span>Field Operative</span>
+						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+							<Popover
+								title="Field Operative"
+								trigger="click"
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+										maxWidth: '260px',
+										whiteSpace: 'normal',
+										fontSize: '13px',
+										lineHeight: '1.4',
+									},
+								}}
+								content={
+									<span>
+          								In Codenames, Field Operatives are the players who use the Spymaster’s clues to identify their team’s words from the cards on the board. Their goal is to guess as many correct words as possible without accidentally selecting the assassin word (black card) or the opposing teams words.
+        							</span>
+								}
+							>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED'
+											? 'hover:text-red-500!'
+											: teamColor === 'BLUE'
+												? 'hover:text-blue-500!'
+												: 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
 					</Button>
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsRoleModalOpen(false)}>Cancel</Button>
@@ -872,6 +983,20 @@ export default function LobbyPage() {
 				onCancel={() => setIsTeamModalOpen(false)}
 				footer={null}
 				centered
+				closeIcon={
+					<CloseOutlined
+						className={
+							`transition-colors duration-200 text-gray-400 hover:${
+								teamColor === 'RED'
+									? 'text-red-500!'
+									: teamColor === 'BLUE'
+										? 'text-blue-500!'
+										: 'text-gray-500!'
+							}`
+						}
+						style={{ fontSize: '18px' }}
+					/>
+				}
 				title={<div className='text-center text-black text-lg font-semibold'>Choose Team</div>}>
 				<div className='flex flex-col items-center gap-4'>
 					<Button
@@ -907,16 +1032,119 @@ export default function LobbyPage() {
 				</div>
 			</Modal>
 
-			<Modal open={isGameModeModalOpen} onCancel={() => setIsGameModeModalOpen(false)} footer={null} centered title='Choose Game Mode'>
+			<Modal
+				open={isGameModeModalOpen}
+				onCancel={() => setIsGameModeModalOpen(false)}
+				footer={null}
+				centered
+				closeIcon={
+					<CloseOutlined
+						className={
+							`transition-colors duration-200 text-gray-400 hover:${
+								teamColor === 'RED'
+									? 'text-red-500!'
+									: teamColor === 'BLUE'
+										? 'text-blue-500!'
+										: 'text-gray-500!'
+							}`
+						}
+						style={{ fontSize: '18px' }}
+					/>
+				}
+				title={<div className='text-center text-black text-lg font-semibold'>Choose Game Mode</div>}>
 				<div className='flex flex-col items-center gap-4'>
-					<Button type={selectedGameMode === 'CLASSIC' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('CLASSIC')} block>
-						Classic
+					<Button
+						type={selectedGameMode === 'CLASSIC' ? 'primary' : 'default'}
+						onClick={() => setSelectedGameMode('CLASSIC')}
+						block
+						className="flex items-center justify-start gap-2!"
+					>
+						<span>Classic</span>
+						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+							<Popover
+								title="Classic Mode"
+								content="The classic game mode with randomly generated words."
+								trigger="click"
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+									},
+								}}
+							>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED'
+											? 'hover:text-red-500!'
+											: teamColor === 'BLUE'
+												? 'hover:text-blue-500!'
+												: 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
 					</Button>
-					<Button type={selectedGameMode === 'OWN_WORDS' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('OWN_WORDS')} block>
-						Own Words
+					<Button
+						type={selectedGameMode === 'OWN_WORDS' ? 'primary' : 'default'}
+						onClick={() => setSelectedGameMode('OWN_WORDS')}
+						block
+						className="flex items-center justify-start gap-2"
+					>
+						<span>Own Words</span>
+						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+							<Popover
+								title="Own Words Mode"
+								content="Bring your own words up to 25! The game fills in the rest if needed."
+								trigger="click"
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+									},
+								}}
+							>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED'
+											? 'hover:text-red-500!'
+											: teamColor === 'BLUE'
+												? 'hover:text-blue-500!'
+												: 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
 					</Button>
-					<Button type={selectedGameMode === 'THEME' ? 'primary' : 'default'} onClick={() => setSelectedGameMode('THEME')} block>
-						Theme
+					<Button
+						type={selectedGameMode === 'THEME' ? 'primary' : 'default'}
+						onClick={() => setSelectedGameMode('THEME')}
+						block
+						className="flex items-center justify-start gap-2"
+					>
+						<span>Theme</span>
+						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+							<Popover
+								title="Theme Mode"
+								content="Choose a theme, and the game will generate words that match it."
+								trigger="click"
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+									},
+								}}
+							>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED'
+											? 'hover:text-red-500!'
+											: teamColor === 'BLUE'
+												? 'hover:text-blue-500!'
+												: 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
 					</Button>
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
@@ -926,6 +1154,17 @@ export default function LobbyPage() {
 					</div>
 				</div>
 			</Modal>
+
+			{/* Chat Icon */}
+			{!isChatOpen && (
+				<button
+					onClick={() => setIsChatOpen(true)}
+					className="fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!"
+					style={{ backdropFilter: 'blur(4px)' }}
+				>
+					<span className="text-xl">💬</span>
+				</button>
+			)}
 		</div>
 	);
 }
