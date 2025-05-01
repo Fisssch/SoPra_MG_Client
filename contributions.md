@@ -192,14 +192,58 @@ reason).
 |                    | 23.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/e1fd748d8e08911c225367c9e42dcb54662affd5) | Visuel changed the game page.                                                        | more appealing for the players |
 |                    | 23.04.25 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/8b5485506f6b1d682996a020e3739b5f73e839fc) | Visuel changed the result page.                                                      | more appealing for the players |
 |                    | 23.04.25 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b5562a6a08bc659fd8468122fbd3e2931ec45fef) | Visuel changed the buttons of cover page.                                            | more appealing for the players |
-| **[Elia Wyrsch](https://github.com/eliawy)** | 28.04.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/56eabf169c0c2bf85e5f91b7d468bbb6d4e9688a)          | Added a page displaying the rules of the game.   | Noticed that this is missing. Important for new players to know how the game works.|
-|                    | 29.04.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/ec1cce4f26f4557b3f54ae843a30ceb11354a4b9) | Added a counter for the spymaster to see how many guesses they have left to make during the game. | Important for the game to be played. | 
-|                     | 29.04.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/77fabc96cbab1abf4b44d4584797c0856cadc315) | Added a websocket to include a display remaining turns per team for each player. | Important for the game to be played. | 
-|                    | 30.04.2025 |  [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/fbacdb3b2b40e51e3c2d8e18cd36732d0ccea70d) | Added the possibilities for field operatives to end their team turn and therefore change the turn to the other team. | Important game logic that we forgot to implement up to now.| 
-|                    |30.04.2025  |   [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/3e33f500f44903f079326a48998e76b051d1b129) | Added the server implementation to end a turn before making all the guesses. | Important for game flow. |               
 
 ---
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 6 - 26.04.25 - 01.05.25
 
-_Continue with the same table format as above._
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 28.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/e743ffbb175df829f7acef7efc057752d8d935e9) | Reverted some changes to the handling of the api key, which were made last week while trying to fix a bug with it not working. | Unnecessary code which made it harder to run locally, so it's better not to have it. |
+|                    | 30.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/9bef5bb6edde6319809fab42609e49ee398592f5) | Implemented backend logic for the chat feature. | We wanted to implement a chat. |
+|                    | 30.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/0d92a03df060babf53d733a3a928f8efeda0e085) | Implemented frontend logic for the chat feature. | We wanted to implement a chat. |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | 28.04.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/56eabf169c0c2bf85e5f91b7d468bbb6d4e9688a)          | Added a page displaying the rules of the game.   | Noticed that this is missing. Important for new players to know how the game works.|
+|                    | 29.04.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/ec1cce4f26f4557b3f54ae843a30ceb11354a4b9) | Added a counter for the spymaster to see how many guesses they have left to make during the game. | Important for the game to be played. |
+|                     | 29.04.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/77fabc96cbab1abf4b44d4584797c0856cadc315) | Added a websocket to include a display remaining turns per team for each player. | Important for the game to be played. |
+|                    | 30.04.2025 |  [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/fbacdb3b2b40e51e3c2d8e18cd36732d0ccea70d) | Added the possibilities for field operatives to end their team turn and therefore change the turn to the other team. | Important game logic that we forgot to implement up to now.| 
+|                    |30.04.2025  |   [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/3e33f500f44903f079326a48998e76b051d1b129) | Added the server implementation to end a turn before making all the guesses. | Important for game flow. |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+
+---
+
+## Contributions Week 7 - 02.05.25 - 08.05.25
+
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+
+---
+
+## Contributions Week 8 - 09.05.25 - 15.05.25
+
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
