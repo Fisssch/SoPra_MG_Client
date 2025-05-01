@@ -24,6 +24,7 @@ interface LobbyInfoDTO {
 	gameMode: string;
 	lobbyCode: number;
 	createdAt: string;
+	openForLostPlayers: boolean;
 }
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
