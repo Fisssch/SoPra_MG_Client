@@ -182,7 +182,7 @@ const GamePage: React.FC = () => {
       setIsSpymaster(role === 'true'); // becomes setIsSpymaster(true)
 
       try {
-        //get gamemode & startingteam first
+        // Get gamemode & starting team first
         const storedGameMode = localStorage.getItem('gameMode') ?? 'CLASSIC';
         const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
 
@@ -191,10 +191,15 @@ const GamePage: React.FC = () => {
           gameMode: storedGameMode.toUpperCase()
         }, {
           'Authorization': `Bearer ${token}`,
-
         });
 
         setGameData(res.data as GameData);
+
+        // Restore remaining guesses from localStorage
+        const storedRemainingGuesses = localStorage.getItem(`remainingGuesses_${gameId}`);
+        if (storedRemainingGuesses) {
+          setRemainingGuesses(parseInt(storedRemainingGuesses, 10));
+        }
       } catch (err: any) {
         setError(err?.response?.data?.message || err.message);
       } finally {
@@ -207,29 +212,34 @@ const GamePage: React.FC = () => {
         await ws.connect();
 
         // Subscribe to game board updates
-        // Subscribe to game board updates
-      await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
-        console.log("Received updated board and remaining guesses:", payload);
-        const { updatedBoard, guessesLeft } = payload;
+        await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
+          console.log("Received updated board and remaining guesses:", payload);
+          const { updatedBoard, guessesLeft } = payload;
 
-        // Update the game board
-        setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
+          // Update the game board
+          setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
 
-        // Update remaining guesses
-        setRemainingGuesses(guessesLeft);
-      });
+          // Update remaining guesses
+          setRemainingGuesses(guessesLeft);
+
+          // Store the remaining guesses in localStorage
+          localStorage.setItem(`remainingGuesses_${gameId}`, guessesLeft.toString());
+        });
 
         // Subscribe to hint updates
         await ws.subscribe(`/topic/game/${gameId}/hint`, (payload: { hint: string; wordsCount: number; guessesLeft: number }) => {
           console.log("Received hint payload:", payload);
           const { hint, wordsCount, guessesLeft } = payload;
-        
+
           // Update the current hint
           setCurrentHint({ hint, wordsCount });
-        
+
           // Update remaining guesses
           setRemainingGuesses(guessesLeft);
-        
+
+          // Store the remaining guesses in localStorage
+          localStorage.setItem(`remainingGuesses_${gameId}`, guessesLeft.toString());
+
           // Store the hint in localStorage
           localStorage.setItem(`currentHint_${gameId}`, JSON.stringify({ hint, wordsCount }));
         });
