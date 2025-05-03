@@ -497,51 +497,55 @@ export default function LobbyPage() {
 	}
 
 	const TeamTable = ({
-						   title,
-						   players,
-					   }: {
-		title: string;
-		players: LobbyPlayer[];
-		color: 'RED' | 'BLUE';
-	}) => {
+  title,
+  players,
+}: {
+  title: string;
+  players: LobbyPlayer[];
+  color: 'RED' | 'BLUE';
+}) => {
+  return (
+    <div className="mb-6">
+      <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
 
-		return (
-			<div className='mb-6'>
-				<h3 className='text-lg font-bold text-white mb-2'>{title}</h3>
+      {/* Header Row */}
+      <div className="grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
+        <span className="text-left">Username</span>
+        <span className="text-left pl-1">Role</span>
+        <span className="text-left pl-1">Status</span>
+      </div>
 
-				{/* Header-Zeile */}
-				<div
-					className="grid grid-cols-2 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
-					<span className='text-left'>Username</span>
-					<span className='text-left pl-1'>Role</span>
-				</div>
+      {/* Player Rows */}
+      <div className="flex flex-col">
+        {players.length === 0 ? (
+          <p className="text-white text-sm italic">No players in this team.</p>
+        ) : (
+          players.map((player, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-3 text-white text-sm items-center border-t border-white/30"
+            >
+              {/* Column 1: Username */}
+              <div className="px-2 py-2 text-left">{player.username}</div>
 
-				{/* Spieler-Zeilen */}
-				<div className='flex flex-col'>
-					{players.length === 0 ? (
-						<p className='text-white text-sm italic'>No players in this team.</p>
-					) : (
-						players.map((player, index) => (
-							<div
-								key={index}
-								className={`grid grid-cols-2 text-white text-sm items-center border-t border-white/30`}
-							>
-								{/* Spalte 1: Username */}
-								<div className='px-2 py-2 text-left'>
-									{player.username}
-								</div>
+              {/* Column 2: Role */}
+              <div className="px-2 py-2 text-left">{formatEnum(player.role)}</div>
 
-								{/* Spalte 2: Rolle */}
-								<div className='px-2 py-2 text-left'>
-									{formatEnum(player.role)}
-								</div>
-							</div>
-						))
-					)}
-				</div>
-			</div>
-		);
-	};
+              {/* Column 3: Ready Status */}
+              <div className="px-2 py-2 text-left">
+                {player.ready ? (
+                  <span className="text-green-400 font-bold">✅ Ready</span>
+                ) : (
+                  <span className="text-gray-400">Not Ready</span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
 
 	return (
 		<div className='min-h-screen w-full flex text-white' style={backgroundStyle}>
