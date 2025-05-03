@@ -99,7 +99,11 @@ const GamePage: React.FC = () => {
       ) {
         const status = (err as any).status;
         const messageText = (err as any).message;
-    
+         // Handle specific error for hint matching a word on the board
+        if (status === 400 && messageText.includes("Hint cannot be the same as a word on the board")) {
+          message.error("Hinweis darf nicht mit einem Wort auf dem Spielfeld übereinstimmen.");
+          return;
+      } 
         if (status === 400 && messageText.includes("Hint cannot be empty")) {
           message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
           return;
