@@ -536,7 +536,7 @@ export default function LobbyPage() {
                 {player.ready ? (
                   <span className="text-green-400 font-bold">✅ Ready</span>
                 ) : (
-                  <span className="text-gray-400">Not Ready</span>
+                  <span className="text-gray-400 fond-bold">Not Ready</span>
                 )}
               </div>
             </div>
@@ -626,6 +626,7 @@ export default function LobbyPage() {
 									in <b>{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</b> min
 								</p>
 							)}
+							
 						</div>
 
 						{/* Team Info */}
@@ -634,7 +635,17 @@ export default function LobbyPage() {
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED'/>
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE'/>
 						</div>
-
+						{/* Set Ready Button */}
+						<div className="mt-6 flex justify-center">
+						<button
+							onClick={handleReadyToggle}
+							className={`px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
+							ready ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
+							}`}
+						>
+							{ready ? '✅ Ready' : 'Set Ready'}
+						</button>
+						</div>
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
 							<div className='mt-8!'>
@@ -657,7 +668,8 @@ export default function LobbyPage() {
 										{customWords.length} / 25 words added
 									</p>
 								</div>
-
+								
+  
 								{/* Anzeige der hinzugefügten Wörter */}
 								{customWords.length === 0 ? (
 									<p className='text-white'>No words added yet.</p>
