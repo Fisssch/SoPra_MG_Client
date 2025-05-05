@@ -552,13 +552,11 @@ const GamePage: React.FC = () => {
                           }
                         }}
                         className={`${baseStyles} ${
-                            card.guessed
-                                ? guessedStyle[card.color]
-                                : isSpymaster
-                                ? unguessedStyles[card.color]
-                                : card.selected
-                                ? 'bg-amber-100 text-black border-yellow-500' //visuals for selected cards 
-                                : 'bg-amber-100 text-black border-gray-500'
+                          card.guessed
+                              ? guessedStyle[card.color]
+                              : `${isSpymaster ? unguessedStyles[card.color].replace(/border-[^\s]+/, '') : 'bg-amber-100 text-black'} ${
+                                    card.selected ? 'border-yellow-500' : 'border-gray-500'
+                                }`
                         } ${
                             !card.guessed && !isSpymaster && teamColor === gameData.teamTurn
                                 ? 'cursor-pointer hover:scale-105'
