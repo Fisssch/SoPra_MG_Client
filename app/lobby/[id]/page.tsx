@@ -55,6 +55,7 @@ export default function LobbyPage() {
 
 	const [role, setRole] = useState<string | null>(null);
 	const [teamColor, setTeamColor] = useState<string | null>(null);
+	const [prevTeamColor, setPrevTeamColor] = useState<string | null>(null);
 	const [ready, setReady] = useState<boolean>(false);
 	const [lobbyCode, setLobbyCode] = useState<number | null>(null);
 	const [gameMode, setGameMode] = useState<string | null>(null);
@@ -92,7 +93,7 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	const wsS = useMemo(() => new webSocketService(), []);
+	const wsS = useRef(new webSocketService()).current
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -135,13 +136,6 @@ export default function LobbyPage() {
 			const usersTeam = teamRes.color.toUpperCase();
 			setTeamColor(usersTeam);
 			localStorage.setItem('playerTeam', usersTeam);
-			try {
-				await wsS.subscribe(`/topic/lobby/${id}/chat/team/${usersTeam}`, (messageDto: ChatMessageDTO) => {
-					setTeamChat(prevChat => [...prevChat, `${messageDto.sender}: ${messageDto.message}`]);
-				});
-			} catch (readyErr) {
-				console.error('Websocket error in team chat:', readyErr);
-			}
 
 			const readyRes = await apiService.get<ReadyStatusDTO>(`/lobby/${id}/status/${userId}`, { Authorization: `Bearer ${token}` });
 			setReady(readyRes.ready);
@@ -206,6 +200,9 @@ export default function LobbyPage() {
 
 		setTeamChat([]); // Clear the chat when changing teams
 		subscribeToTeamChat();
+
+		// store current team as previous for later unsubscribe
+		setPrevTeamColor(teamColor);
 
 		// Clean up subscription when team changes
 		return () => {
@@ -332,6 +329,20 @@ export default function LobbyPage() {
 			} catch (err) {
 				console.error('Error leaving lobby:', err);
 			}
+
+			// Unsubscribe all topics to clean websocket properly
+			wsS.unsubscribe(`/topic/lobby/${id}/start`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/gameMode`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/playerStatus`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/customWords`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/close`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/theme`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/readyError`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/chat/global`).catch(() => {});
+			if (prevTeamColor) {
+				wsS.unsubscribe(`/topic/lobby/${id}/chat/team/${prevTeamColor}`).catch(() => {});
+			}
+
 			wsS.disconnect();
 		};
 	}, [id]);
