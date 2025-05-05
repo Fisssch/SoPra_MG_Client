@@ -1,7 +1,7 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import {useEffect, useState, useCallback, useMemo, useRef} from 'react';
+import {useEffect, useState, useCallback, useRef} from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { App, Button, Card, Modal, Popover } from 'antd';

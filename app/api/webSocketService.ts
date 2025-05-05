@@ -4,7 +4,7 @@ import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs';
 export class webSocketService {
 	private static instance: webSocketService;
 	private static client: Client;
-	private static subscriptionIds: Map<string, StompSubscription> = new Map();
+	private static subscriptions: Map<string, StompSubscription> = new Map();
 	private unloading: boolean = false;
 	private isConnecting: boolean = false;
 
@@ -90,7 +90,7 @@ export class webSocketService {
 	}
 
 	public async subscribe<T = any>(destination: string, callback: (message: T) => void) {
-		if (webSocketService.subscriptionIds.has(destination)) {
+		if (webSocketService.subscriptions.has(destination)) {
 			// Already subscribed
 			return;
 		}
@@ -110,21 +110,21 @@ export class webSocketService {
 			}
 		});
 
-		webSocketService.subscriptionIds.set(destination, subscription);
+		webSocketService.subscriptions.set(destination, subscription);
 	}
 
 	public async unsubscribe(destination: string) {
-		if (!webSocketService.subscriptionIds.has(destination)) return;
+		if (!webSocketService.subscriptions.has(destination)) return;
 
-		const subscription = webSocketService.subscriptionIds.get(destination);
+		const subscription = webSocketService.subscriptions.get(destination);
 		subscription?.unsubscribe();
-		webSocketService.subscriptionIds.delete(destination);
+		webSocketService.subscriptions.delete(destination);
 	}
 
 
 	public async disconnect() {
 		if (webSocketService.client && webSocketService.client.active) {
-			webSocketService.subscriptionIds?.clear();
+			webSocketService.subscriptions?.clear();
 			await webSocketService.client.deactivate();
 		}
 	}
