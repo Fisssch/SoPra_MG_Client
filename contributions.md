@@ -231,8 +231,9 @@ reason).
 
 | **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
 |--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
-| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Silvan Wyss](https://github.com/Fisssch)** | 06.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/be314a886735e924004e575b5e1c7595d271aa1d) | Backend logic for ability to change lobby language and use it when loading the words from the api. | We want to have the ability to change the language of the lobby and therefore also the words that get loaded from the api. |
+|                    | 06.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/acb0a548126667c8e3a84d9eb0d9d967f52dc8f6) | Bugfixes for the backend logic. | We want our program to be as bug free as possible |
+|                    | 06.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/85b57fee868c84bcec989e27008c2194af2ee036) | Frontend logic for ability to change lobby language and use it when loading the words from the api. | We want to have the ability to change the language of the lobby and therefore also the words that get loaded from the api. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
