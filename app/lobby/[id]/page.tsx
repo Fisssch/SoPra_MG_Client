@@ -1,7 +1,7 @@
 'use client';
 
 import '@ant-design/v5-patch-for-react-19';
-import {useEffect, useState, useCallback, useRef} from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useApi } from '@/hooks/useApi';
 import { App, Button, Card, Modal, Popover } from 'antd';
@@ -23,6 +23,7 @@ interface LobbyInfoDTO {
 	gameMode: string;
 	lobbyCode: number;
 	createdAt: string;
+	language: string;
 }
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
@@ -59,6 +60,7 @@ export default function LobbyPage() {
 	const [ready, setReady] = useState<boolean>(false);
 	const [lobbyCode, setLobbyCode] = useState<number | null>(null);
 	const [gameMode, setGameMode] = useState<string | null>(null);
+	const [language, setLanguage] = useState<string | null>(null);
 	const [token, setToken] = useState<string | null>(null);
 	const [userId, setUserId] = useState<string | null>(null);
 
@@ -70,6 +72,9 @@ export default function LobbyPage() {
 
 	const [isGameModeModalOpen, setIsGameModeModalOpen] = useState(false);
 	const [selectedGameMode, setSelectedGameMode] = useState<string | null>(null);
+
+	const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+	const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
 
 	const [totalPlayers, setTotalPlayers] = useState<number>(0);
 	const [readyPlayers, setReadyPlayers] = useState<number>(0);
@@ -93,7 +98,7 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	const wsS = useRef(new webSocketService()).current
+	const wsS = useRef(new webSocketService()).current;
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -145,6 +150,8 @@ export default function LobbyPage() {
 			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
 			setGameMode(lobbyInfo.gameMode);
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
+			setLanguage(lobbyInfo.language);
+			localStorage.setItem('language', lobbyInfo.language);
 
 			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
 			const createdAt = new Date(lobbyInfo.createdAt).getTime();
@@ -258,6 +265,17 @@ export default function LobbyPage() {
 					console.error('WebSocket error in gamemode:', modeErr);
 				}
 
+				// Language
+				try {
+					await wsS.subscribe(`/topic/lobby/${id}/language`, (language: string) => {
+						setLanguage(language); // global
+						setSelectedLanguage(language); // lokal
+						localStorage.setItem('language', language);
+					});
+				} catch (modeErr) {
+					console.error('WebSocket error in language:', modeErr);
+				}
+
 				//number of player
 				await wsS.subscribe(`/topic/lobby/${id}/playerStatus`, (status: ExtendedLobbyStatusDTO) => {
 					const mappedPlayers: LobbyPlayer[] = status.players.map(player => ({
@@ -337,6 +355,7 @@ export default function LobbyPage() {
 			wsS.unsubscribe(`/topic/lobby/${id}/customWords`).catch(() => {});
 			wsS.unsubscribe(`/topic/lobby/${id}/close`).catch(() => {});
 			wsS.unsubscribe(`/topic/lobby/${id}/theme`).catch(() => {});
+			wsS.unsubscribe(`/topic/lobby/${id}/language`).catch(() => {});
 			wsS.unsubscribe(`/topic/lobby/${id}/readyError`).catch(() => {});
 			wsS.unsubscribe(`/topic/lobby/${id}/chat/global`).catch(() => {});
 			if (prevTeamColor) {
@@ -418,7 +437,6 @@ export default function LobbyPage() {
 		setIsTeamModalOpen(false);
 	};
 
-
 	const handleGameModeChange = async () => {
 		if (selectedGameMode && selectedGameMode !== gameMode) {
 			try {
@@ -432,6 +450,22 @@ export default function LobbyPage() {
 			}
 		} else {
 			setIsGameModeModalOpen(false);
+		}
+	};
+
+	const handleLanguageChange = async () => {
+		if (selectedLanguage && selectedLanguage !== language) {
+			try {
+				await apiService.put(`/lobby/${id}/language`, selectedLanguage, {
+					Authorization: `Bearer ${token}`,
+				});
+				setLanguage(selectedLanguage);
+				setIsLanguageModalOpen(false);
+			} catch (err) {
+				console.error('Failed to change language', err);
+			}
+		} else {
+			setIsLanguageModalOpen(false);
 		}
 	};
 
@@ -634,30 +668,27 @@ export default function LobbyPage() {
 					</span>
 					<span
 						onClick={() => !ready && setIsRoleModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${
-							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}>
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
 						Change Role
 					</span>
 					<span
 						onClick={() => !ready && setIsTeamModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${
-							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}>
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
 						Change Team
 					</span>
 					<span
 						onClick={() => !ready && setIsGameModeModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${
-							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}>
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
 						Change GameMode
 					</span>
 					<span
+						onClick={() => !ready && setIsLanguageModalOpen(true)}
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
+						Change Language
+					</span>
+					<span
 						onClick={handleCopyLobbyCode}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${
-							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
-						}`}>
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
 						Copy Lobby Code <CopyOutlined />
 					</span>
 					<span
@@ -690,6 +721,9 @@ export default function LobbyPage() {
 							</p>
 							<p>
 								Gamemode: <b>{formatEnum(gameMode ?? '')}</b>
+							</p>
+							<p>
+								Language: <b>{formatEnum(language ?? '')}</b>
 							</p>
 							<p>
 								Lobby Code: <b>{lobbyCode}</b>
@@ -793,21 +827,17 @@ export default function LobbyPage() {
 			{/* Chat */}
 			{isChatOpen && (
 				<div
-					className="absolute right-1 bottom-1 w-80 h-96 bg-[#1f2937]/95 backdrop-blur-md shadow-2xl border border-white/10 rounded-xl flex flex-col overflow-hidden"
-					style={{ zIndex: 100 }}
-				>
+					className='absolute right-1 bottom-1 w-80 h-96 bg-[#1f2937]/95 backdrop-blur-md shadow-2xl border border-white/10 rounded-xl flex flex-col overflow-hidden'
+					style={{ zIndex: 100 }}>
 					{/* Chat Header */}
-					<div className="flex justify-between items-center px-1! py-1! bg-[#111827] border-b border-white/10!">
-						<div className="flex space-x-2!">
+					<div className='flex justify-between items-center px-1! py-1! bg-[#111827] border-b border-white/10!'>
+						<div className='flex space-x-2!'>
 							<button
 								onClick={() => setActiveChat('global')}
 								style={{ all: 'unset', cursor: 'pointer', padding: '4px 6px' }}
 								className={`text-sm rounded transition-colors
-									${activeChat === 'global'
-										? 'text-white! font-bold!'
-										: 'text-white/60! hover:text-white! hover:text-white'}
-								`}
-							>
+									${activeChat === 'global' ? 'text-white! font-bold!' : 'text-white/60! hover:text-white! hover:text-white'}
+								`}>
 								Global
 							</button>
 
@@ -815,66 +845,55 @@ export default function LobbyPage() {
 								onClick={() => setActiveChat('team')}
 								style={{ all: 'unset', cursor: 'pointer', padding: '4px 6px' }}
 								className={`text-sm rounded transition-colors
-									${activeChat === 'team'
-										? 'text-white! font-bold!'
-										: 'text-white/60! hover:text-white! hover:text-white'}
-								`}
-							>
+									${activeChat === 'team' ? 'text-white! font-bold!' : 'text-white/60! hover:text-white! hover:text-white'}
+								`}>
 								Team
 							</button>
 						</div>
 						<button
 							onClick={() => setIsChatOpen(false)}
-							className="text-white/60 text-sm px-2! py-1! rounded! bg-white/5 hover:bg-white/10! hover:text-red-500! transition-colors"
-							style={{ all: 'unset', cursor: 'pointer' }}
-						>
+							className='text-white/60 text-sm px-2! py-1! rounded! bg-white/5 hover:bg-white/10! hover:text-red-500! transition-colors'
+							style={{ all: 'unset', cursor: 'pointer' }}>
 							×
 						</button>
 					</div>
 
 					{/* Chat Messages */}
-					<div className="flex-1 overflow-y-auto px-2! py-1! space-y-2! text-sm break-words">
+					<div className='flex-1 overflow-y-auto px-2! py-1! space-y-2! text-sm break-words'>
 						{activeChat === 'global' ? (
 							globalChat.length > 0 ? (
 								globalChat.map((msg, index) => (
-									<div
-										key={index}
-										className=" text-white p-2"
-
-									>
+									<div key={index} className=' text-white p-2'>
 										{msg.replace(/"([^"]*)"/g, '$1')}
 									</div>
 								))
 							) : (
-								<div className="text-white/40 text-center">No global messages yet</div>
+								<div className='text-white/40 text-center'>No global messages yet</div>
 							)
 						) : teamChat.length > 0 ? (
 							teamChat.map((msg, index) => (
-								<div
-									key={index}
-									className="text-white p-2"
-								>
+								<div key={index} className='text-white p-2'>
 									{msg.replace(/"([^"]*)"/g, '$1')}
 								</div>
 							))
 						) : (
-							<div className="text-white/40 text-center">No team messages yet</div>
+							<div className='text-white/40 text-center'>No team messages yet</div>
 						)}
 						{/* Scroll target */}
 						<div ref={bottomRef} />
 					</div>
 
 					{/* Message Input */}
-					<div className="border-t border-white/10 p-1! bg-[#111827] flex items-center gap-2">
+					<div className='border-t border-white/10 p-1! bg-[#111827] flex items-center gap-2'>
 						<input
-							type="text"
+							type='text'
 							value={chatMessage}
-							onChange={(e) => setChatMessage(e.target.value)}
-							onKeyDown={(e) => {
+							onChange={e => setChatMessage(e.target.value)}
+							onKeyDown={e => {
 								if (e.key === 'Enter') handleSendChatMessage();
 							}}
 							placeholder={`Type ${activeChat} message...`}
-							className="flex-1 bg-gray-800 text-white placeholder-white/50 p-2 rounded-md text-sm outline-none"
+							className='flex-1 bg-gray-800 text-white placeholder-white/50 p-2 rounded-md text-sm outline-none'
 						/>
 					</div>
 				</div>
@@ -888,15 +907,9 @@ export default function LobbyPage() {
 				centered
 				closeIcon={
 					<CloseOutlined
-						className={
-							`transition-colors duration-200 text-gray-400 hover:${
-								teamColor === 'RED'
-									? 'text-red-500!'
-									: teamColor === 'BLUE'
-										? 'text-blue-500!'
-										: 'text-gray-500!'
-							}`
-						}
+						className={`transition-colors duration-200 text-gray-400 hover:${
+							teamColor === 'RED' ? 'text-red-500!' : teamColor === 'BLUE' ? 'text-blue-500!' : 'text-gray-500!'
+						}`}
 						style={{ fontSize: '18px' }}
 					/>
 				}
@@ -906,13 +919,12 @@ export default function LobbyPage() {
 						type={selectedRole === 'SPYMASTER' ? 'primary' : 'default'}
 						onClick={() => setSelectedRole('SPYMASTER')}
 						block
-						className="flex items-center justify-start gap-2"
-					>
+						className='flex items-center justify-start gap-2'>
 						<span>Spymaster</span>
-						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
-								title="Spymaster"
-								trigger="click"
+								title='Spymaster'
+								trigger='click'
 								styles={{
 									body: {
 										backgroundColor: '#1f2937',
@@ -925,17 +937,15 @@ export default function LobbyPage() {
 								}}
 								content={
 									<span>
-      									As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to words belonging to the other team or, even worse, the assassin word (black card)S!
-    								</span>
-								}
-							>
+										As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only
+										give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates
+										will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to
+										words belonging to the other team or, even worse, the assassin word (black card)S!
+									</span>
+								}>
 								<InfoCircleOutlined
 									className={`text-gray-700! cursor-pointer text-lg ${
-										teamColor === 'RED'
-											? 'hover:text-red-500!'
-											: teamColor === 'BLUE'
-												? 'hover:text-blue-500!'
-												: 'hover:text-gray-500!'
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
 									}`}
 								/>
 							</Popover>
@@ -945,13 +955,12 @@ export default function LobbyPage() {
 						type={selectedRole === 'FIELD_OPERATIVE' ? 'primary' : 'default'}
 						onClick={() => setSelectedRole('FIELD_OPERATIVE')}
 						block
-						className="flex items-center justify-start gap-2"
-					>
+						className='flex items-center justify-start gap-2'>
 						<span>Field Operative</span>
-						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
-								title="Field Operative"
-								trigger="click"
+								title='Field Operative'
+								trigger='click'
 								styles={{
 									body: {
 										backgroundColor: '#1f2937',
@@ -964,17 +973,14 @@ export default function LobbyPage() {
 								}}
 								content={
 									<span>
-          								In Codenames, Field Operatives are the players who use the Spymaster’s clues to identify their team’s words from the cards on the board. Their goal is to guess as many correct words as possible without accidentally selecting the assassin word (black card) or the opposing teams words.
-        							</span>
-								}
-							>
+										In Codenames, Field Operatives are the players who use the Spymaster’s clues to identify their team’s words from the cards on the
+										board. Their goal is to guess as many correct words as possible without accidentally selecting the assassin word (black card) or
+										the opposing teams words.
+									</span>
+								}>
 								<InfoCircleOutlined
 									className={`text-gray-700! cursor-pointer text-lg ${
-										teamColor === 'RED'
-											? 'hover:text-red-500!'
-											: teamColor === 'BLUE'
-												? 'hover:text-blue-500!'
-												: 'hover:text-gray-500!'
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
 									}`}
 								/>
 							</Popover>
@@ -996,15 +1002,9 @@ export default function LobbyPage() {
 				centered
 				closeIcon={
 					<CloseOutlined
-						className={
-							`transition-colors duration-200 text-gray-400 hover:${
-								teamColor === 'RED'
-									? 'text-red-500!'
-									: teamColor === 'BLUE'
-										? 'text-blue-500!'
-										: 'text-gray-500!'
-							}`
-						}
+						className={`transition-colors duration-200 text-gray-400 hover:${
+							teamColor === 'RED' ? 'text-red-500!' : teamColor === 'BLUE' ? 'text-blue-500!' : 'text-gray-500!'
+						}`}
 						style={{ fontSize: '18px' }}
 					/>
 				}
@@ -1050,15 +1050,9 @@ export default function LobbyPage() {
 				centered
 				closeIcon={
 					<CloseOutlined
-						className={
-							`transition-colors duration-200 text-gray-400 hover:${
-								teamColor === 'RED'
-									? 'text-red-500!'
-									: teamColor === 'BLUE'
-										? 'text-blue-500!'
-										: 'text-gray-500!'
-							}`
-						}
+						className={`transition-colors duration-200 text-gray-400 hover:${
+							teamColor === 'RED' ? 'text-red-500!' : teamColor === 'BLUE' ? 'text-blue-500!' : 'text-gray-500!'
+						}`}
 						style={{ fontSize: '18px' }}
 					/>
 				}
@@ -1068,28 +1062,22 @@ export default function LobbyPage() {
 						type={selectedGameMode === 'CLASSIC' ? 'primary' : 'default'}
 						onClick={() => setSelectedGameMode('CLASSIC')}
 						block
-						className="flex items-center justify-start gap-2!"
-					>
+						className='flex items-center justify-start gap-2!'>
 						<span>Classic</span>
-						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
-								title="Classic Mode"
-								content="The classic game mode with randomly generated words."
-								trigger="click"
+								title='Classic Mode'
+								content='The classic game mode with randomly generated words.'
+								trigger='click'
 								styles={{
 									body: {
 										backgroundColor: '#1f2937',
 										color: 'white',
 									},
-								}}
-							>
+								}}>
 								<InfoCircleOutlined
 									className={`text-gray-700! cursor-pointer text-lg ${
-										teamColor === 'RED'
-											? 'hover:text-red-500!'
-											: teamColor === 'BLUE'
-												? 'hover:text-blue-500!'
-												: 'hover:text-gray-500!'
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
 									}`}
 								/>
 							</Popover>
@@ -1099,28 +1087,22 @@ export default function LobbyPage() {
 						type={selectedGameMode === 'OWN_WORDS' ? 'primary' : 'default'}
 						onClick={() => setSelectedGameMode('OWN_WORDS')}
 						block
-						className="flex items-center justify-start gap-2"
-					>
+						className='flex items-center justify-start gap-2'>
 						<span>Own Words</span>
-						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
-								title="Own Words Mode"
-								content="Bring your own words up to 25! The game fills in the rest if needed."
-								trigger="click"
+								title='Own Words Mode'
+								content='Bring your own words up to 25! The game fills in the rest if needed.'
+								trigger='click'
 								styles={{
 									body: {
 										backgroundColor: '#1f2937',
 										color: 'white',
 									},
-								}}
-							>
+								}}>
 								<InfoCircleOutlined
 									className={`text-gray-700! cursor-pointer text-lg ${
-										teamColor === 'RED'
-											? 'hover:text-red-500!'
-											: teamColor === 'BLUE'
-												? 'hover:text-blue-500!'
-												: 'hover:text-gray-500!'
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
 									}`}
 								/>
 							</Popover>
@@ -1130,28 +1112,22 @@ export default function LobbyPage() {
 						type={selectedGameMode === 'THEME' ? 'primary' : 'default'}
 						onClick={() => setSelectedGameMode('THEME')}
 						block
-						className="flex items-center justify-start gap-2"
-					>
+						className='flex items-center justify-start gap-2'>
 						<span>Theme</span>
-						<div className="ml-auto" onClick={(e) => e.stopPropagation()}>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
-								title="Theme Mode"
-								content="Choose a theme, and the game will generate words that match it."
-								trigger="click"
+								title='Theme Mode'
+								content='Choose a theme, and the game will generate words that match it.'
+								trigger='click'
 								styles={{
 									body: {
 										backgroundColor: '#1f2937',
 										color: 'white',
 									},
-								}}
-							>
+								}}>
 								<InfoCircleOutlined
 									className={`text-gray-700! cursor-pointer text-lg ${
-										teamColor === 'RED'
-											? 'hover:text-red-500!'
-											: teamColor === 'BLUE'
-												? 'hover:text-blue-500!'
-												: 'hover:text-gray-500!'
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
 									}`}
 								/>
 							</Popover>
@@ -1166,14 +1142,65 @@ export default function LobbyPage() {
 				</div>
 			</Modal>
 
+			<Modal
+				open={isLanguageModalOpen}
+				onCancel={() => setIsLanguageModalOpen(false)}
+				footer={null}
+				centered
+				closeIcon={
+					<CloseOutlined
+						className={`transition-colors duration-200 text-gray-400 hover:${
+							teamColor === 'RED' ? 'text-red-500!' : teamColor === 'BLUE' ? 'text-blue-500!' : 'text-gray-500!'
+						}`}
+						style={{ fontSize: '18px' }}
+					/>
+				}
+				title={<div className='text-center text-black text-lg font-semibold'>Choose Language</div>}>
+				<div className='flex flex-col items-center gap-4'>
+					<Button
+						type={selectedLanguage === 'GERMAN' ? 'primary' : 'default'}
+						onClick={() => setSelectedLanguage('GERMAN')}
+						block
+						className='flex items-center justify-start gap-2!'>
+						<span>German</span>
+					</Button>
+					<Button
+						type={selectedLanguage === 'ENGLISH' ? 'primary' : 'default'}
+						onClick={() => setSelectedLanguage('ENGLISH')}
+						block
+						className='flex items-center justify-start gap-2!'>
+						<span>English</span>
+					</Button>
+					<Button
+						type={selectedLanguage === 'FRENCH' ? 'primary' : 'default'}
+						onClick={() => setSelectedLanguage('FRENCH')}
+						block
+						className='flex items-center justify-start gap-2!'>
+						<span>French</span>
+					</Button>
+					<Button
+						type={selectedLanguage === 'ITALIAN' ? 'primary' : 'default'}
+						onClick={() => setSelectedLanguage('ITALIAN')}
+						block
+						className='flex items-center justify-start gap-2!'>
+						<span>Italian</span>
+					</Button>
+					<div className='mt-4 flex gap-3'>
+						<Button onClick={() => setIsLanguageModalOpen(false)}>Cancel</Button>
+						<Button type='primary' onClick={handleLanguageChange}>
+							Confirm
+						</Button>
+					</div>
+				</div>
+			</Modal>
+
 			{/* Chat Icon */}
 			{!isChatOpen && (
 				<button
 					onClick={() => setIsChatOpen(true)}
-					className="fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!"
-					style={{ backdropFilter: 'blur(4px)' }}
-				>
-					<span className="text-xl">💬</span>
+					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!'
+					style={{ backdropFilter: 'blur(4px)' }}>
+					<span className='text-xl'>💬</span>
 				</button>
 			)}
 		</div>
