@@ -4,7 +4,7 @@ import "@ant-design/v5-patch-for-react-19";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, App } from "antd";
 import { useState } from "react";
 import { User } from "@/types/user";
 import { calculateHash } from "@/utils/hash";
@@ -23,6 +23,8 @@ const Register: React.FC = () => {
 
   const { set: setToken } = useLocalStorage<string>("token", "");
   const { set: setUserId } = useLocalStorage<string>("id", "");
+
+  const { message } = App.useApp();
 
   const handleRegister = async (values: UserDTO) => {
     setLoading(true);
@@ -44,12 +46,12 @@ const Register: React.FC = () => {
 
       if (user?.id) {
         setUserId(String(user.id));
-        alert("Registration successful!");
+        message.success("Registration successful!");
         router.push("/mainpage");
 }
 
     } catch (error: any) {
-      alert(`Registration failed: ${error.message || "Unknown error"}`);
+      message.error(`Registration failed: ${error.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }

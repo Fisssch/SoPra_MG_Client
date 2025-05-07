@@ -3,7 +3,7 @@
 import "@ant-design/v5-patch-for-react-19";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button, App } from "antd";
 import { useApi } from "@/hooks/useApi";
 
 const EditUsername: React.FC = () => {
@@ -14,6 +14,8 @@ const EditUsername: React.FC = () => {
     const [authorized, setAuthorized] = useState<boolean | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+
+    const { message } = App.useApp();
 
     useEffect(() => {
         const storedToken = localStorage.getItem("token")?.replace(/^"|"$/g, "");
