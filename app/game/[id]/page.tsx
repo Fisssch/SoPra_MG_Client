@@ -109,7 +109,8 @@ const GamePage: React.FC = () => {
           return;
         }
       }
-    
+      
+      console.error("Unexpected error sending hint:", err); 
       message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
