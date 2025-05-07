@@ -15,12 +15,14 @@ interface LobbyResponseDTO {
   lobbyCode: number;
   openForLostPlayers: boolean;
 }
+
 interface PlayerResponseDTO {
   id: number;
   role: string;
   teamColor: string;
   ready: boolean;
 }
+
 interface ReadyStatusDTO {
   ready: boolean;
 }
@@ -48,54 +50,57 @@ export default function Home() {
   if (authorized === null) return null;
 
   // Funktion, um einer offenen Lobby beizutreten
-  const fetchOpenLobby = async () => {
-    try {
-      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-      if (!token) {
-        router.replace("/?message=Please login first.");
-        return;
-      }
+ // Funktion, um einer offenen Lobby beizutreten
+ const fetchOpenLobby = async () => {
+   try {
+     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+     const playerId = localStorage.getItem("id")?.replace(/^"|"$/g, "");
 
-      // Anfrage nach einer offenen Lobby
-      const response = await apiService.get<LobbyResponseDTO>(
-        "/lobby/lost", // Hier die Anfrage nach einer offenen Lobby
-        { Authorization: `Bearer ${token}` }
-      );
+     if (!token || !playerId) {
+       router.replace("/?message=Please login first.");
+       return;
+     }
 
-      // Überprüfen, ob eine offene Lobby zurückgegeben wurde
-      if (!response || !response.id) {
-        message.info("Es existiert keine offene Lobby. Du kannst eine neue Lobby erstellen.");
-        return; // Es existiert keine offene Lobby, keine Aktion wird durchgeführt
-      }
+     // Anfrage nach einer offenen Lobby
+     const response = await apiService.get<LobbyResponseDTO>(
+       "/lobby/lost", // Hier die Anfrage nach einer offenen Lobby
+       { Authorization: `Bearer ${token}` }
+     );
 
-      // Wenn eine offene Lobby existiert, dann tritt dem Lobby bei
-      const lobby = response;
+     // Überprüfen, ob eine offene Lobby zurückgegeben wurde
+     if (!response || !response.id) {
+       message.info("Es existiert keine offene Lobby. Du kannst eine neue Lobby erstellen.");
+       return; // Es existiert keine offene Lobby, keine Aktion wird durchgeführt
+     }
 
-      // Wichtig: Entferne die URL-Kodierung für die playerId
-      await apiService.put<PlayerResponseDTO>(
-        `/lobby/${lobby.lobbyCode}/${localStorage.getItem("id")}`, // Verwende die lobbyCode und playerId ohne URL-Kodierung
-        null,
-        { Authorization: `Bearer ${token}` }
-      );
+     // Wenn eine offene Lobby existiert, dann tritt dem Lobby bei
+     const lobby = response;
 
-      // Speichern der Lobby-Informationen
-      setLobbyId(String(lobby.id));
-      localStorage.setItem("lobbyCode", String(lobby.lobbyCode));
+     // Hier verwenden wir die lobbyId korrekt, statt des lobbyCodes
+     await apiService.put<PlayerResponseDTO>(
+       `/lobby/${lobby.id}/${playerId}`, // Verwende die lobbyId hier
+       null,
+       { Authorization: `Bearer ${token}` }
+     );
 
-      // Setze den Spielerstatus auf "nicht bereit"
-      await apiService.put<ReadyStatusDTO>(
-        `/lobby/${lobby.id}/status/${localStorage.getItem("id")}`,
-        { ready: false },
-        { Authorization: `Bearer ${token}` }
-      );
+     // Speichern der Lobby-Informationen
+     setLobbyId(String(lobby.id));
+     localStorage.setItem("lobbyCode", String(lobby.lobbyCode));
 
-      // Weiterleitung zur Lobby-Seite
-      window.location.href = `/lobby/${lobby.id}`;
-    } catch (error: any) {
-      console.error("Fehler beim Beitreten der offenen Lobby:", error);
-      message.error("Konnte keine offene Lobby finden oder beitreten.");
-    }
-  };
+     // Setze den Spielerstatus auf "nicht bereit"
+     await apiService.put<ReadyStatusDTO>(
+       `/lobby/${lobby.id}/status/${playerId}`,
+       { ready: false },
+       { Authorization: `Bearer ${token}` }
+     );
+
+     // Weiterleitung zur Lobby-Seite
+     window.location.href = `/lobby/${lobby.id}`;
+   } catch (error: any) {
+     console.error("Fehler beim Beitreten der offenen Lobby:", error);
+     message.error("Konnte keine offene Lobby finden oder beitreten.");
+   }
+ };
 
   // Funktion für Beitritt oder Erstellung einer Lobby
   const handleJoinOrCreateLobby = async () => {
