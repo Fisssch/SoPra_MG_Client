@@ -46,6 +46,7 @@ const GamePage: React.FC = () => {
   const [currentHint, setCurrentHint] = useState<{ hint: string; wordsCount: number } | null>(null);
   const getHintKey = (gameId: string | string[], team: string) => `hintSubmitted_${gameId}_${team}`;
   const previousTeamRef = useRef<'RED' | 'BLUE' | null>(null);
+  const [remainingGuesses, setRemainingGuesses] = useState<number | null>(null);
 
   const ws = useRef(new webSocketService()).current;
   const initializedRef = useRef(false);
@@ -139,6 +140,24 @@ const GamePage: React.FC = () => {
     }
   };
 
+  const handleEndTurn = async () => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    if (!token) {
+      console.error("No token found when trying to end turn.");
+      return;
+    }
+    try {
+      // Make a PUT request to the backend to end the turn
+      await apiService.put(`/game/${gameId}/endTurn`, {}, {
+        'Authorization': `Bearer ${token}`,
+      });
+      console.log("Turn ended successfully.");
+    } catch (err) {
+      console.error("Error ending turn:", err);
+      message.error("Zug konnte nicht beendet werden.");
+    }
+  };
+
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
@@ -188,14 +207,31 @@ const GamePage: React.FC = () => {
         await ws.connect();
 
         // Subscribe to game board updates
-        await ws.subscribe(`/topic/game/${gameId}/board`, (updatedBoard: Card[]) => {
-          setGameData((prev) => prev ? { ...prev, board: updatedBoard } : prev);
-        });
+        // Subscribe to game board updates
+      await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
+        console.log("Received updated board and remaining guesses:", payload);
+        const { updatedBoard, guessesLeft } = payload;
+
+        // Update the game board
+        setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
+
+        // Update remaining guesses
+        setRemainingGuesses(guessesLeft);
+      });
 
         // Subscribe to hint updates
-        await ws.subscribe(`/topic/game/${gameId}/hint`, (hint) => {
-          setCurrentHint(hint);
-          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify(hint));
+        await ws.subscribe(`/topic/game/${gameId}/hint`, (payload: { hint: string; wordsCount: number; guessesLeft: number }) => {
+          console.log("Received hint payload:", payload);
+          const { hint, wordsCount, guessesLeft } = payload;
+        
+          // Update the current hint
+          setCurrentHint({ hint, wordsCount });
+        
+          // Update remaining guesses
+          setRemainingGuesses(guessesLeft);
+        
+          // Store the hint in localStorage
+          localStorage.setItem(`currentHint_${gameId}`, JSON.stringify({ hint, wordsCount }));
         });
 
         // Subscribe to guess updates
@@ -208,6 +244,16 @@ const GamePage: React.FC = () => {
           localStorage.setItem("winningTeam", winningTeam);
           clearGameLocalStorage(gameId);
           router.replace(`/result/${gameId}`);
+        });
+        await ws.subscribe(`/topic/game/${gameId}/turn`, (payload: { teamTurn: 'RED' | 'BLUE' }) => {
+          console.log("Turn ended. Switching to the next team:", payload.teamTurn);
+        
+          // Reset local state if needed
+          // Update the gameData state with the new teamTurn
+          setGameData((prev) => (prev ? { ...prev, teamTurn: payload.teamTurn } : prev));
+          setHintSubmitted(false);
+          setCurrentHint(null);
+          setRemainingGuesses(null);
         });
       } catch (e) {
         console.error("WebSocket connection failed:", e);
@@ -389,6 +435,21 @@ const GamePage: React.FC = () => {
                     Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
                   </p>
                 </div>
+            )}
+
+            {/* Remaining guesses display */}
+            {teamColor === gameData.teamTurn && !isSpymaster && currentHint && (
+              <div className="text-center mt-4">
+                <p className="text-2xl font-semibold italic ">
+                  Verbleibende Versuche: <strong >{remainingGuesses}</strong>
+                </p>
+                <button
+                  onClick={handleEndTurn}
+                  className="mt-4 bg-red-600 px-6 py-3 rounded text-lg font-semibold text-white hover:bg-red-700 transition-all"
+                >
+                  Zug beenden
+                </button>
+              </div>
             )}
           </div>
 
