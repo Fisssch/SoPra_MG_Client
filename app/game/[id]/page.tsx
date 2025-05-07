@@ -87,7 +87,6 @@ const GamePage: React.FC = () => {
       localStorage.setItem(getHintKey(gameId, teamColor), "true");
       setHintSubmitted(true);
     } catch (err) {
-      console.error('Error sending hint:', err);
     
       if (
         typeof err === 'object' &&
@@ -109,7 +108,8 @@ const GamePage: React.FC = () => {
           return;
         }
       }
-    
+      
+      console.error("Unexpected error sending hint:", err); 
       message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
