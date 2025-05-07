@@ -2,7 +2,7 @@
 
 import "@ant-design/v5-patch-for-react-19";
 import { useRouter } from 'next/navigation';
-import { Button, Input, Checkbox, App } from 'antd';
+import { Button, Input, App } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { useApi } from "@/hooks/useApi";
@@ -32,7 +32,6 @@ export default function Home() {
 
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [lobbyCode, setLobbyCode] = useState<string>("");
-  const [joinOpenLobby, setJoinOpenLobby] = useState(false);
   const [allowLostPlayers, setAllowLostPlayers] = useState(false);
 
   const { set: setLobbyId } = useLocalStorage<string>("lobbyId", "");
@@ -48,6 +47,57 @@ export default function Home() {
 
   if (authorized === null) return null;
 
+  // Funktion, um einer offenen Lobby beizutreten
+  const fetchOpenLobby = async () => {
+    try {
+      const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+      if (!token) {
+        router.replace("/?message=Please login first.");
+        return;
+      }
+
+      // Anfrage nach einer offenen Lobby
+      const response = await apiService.get<LobbyResponseDTO>(
+        "/lobby/lost", // Hier die Anfrage nach einer offenen Lobby
+        { Authorization: `Bearer ${token}` }
+      );
+
+      // Überprüfen, ob eine offene Lobby zurückgegeben wurde
+      if (!response || !response.id) {
+        message.info("Es existiert keine offene Lobby. Du kannst eine neue Lobby erstellen.");
+        return; // Es existiert keine offene Lobby, keine Aktion wird durchgeführt
+      }
+
+      // Wenn eine offene Lobby existiert, dann tritt dem Lobby bei
+      const lobby = response;
+
+      // Wichtig: Entferne die URL-Kodierung für die playerId
+      await apiService.put<PlayerResponseDTO>(
+        `/lobby/${lobby.lobbyCode}/${localStorage.getItem("id")}`, // Verwende die lobbyCode und playerId ohne URL-Kodierung
+        null,
+        { Authorization: `Bearer ${token}` }
+      );
+
+      // Speichern der Lobby-Informationen
+      setLobbyId(String(lobby.id));
+      localStorage.setItem("lobbyCode", String(lobby.lobbyCode));
+
+      // Setze den Spielerstatus auf "nicht bereit"
+      await apiService.put<ReadyStatusDTO>(
+        `/lobby/${lobby.id}/status/${localStorage.getItem("id")}`,
+        { ready: false },
+        { Authorization: `Bearer ${token}` }
+      );
+
+      // Weiterleitung zur Lobby-Seite
+      window.location.href = `/lobby/${lobby.id}`;
+    } catch (error: any) {
+      console.error("Fehler beim Beitreten der offenen Lobby:", error);
+      message.error("Konnte keine offene Lobby finden oder beitreten.");
+    }
+  };
+
+  // Funktion für Beitritt oder Erstellung einer Lobby
   const handleJoinOrCreateLobby = async () => {
     try {
       const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -60,16 +110,7 @@ export default function Home() {
 
       let lobby: LobbyResponseDTO;
 
-      // Case 1: Join offene Lobby (verlorene Spieler)
-      if (joinOpenLobby && !lobbyCode.trim()) {
-        const response = await apiService.get<{ data: LobbyResponseDTO }>("/lobby/lost", {
-          Authorization: `Bearer ${token}`,
-        });
-        lobby = response.data ?? response;
-      }
-
-      // Case 2: Join via Code
-      else if (lobbyCode.trim()) {
+      if (lobbyCode.trim()) {
         const response = await apiService.get<LobbyResponseDTO>(
           `/lobby?code=${parseInt(lobbyCode)}&autoCreate=false`,
           { Authorization: `Bearer ${token}` }
@@ -77,7 +118,7 @@ export default function Home() {
         lobby = response;
       }
 
-      // Case 3: Create Lobby
+      // Fall: Neue Lobby erstellen
       else {
         const response = await apiService.post<{ data: LobbyResponseDTO }>(
           "/lobby",
@@ -123,7 +164,6 @@ export default function Home() {
   const handleCodeChange = (value: string) => {
     setLobbyCode(value);
     if (value.trim() !== "") {
-      setJoinOpenLobby(false);
       setAllowLostPlayers(false);
     }
   };
@@ -167,33 +207,6 @@ export default function Home() {
         />
       </div>
 
-      {lobbyCode.trim() === "" && (
-        <div className="w-full max-w-sm flex flex-col gap-2 text-left text-white">
-          {!allowLostPlayers && (
-            <Checkbox
-              checked={joinOpenLobby}
-              onChange={() => {
-                setJoinOpenLobby(!joinOpenLobby);
-                setAllowLostPlayers(false);
-              }}
-            >
-              Join game without a code
-            </Checkbox>
-          )}
-          {!joinOpenLobby && (
-            <Checkbox
-              checked={allowLostPlayers}
-              onChange={() => {
-                setAllowLostPlayers(!allowLostPlayers);
-                setJoinOpenLobby(false);
-              }}
-            >
-              Allow to join Lobby without Code
-            </Checkbox>
-          )}
-        </div>
-      )}
-
       <div className="flex gap-6 mt-6">
         <Button
           type="default"
@@ -201,11 +214,15 @@ export default function Home() {
           className="bg-white text-black font-medium rounded-md px-6 py-2"
           onClick={handleJoinOrCreateLobby}
         >
-          {lobbyCode.trim()
-            ? "Join Lobby"
-            : joinOpenLobby
-            ? "Join offene Lobby"
-            : "Create Lobby"}
+          {lobbyCode.trim() ? "Join Lobby" : "Create Lobby"}
+        </Button>
+        <Button
+          type="default"
+          size="large"
+          className="bg-white text-black font-medium rounded-md px-6 py-2"
+          onClick={fetchOpenLobby} // Button zum Beitreten einer offenen Lobby
+        >
+          Join Open Lobby
         </Button>
         <Button
           type="default"

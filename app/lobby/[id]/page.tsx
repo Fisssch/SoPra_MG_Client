@@ -74,6 +74,9 @@ export default function LobbyPage() {
 	const [customWords, setCustomWords] = useState<string[]>([]);
 	const [newCustomWord, setNewCustomWord] = useState<string>('');
 
+	// Open for lost players state
+	const [openForLostPlayers, setOpenForLostPlayers] = useState<boolean>(false);
+
 	const [theme, setTheme] = useState<string>('');
 	const [newTheme, setNewTheme] = useState<string>('');
 
@@ -133,6 +136,7 @@ export default function LobbyPage() {
 			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
 			setGameMode(lobbyInfo.gameMode);
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
+			setOpenForLostPlayers(lobbyInfo.openForLostPlayers);
 
 			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, {Authorization: `Bearer ${token}`});
 			const createdAt = new Date(lobbyInfo.createdAt).getTime();
@@ -580,6 +584,25 @@ export default function LobbyPage() {
 					>
       					Change GameMode
 					</span>
+					{/* Toggle Open Lobby under Game Options */}
+					<span
+						onClick={async () => {
+							try {
+								const updatedFlag = !openForLostPlayers;
+								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
+									Authorization: `Bearer ${token}`,
+								});
+								setOpenForLostPlayers(updatedFlag);
+								message.success(`Lobby is now ${updatedFlag ? 'open' : 'closed'} for lost players.`);
+							} catch (err) {
+								console.error('Failed to toggle lost player setting:', err);
+								message.error('Could not change lost player setting.');
+							}
+						}}
+						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-yellow-400"
+					>
+						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
+					</span>
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${
@@ -705,6 +728,7 @@ export default function LobbyPage() {
 								)}
 							</div>
 						)}
+
 					</Card>
 				</div>
 			</div>
