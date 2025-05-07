@@ -3,13 +3,15 @@
 import "@ant-design/v5-patch-for-react-19";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button, App } from "antd";
 import { useApi } from "@/hooks/useApi";
 import { calculateHash } from "@/utils/hash";
 
 const EditPassword: React.FC = () => {
     const router = useRouter();
     const apiService = useApi();
+
+    const { message } = App.useApp();
 
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");

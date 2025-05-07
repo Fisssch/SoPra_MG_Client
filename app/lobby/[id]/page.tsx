@@ -476,7 +476,7 @@ export default function LobbyPage() {
 		if (!trimmedWord) return;
 
 		if (trimmedWord.length > MAX_CUSTOM_WORD_LENGTH) {
-			alert(`Word is too long (max ${MAX_CUSTOM_WORD_LENGTH} characters).`);
+			message.warning(`Word is too long (max ${MAX_CUSTOM_WORD_LENGTH} characters).`);
 			return;
 		}
 
