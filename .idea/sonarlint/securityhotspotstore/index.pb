@@ -102,3 +102,5 @@ G.idea/sonarlint/issuestore/8/5/85c1ed67c9cc2884f0d0e3fd390521f82a03fce1,7/6/76
 Q.idea/sonarlint/securityhotspotstore/5/9/592a1aae25926e838f4bca2e1c8981f30b077dda,7/c/7ccaeb93ea9051f033542b5f7707f83ce720002b
 Å
 Q.idea/sonarlint/securityhotspotstore/8/5/85c1ed67c9cc2884f0d0e3fd390521f82a03fce1,7/c/7c1304596f95d4be36cd039b49f068451bc250c9
+B
+app/rules/page.tsx,f/c/fcd7a0587849035a884c83253aacbf872cd8014a
