@@ -34,7 +34,7 @@ export default function Home() {
 
   const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [lobbyCode, setLobbyCode] = useState<string>("");
-  const [allowLostPlayers, setAllowLostPlayers] = useState(false);
+
 
   const { set: setLobbyId } = useLocalStorage<string>("lobbyId", "");
 
@@ -125,13 +125,8 @@ export default function Home() {
 
       // Fall: Neue Lobby erstellen
       else {
-        const response = await apiService.post<{ data: LobbyResponseDTO }>(
+        const response = await apiService.get<{ data: LobbyResponseDTO }>(
           "/lobby",
-          {
-            lobbyName: `Lobby ${Math.floor(Math.random() * 1000)}`,
-            gameMode: "classic",
-            openForLostPlayers: allowLostPlayers,
-          },
           { Authorization: `Bearer ${token}` }
         );
         lobby = response.data ?? response;
@@ -168,9 +163,6 @@ export default function Home() {
 
   const handleCodeChange = (value: string) => {
     setLobbyCode(value);
-    if (value.trim() !== "") {
-      setAllowLostPlayers(false);
-    }
   };
 
   return (
