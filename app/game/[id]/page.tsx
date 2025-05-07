@@ -223,6 +223,8 @@ const GamePage: React.FC = () => {
         });
 
         setGameData(res.data as GameData);
+        const gameData = res.data as GameData;
+        localStorage.setItem(`gameBoard_${gameId}`, JSON.stringify(gameData.board));
 
         // Restore remaining guesses from localStorage
         const storedRemainingGuesses = localStorage.getItem(`remainingGuesses_${gameId}`);
@@ -539,7 +541,7 @@ const GamePage: React.FC = () => {
                 const guessedStyle = {
                   RED: 'bg-red-300 text-black border-red-500',
                   BLUE: 'bg-blue-300 text-black border-blue-500',
-                  NEUTRAL: 'bg-gray-200 text-black border-gray-400',
+                  NEUTRAL: 'bg-gray-400 text-black border-gray-500',
                   BLACK: 'bg-black text-white border-gray-700',
                 };
 
