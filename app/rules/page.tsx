@@ -6,7 +6,7 @@ import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '600', '700'], // Normal, semi-bold, bold
+  weight: ['400', '600', '700'], // Normal, semi-bold,  bold
 });
 
 export default function RulesPage() {

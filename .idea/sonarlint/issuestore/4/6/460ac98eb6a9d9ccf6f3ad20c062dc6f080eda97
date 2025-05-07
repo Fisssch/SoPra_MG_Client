@@ -1,0 +1,17 @@
+
+·typescript:S3863"'/Users/luisschmid_1/Documents/Studium/Informatik/SOPRA/FS25-Group25/SoPra_MG_Client/node_modules/next/navigation.js' imported multiple times.(öÌÍ¯ÿÿÿÿÿ8Ü¼³´æ2
+²typescript:S3863"'/Users/luisschmid_1/Documents/Studium/Informatik/SOPRA/FS25-Group25/SoPra_MG_Client/node_modules/next/navigation.js' imported multiple times.(Ì¤İÚ8Ü¼³´æ2
+wtypescript:S5850E"TGroup parts of the regex together to make the intended operator precedence explicit.(ªùÇ¼8Ü¼³´æ2
+wtypescript:S5850t"TGroup parts of the regex together to make the intended operator precedence explicit.(ªùÇ¼8İ¼³´æ2
+xtypescript:S5850—"TGroup parts of the regex together to make the intended operator precedence explicit.(ªùÇ¼8İ¼³´æ2
+typescript:S6606¬"jPrefer using nullish coalescing operator (`??`) instead of a logical or (`||`), as it is a safer operator.(é»‰8İ¼³´æ2
+jtypescript:S2004Ä"ARefactor this code to not nest functions more than 4 levels deep.(›îÄ¿ùÿÿÿÿ8İ¼³´æ2
+jtypescript:S2004Ï"ARefactor this code to not nest functions more than 4 levels deep.(“¦Üøÿÿÿÿ8Ş¼³´æ2
+štypescript:S2681š"vThis line will not be executed conditionally; only the first statement will be. The rest will execute unconditionally.(›¥äì8Ş¼³´æ2
+mtypescript:S3358¥"DExtract this nested ternary operation into an independent statement.(İßİùÿÿÿÿ8ß¼³´æ2
+mtypescript:S3358¦"DExtract this nested ternary operation into an independent statement.(¾óÜ¤üÿÿÿÿ8ß¼³´æ2
+mtypescript:S3358´"DExtract this nested ternary operation into an independent statement.(­ßåÿÿÿÿÿ8ß¼³´æ2
+ìtypescript:S6848—"ÂAvoid non-native interactive elements. If using native HTML is not possible, add an appropriate role and support for tabbing, mouse, keyboard, and touch inputs to an interactive content element.(¯ƒúÁøÿÿÿÿ8à¼³´æ2
+ˆtypescript:S1082—"_Visible, non-interactive elements with click handlers must have at least one keyboard listener.(¯ƒúÁøÿÿÿÿ8à¼³´æ2
+Gtypescript:S6479˜"Do not use Array index in keys(Ê¹¹óşÿÿÿÿ8à¼³´æ2
+mtypescript:S3358©"DExtract this nested ternary operation into an independent statement.(“—¾İûÿÿÿÿ8à¼³´æ2
