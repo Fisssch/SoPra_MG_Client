@@ -173,14 +173,89 @@ reason).
 |                    | 17.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/pull/93/commits/f0efed63caa418619d60653370bd65d9c165f477) | If you where field operative or in the enemy team and you reloaded/ refreshed the side, then you were not able to see the hint anymore, which were given. | This bugfix is important so that the game works correctly.                                                                                                                        |
 |                    | 17.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/93/commits/a19f5fd28c5d0bba4915ffd9b000d65f857613f4) | If you click a card as a field operative all other players should see the card you picked, which was not the case. Only if you reloaded the page you were able to see it. From that point on you were able to see every card which was choosen by the field operative in real time but only if you reloaded. The card count of the teams also did not change. There war a issue with the websocket. | This bugfix was very important so that the game works correctly, because without that you were not able to see picked cards and how many cards your team has to find unless you would have reloaded the page. |
 |                    | 18.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/94/commits/3a403901fc2dd868cdb320aaeb01a02d8b70c1c7) | The end page now shows the correct winner of the game and also navigates to the mainpage or back to the lobby. | This is important because after the game you want to know who won as well as have the option to back to the lobby and play another round. Or you want to go back to the mainpage. |
----
-
-## Contributions Week 5 - [Begin Date] to [End Date]
-
-_Continue with the same table format as above._
 
 ---
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 5 (Optional) - 18.04.25 to 25.04.25
 
-_Continue with the same table format as above._
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 25.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/4317b1e3b68c05e1cf458c9ed369fa52f15601ea) | Partially fixed api key not working on deployed version. | The game doesn't work without an api key. |
+|                    | 25.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/82c4cd35e78abc5fd8ae8e758c1da93134aca30d) | Partially fixed api key not working on deployed version. | The game doesn't work without an api key. |
+|                    | 25.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/e253c80f6178704df56ea7cfc7449d1d1a7b09ca) | Fixed api key not working on deployed version. | The game doesn't work without an api key. |
+| **[Mathis Beeler](https://github.com/beelermathis)** | 22.04.24 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/8b991dc3e12a1750c83ac8bc1fb273d62d75c57c) | removed unnecessary LobbyController endpoint | We don't want unneccessary code in our project |
+|                    | 23.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/f1f5a5fdf785f098daedfa276470ab7669b50608) | debugging and bugfix: specific theme game creation works now correctly | Players want to have working gamemodes |
+|                    | 23.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/993588b86f59581389e31b43202cbf5dedf0547d) | debugging and bugfix: solved double deletion problem after automatic lobby closing | We want to have bugfree code |
+|                    | 24.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/79dfabd911e077b7bb99d89025dc01a0f92d028e) | debugging and bugfix: A lobby gets now also automatically closed after using the back to lobby functionality | We want to have a working lobby |
+|                    | 23.04.24 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/be144d94fb034d53654efb31eaa8ed850997800a) | debugging and bugfix: fixed websocket connection error | We want to have working websockets |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 23.04.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b0923ab2f8f764238e380a133f10f6b1ed171fb9) | Visuel changed the cover page                                                        | more appealing for the players |
+|                    | 23.04.25 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/785e0bc9763c84e332d5b2ebee08043d1c3a9d50) | Visuel changed the login and register page. Also added a hash function for security. | more appealing for the players |
+|                    | 23.04.25 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b2454a2b3738bd60090a492d0d06f7841bdca20d) | Visuel changed the main page.                                                        | more appealing for the players |
+|                    | 23.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/d1aa91113e44b849686fcb2b37d95d37381ce743) | Visuel changed the profil page, username change page and password change page.       | more appealing for the players |
+|                    | 23.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/3c62291db44cce22e679dd3e246cbe9944d011d6) | Visuel changed the overview page and stats page.                                     | more appealing for the players |
+|                    | 23.04.25 | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/01d957147d2ee5ab38e122224bf1d7d9127ed8d3) | Visuel changed the lobby page.                                                       | more appealing for the players |
+|                    | 23.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/e1fd748d8e08911c225367c9e42dcb54662affd5) | Visuel changed the game page.                                                        | more appealing for the players |
+|                    | 23.04.25 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/8b5485506f6b1d682996a020e3739b5f73e839fc) | Visuel changed the result page.                                                      | more appealing for the players |
+|                    | 23.04.25 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Client/pull/99/commits/b5562a6a08bc659fd8468122fbd3e2931ec45fef) | Visuel changed the buttons of cover page.                                            | more appealing for the players |
+
+---
+
+## Contributions Week 6 - 26.04.25 - 01.05.25
+
+| **Student** | **Date**    | **Link to Commit** | **Description**                                                           | **Relevance**                                                                     |
+|--------------------|-------------|-----------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 28.04.25    | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/e743ffbb175df829f7acef7efc057752d8d935e9) | Reverted some changes to the handling of the api key, which were made last week while trying to fix a bug with it not working. | Unnecessary code which made it harder to run locally, so it's better not to have it. |
+|                    | 30.04.25    | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/9bef5bb6edde6319809fab42609e49ee398592f5) | Implemented backend logic for the chat feature.                           | We wanted to implement a chat.                                                    |
+|                    | 30.04.25    | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/0d92a03df060babf53d733a3a928f8efeda0e085) | Implemented frontend logic for the chat feature.                          | We wanted to implement a chat.                                                    |
+| **[Mathis Beeler](https://github.com/beelermathis)** | 30.04.25    | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/b9c61182d9496edf690fb4c09c9395b7b825aadb) | Added more tests                                                          | We want to test all our functionalities                                           |
+|                    | 30.04.25    | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/39738d6ef1ae2b60ff940b262839a8dcda66e463) | Added functionality to select words temporary during the guessing phase   | Players want to have the option to select some words without making a real guess  |
+|                    | 30.04.25    | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/4e17d796ea1dd441ab61f7979de7093b6398863c) | Added a reset at temporary selected words after each turn                 | Players want to select new words after each turn                                  |
+|                    | 30.04.25 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/f353cad78ee95c62c4c3317112f3dc31fab56a54) | added proper user messages for register & login | users want to receive good messages |
+|                    | 30.04.25 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/e2518aded8a47ee093e37b949324edbf4a9de688) | added proper messages for updating username / password | users want to receive good messages |
+|                    | 30.04.25 | [Commit 6](https://github.com/Fisssch/SoPra_MG_Client/commit/502ff934bd5fa88a9c81b2eb899990ce7f70697d) | added proper messages during to game | users want to receive good messages during the game  |
+|                    | 30.04.25 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Client/commit/a3fae1a4471de268cdbc70323ee9468daf6e3969) | added proper messages in the lobby | users want to receive good messages in the lobby |
+| **[Elia Wyrsch](https://github.com/eliawy)** | 28.04.2025  | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/56eabf169c0c2bf85e5f91b7d468bbb6d4e9688a)          | Added a page displaying the rules of the game.                            | Noticed that this is missing. Important for new players to know how the game works. |
+|                    | 29.04.2025  | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/ec1cce4f26f4557b3f54ae843a30ceb11354a4b9) | Added a counter for the spymaster to see how many guesses they have left to make during the game. | Important for the game to be played.                                              |
+|                     | 29.04.2025  | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/77fabc96cbab1abf4b44d4584797c0856cadc315) | Added a websocket to include a display remaining turns per team for each player. | Important for the game to be played.                                              |
+|                    | 30.04.2025  |  [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/fbacdb3b2b40e51e3c2d8e18cd36732d0ccea70d) | Added the possibilities for field operatives to end their team turn and therefore change the turn to the other team. | Important game logic that we forgot to implement up to now.                       |
+|                  | 30.04.2025  |   [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/3e33f500f44903f079326a48998e76b051d1b129) |  Added the server implementation to end a turn before making all the guesses. | Important for game flow.                                                          |
+| **[Luis Schmid](https://github.com/LooPyt)** | 30.04.2025      | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/0ce10c498c399e525e51ec6778e2da163567bec4) | Implements player chat functionality in lobby and after game.                                                                     | importance to communicate for coordination within the Team - e.g. roles                                                                              |
+|                    | 01.05.2025      | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/6c8ca2b33c563d88bbd9dbd1c3ad90597d9f0f68) | Allows to join a Lobby without code Server                                                                  | A Player who do not know other Playeers and want to match to any game opened for "lost players" can only play with this feature                                                                     |
+|                    | 01.05.2025      | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/a5b6b96e071dd074c69a7b4c815be01142a58ca4) | Allows to join a Lobby without code  Client                                                                 | A Player who do not know other Playeers and want to match to any game opened for "lost players" can only play with this feature                                                                     |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 01.04.25    | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/50d8520432afb91ef7fdc0c75b38321979614692) | Just changed the size and the placements of the buttons on the mainpage   | It looks more appealing for the players and also for the looks more professional. |
+|                    | 01.04.25    | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/6c47c7c6d7051fa9c7ea42591375e7c5fd2fcb22) | Used the frontend logic which was already created and made visual changes | As we already had a chat, it also needed to look smooth so that is is more appealing for the players and also looks more professional. |
+
+---
+
+## Contributions Week 7 - 02.05.25 - 08.05.25
+
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 06.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/be314a886735e924004e575b5e1c7595d271aa1d) | Backend logic for ability to change lobby language and use it when loading the words from the api. | We want to have the ability to change the language of the lobby and therefore also the words that get loaded from the api. |
+|                    | 06.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/acb0a548126667c8e3a84d9eb0d9d967f52dc8f6) | Bugfixes for the backend logic. | We want our program to be as bug free as possible |
+|                    | 06.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/85b57fee868c84bcec989e27008c2194af2ee036) | Frontend logic for ability to change lobby language and use it when loading the words from the api. | We want to have the ability to change the language of the lobby and therefore also the words that get loaded from the api. |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+
+---
+
+## Contributions Week 8 - 09.05.25 - 15.05.25
+
+| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
+|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
