@@ -203,7 +203,7 @@ export default function Home() {
         Codenames+
       </h1>
 
-      <div className="w-full max-w-sm mb-4">
+      <div className="w-full max-w-sm mb-3!">
         <Input
           placeholder="Enter Lobby Code (optional)"
           value={lobbyCode}
@@ -211,12 +211,11 @@ export default function Home() {
           size="large"
         />
       </div>
-
-      <div className="flex gap-6 mt-6">
+        <div className="flex flex-col items-center gap-3! w-full max-w-xs">
         <Button
           type="default"
-          size="large"
-          className="bg-white text-black font-medium rounded-md px-6 py-2"
+          size="middle"
+          style={{ width: 250 }}
           onClick={handleJoinOrCreateLobby}
         >
           {lobbyCode.trim() ? "Join Lobby" : "Create Lobby"}
@@ -231,11 +230,19 @@ export default function Home() {
         </Button>
         <Button
           type="default"
-          size="large"
-          className="bg-white text-black font-medium rounded-md px-6 py-2"
+          size="middle"
+          style={{ width: 250 }}
           onClick={() => router.push('/users')}
         >
           View all users
+        </Button>
+        <Button
+          type="default"
+          size="middle"
+          style={{ width: 250 }}
+          onClick={() => router.push('/rules')}
+        >
+        Game Rules
         </Button>
       </div>
     </div>

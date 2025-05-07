@@ -1,95 +1,145 @@
 import { getWebSocketDomain } from '@/utils/domain';
-import { Client, IFrame } from '@stomp/stompjs';
+import { Client, IFrame, IMessage, StompSubscription } from '@stomp/stompjs';
 
 export class webSocketService {
-  private static instance: webSocketService;
-  private static client: Client;
-  private static subscriptions: Set<string> = new Set();
+	private static instance: webSocketService;
+	private static client: Client;
+	private static subscriptions: Map<string, StompSubscription> = new Map();
+	private unloading: boolean = false;
+	private isConnecting: boolean = false;
 
-  constructor() {
-    if (webSocketService.instance) {
-      return webSocketService.instance;
-    }
+	constructor() {
+		if (webSocketService.instance) {
+			return webSocketService.instance;
+		}
 
-    webSocketService.client = new Client();
-    webSocketService.instance = this;
+		webSocketService.client = new Client();
+		webSocketService.instance = this;
 
-  }
+		if (typeof window !== "undefined") {
+			window.addEventListener("beforeunload", () => {
+				this.unloading = true;
+			});
+		}
+	} 
 
-  public async connect(retries: number = 0): Promise<void> {
-    //new
-    if (webSocketService.client && webSocketService.client.active) {
-      await webSocketService.client.deactivate(); 
-    }
+	private waitUntilConnected(): Promise<void> {
+		return new Promise((resolve) => {
+			if (webSocketService.client.connected) {
+				resolve();
+			} else {
+				const checkInterval = setInterval(() => {
+					if (webSocketService.client.connected) {
+						clearInterval(checkInterval);
+						resolve();
+					}
+				}, 50);
+			}
+		});
+	}
 
-    const websocketUrl = getWebSocketDomain();
+	public async connect(retries: number = 0): Promise<void> {
+		//new
+		if (webSocketService.client && webSocketService.client.active) {
+			await webSocketService.client.deactivate();
+		}
 
-    webSocketService.client.configure({
-      brokerURL: websocketUrl,
-      reconnectDelay: 5000,
-      onWebSocketError: this.onError,
-      onStompError: this.onStompError,
-    });
+		const websocketUrl = getWebSocketDomain();
 
-    const connectedPromise = new Promise<void>((resolve, reject) => {
-      webSocketService.client.onConnect = () => {
-        console.log('Connected to websocket');
-        resolve();
-      };
+		webSocketService.client.configure({
+			brokerURL: websocketUrl,
+			reconnectDelay: 5000,
+			onWebSocketError: this.onError.bind(this),
+			onStompError: this.onStompError.bind(this),
+		});
 
-      webSocketService.client.onStompError = (frame: IFrame) => {
-        reject(new Error(`STOMP error: ${frame.headers['message']}`));
-      };
-    });
+		this.isConnecting = true; 
 
-    //new
-    setTimeout(() => {
-      webSocketService.client.activate();
-    }, 250); // Delay a bit to let server cleanup finish
-    //new
-    try {
-      await connectedPromise;
-    } catch (err) {
-      console.warn(`WebSocket failed to connect (retry ${retries})`, err);
-  
-      if (retries < 10) {
-        setTimeout(() => this.connect(retries + 1), 1000); 
-      } else {
-        console.error('WebSocket failed after multiple retries.');
-      }
-    }
-  }
+		const connectedPromise = new Promise<void>((resolve, reject) => {
+			webSocketService.client.onConnect = () => {
+				console.log('Connected to websocket');
+				this.isConnecting = false; 
+				resolve();
+			};
 
-  public async subscribe(destination: string, callback: (message: any) => void) {
-    if (webSocketService.subscriptions.has(destination)) return;
-    webSocketService.subscriptions.add(destination);
+			webSocketService.client.onStompError = (frame: IFrame) => {
+				this.isConnecting = false; 
+				reject(new Error(`STOMP error: ${frame.headers['message']}`));
+			};
+		});
 
-    if (!webSocketService.client.connected) {
-      await this.connect();
-    }
+		//new
+		setTimeout(() => {
+			webSocketService.client.activate();
+		}, 250); // Delay a bit to let server cleanup finish
+		//new
+		try {
+			await connectedPromise;
+		} catch (err) {
+			console.warn(`WebSocket failed to connect (retry ${retries})`, err);
 
-    webSocketService.client.subscribe(destination, message => {
-      try {
-        callback(JSON.parse(message.body));
-      } catch (e) {
-        console.warn('WebSocket JSON parse error:', e);
-        callback(message.body);
-      }
-    });
-  }
+			this.isConnecting = false; 
 
-  public async disconnect() {
-    if (webSocketService.client && webSocketService.client.active) {
-      webSocketService.subscriptions.clear();
-      await webSocketService.client.deactivate();
-    }
-  }
+			if (retries < 10 && !this.unloading) {
+				const delay = 1000 * Math.pow(2, retries);
+				setTimeout(() => this.connect(retries + 1), delay);
+			} else {
+				console.error('WebSocket failed after multiple retries.');
+			}
+		}
+	}
 
-  private onError(error: Event) {
-    console.error('WebSocket error:', error);
-  }
+	public async subscribe<T = any>(destination: string, callback: (message: T) => void) {
+		if (webSocketService.subscriptions.has(destination)) {
+			// Already subscribed
+			return;
+		}
 
-  private onStompError(frame: IFrame) {
-    console.error('STOMP error:', frame.headers['message'], frame.body);
-  }
+		if (!webSocketService.client.connected && !this.isConnecting) {
+			await this.connect();
+		}
+
+		await this.waitUntilConnected();
+
+		const subscription = webSocketService.client.subscribe(destination, (message: IMessage) => {
+			try {
+				callback(JSON.parse(message.body));
+			} catch (err) {
+				console.warn('WebSocket JSON parse error:', err);
+				callback(message.body as unknown as T);
+			}
+		});
+
+		webSocketService.subscriptions.set(destination, subscription);
+	}
+
+	public async unsubscribe(destination: string) {
+		if (!webSocketService.subscriptions.has(destination)) return;
+
+		const subscription = webSocketService.subscriptions.get(destination);
+		subscription?.unsubscribe();
+		webSocketService.subscriptions.delete(destination);
+	}
+
+
+	public async disconnect() {
+		if (webSocketService.client && webSocketService.client.active) {
+			webSocketService.subscriptions?.clear();
+			await webSocketService.client.deactivate();
+		}
+	}
+
+	private onError(error: Event) {
+		if (this.unloading) return;
+
+		if (error instanceof CloseEvent) {
+			console.error(`WebSocket closed: Code ${error.code}, Reason: ${error.reason}, Clean: ${error.wasClean}`);
+		} else {
+			console.error('WebSocket error event:', error.type);
+		}
+	}
+
+	private onStompError(frame: IFrame) {
+		console.error('STOMP error:', frame.headers['message'], frame.body);
+	}
 }
