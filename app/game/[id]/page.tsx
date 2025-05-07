@@ -28,14 +28,14 @@ type GameData = {
 
 type makeGuessDTO = {
     teamColor: 'RED' | 'BLUE';
-    word: string;
+    wordStr: string;
 };
 
 const GamePage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const gameId = params.id as string;
-  const apiService = useApi(); 
+  const apiService = useApi();
   const { message } = App.useApp();
 
 
@@ -63,6 +63,9 @@ const GamePage: React.FC = () => {
     localStorage.removeItem(`gameStartedOnce_${gameId}`);
   };
 
+  const formatWord = (word: string) =>
+      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+
   const sendHint = async () => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
     if (!token) {
@@ -88,7 +91,7 @@ const GamePage: React.FC = () => {
       localStorage.setItem(getHintKey(gameId, teamColor), "true");
       setHintSubmitted(true);
     } catch (err) {
-    
+
       if (
         typeof err === 'object' &&
         err !== null &&
@@ -103,13 +106,13 @@ const GamePage: React.FC = () => {
         if (status === 400 && messageText.includes("Hint cannot be the same as a word on the board")) {
           message.error("Hinweis darf nicht mit einem Wort auf dem Spielfeld übereinstimmen.");
           return;
-      } 
+      }
         if (status === 400 && messageText.includes("Hint cannot be empty")) {
           message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
           return;
         }
       }
-    
+
       message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
@@ -146,7 +149,7 @@ const GamePage: React.FC = () => {
 
   const handleSelectedWord = async (word: string, selected: boolean) => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
-    const team = localStorage.getItem("playerTeam")?.toUpperCase(); 
+    const team = localStorage.getItem("playerTeam")?.toUpperCase();
 
     if (!token || !team) {
       console.error("Missing token or team in localStorage.");
@@ -164,7 +167,7 @@ const GamePage: React.FC = () => {
     } catch (err) {
       console.error("Error selecting word:", err);
     }
-  }; 
+  };
 
   const handleEndTurn = async () => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -271,11 +274,17 @@ const GamePage: React.FC = () => {
         });
 
         // Subscribe to guess updates
-        await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
-          setGameData((prev) => prev ? { ...prev, teamTurn: guess.teamColor } : prev);
-        });
+          await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
+            setGameData((prev) => prev ? { ...prev, teamTurn: guess.teamColor } : prev);
+            message.open({type: 'info', content: (
+                <span>
+                  Geratenes Wort: <strong>{formatWord(guess.wordStr)}</strong>
+                </span>
+              ),
+            });
+          });
 
-        // Subscribe to game completion
+          // Subscribe to game completion
         await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
           localStorage.setItem("winningTeam", winningTeam);
           clearGameLocalStorage(gameId);
@@ -283,7 +292,7 @@ const GamePage: React.FC = () => {
         });
         await ws.subscribe(`/topic/game/${gameId}/turn`, (payload: { teamTurn: 'RED' | 'BLUE' }) => {
           console.log("Turn ended. Switching to the next team:", payload.teamTurn);
-        
+
           // Reset local state if needed
           // Update the gameData state with the new teamTurn
           setGameData((prev) => (prev ? { ...prev, teamTurn: payload.teamTurn } : prev));
@@ -496,7 +505,7 @@ const GamePage: React.FC = () => {
             <div
                 className="bg-blue-700 h-32 w-40 p-4 rounded-xl flex flex-col justify-center items-center shadow-md border-4 border-blue-400 ml-4!">
   <span className="text-3xl font-bold">
-    {(gameData?.board ?? []).filter(card => card.color === 'BLUE' && !card.guessed).length} 
+    {(gameData?.board ?? []).filter(card => card.color === 'BLUE' && !card.guessed).length}
   </span>
               <span className="text-2xl font-bold mt-2">Team blau</span>
             </div>
@@ -581,7 +590,7 @@ const GamePage: React.FC = () => {
                         ></div>
                       )}
 
-                      {card.word}
+                      {formatWord(card.word)}
                     </div>
                 );
               })}
