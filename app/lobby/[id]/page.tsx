@@ -631,31 +631,44 @@ export default function LobbyPage() {
 			<div className='mb-6'>
 				<h3 className='text-lg font-bold text-white mb-2'>{title}</h3>
 
-				{/* Header-Zeile */}
-				<div className='grid grid-cols-2 gap-x-1 text-white text-base items-center border-t border-white/30 py-2'>
-					<span className='text-left'>Username</span>
-					<span className='text-left pl-1'>Role</span>
-				</div>
+      {/* Header Row */}
+      <div className="grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
+        <span className="text-left">Username</span>
+        <span className="text-left pl-1">Role</span>
+        <span className="text-left pl-1">Status</span>
+      </div>
 
-				{/* Spieler-Zeilen */}
-				<div className='flex flex-col'>
-					{players.length === 0 ? (
-						<p className='text-white text-sm italic'>No players in this team.</p>
-					) : (
-						players.map((player, index) => (
-							<div key={index} className={`grid grid-cols-2 text-white text-sm items-center border-t border-white/30`}>
-								{/* Spalte 1: Username */}
-								<div className='px-2 py-2 text-left'>{player.username}</div>
+      {/* Player Rows */}
+      <div className="flex flex-col">
+        {players.length === 0 ? (
+          <p className="text-white text-sm italic">No players in this team.</p>
+        ) : (
+          players.map((player, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-3 text-white text-sm items-center border-t border-white/30"
+            >
+              {/* Column 1: Username */}
+              <div className="px-2 py-2 text-left">{player.username}</div>
 
-								{/* Spalte 2: Rolle */}
-								<div className='px-2 py-2 text-left'>{formatEnum(player.role)}</div>
-							</div>
-						))
-					)}
-				</div>
-			</div>
-		);
-	};
+              {/* Column 2: Role */}
+              <div className="px-2 py-2 text-left">{formatEnum(player.role)}</div>
+
+              {/* Column 3: Ready Status */}
+              <div className="px-2 py-2 text-left">
+                {player.ready ? (
+                  <span className="text-green-400 font-bold">✅ Ready</span>
+                ) : (
+                  <span className="text-gray-400 fond-bold">Not Ready</span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
 
 	return (
 		<div className='min-h-screen w-full flex text-white' style={backgroundStyle}>
@@ -743,6 +756,7 @@ export default function LobbyPage() {
 									min
 								</p>
 							)}
+							
 						</div>
 
 						{/* Team Info */}
@@ -751,7 +765,17 @@ export default function LobbyPage() {
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
 						</div>
-
+						{/* Set Ready Button */}
+						<div className="mt-6 flex justify-center">
+						<button
+							onClick={handleReadyToggle}
+							className={`px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
+							ready ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
+							}`}
+						>
+							{ready ? '✅ Ready' : 'Set Ready'}
+						</button>
+						</div>
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
 							<div className='mt-8!'>
@@ -772,7 +796,8 @@ export default function LobbyPage() {
 									/>
 									<p className='text-sm text-white'>{customWords.length} / 25 words added</p>
 								</div>
-
+								
+  
 								{/* Anzeige der hinzugefügten Wörter */}
 								{customWords.length === 0 ? (
 									<p className='text-white'>No words added yet.</p>
