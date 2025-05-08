@@ -236,8 +236,11 @@ reason).
 |                    | 06.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/85b57fee868c84bcec989e27008c2194af2ee036) | Frontend logic for ability to change lobby language and use it when loading the words from the api. | We want to have the ability to change the language of the lobby and therefore also the words that get loaded from the api. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | 02.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/7b526af8f9296d2688d4ea046b1a39ca42484156) | Fixed the bug that if we reload the page then the "turns left for your team" display shows no number anymore. | Important for gameplay. |
+|                    | 03.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/4a3af2254d5941ae7a62cf1d23d2b6221ea92fc1) | Added logic to check if the given hint is valid (is not a word that is on one of the cards). | Is an important rule for the game, otherwise you could easily just write down the word which is on the card. |
+|                    | 03.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/21c70769de820ee53f2f2465ac2c53459b5b5ed2) | Added display showing which players are ready in the lobby. | Good to see who is not ready yet. |
+|                    | 03.05.2025 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/c98a79fc4783a59e95edb6331c6958a9b4c25255) | Added a second "set ready" button. | Noticed that this seems a problem when playing as the button before was very small and some users did not find it intuitively. |
+|                    | 03.05.2025 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/cca5d8b90e9419f57a326d2ac2c269b5524ef98a) | Added the check if the hint is valid in the backend. | Important rule for a fair game. |
 | **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
