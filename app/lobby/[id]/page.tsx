@@ -765,17 +765,7 @@ export default function LobbyPage() {
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
 						</div>
-						{/* Set Ready Button */}
-						<div className="mt-6 flex justify-center">
-						<button
-							onClick={handleReadyToggle}
-							className={`px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
-							ready ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
-							}`}
-						>
-							{ready ? '✅ Ready' : 'Set Ready'}
-						</button>
-						</div>
+
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
 							<div className='mt-8!'>
@@ -845,6 +835,17 @@ export default function LobbyPage() {
 								)}
 							</div>
 						)}
+						{/* Set Ready Button */}
+						<div className="mt-10! flex justify-center">
+							<button
+								onClick={handleReadyToggle}
+								className={`px-15! py-2 rounded-lg font-semibold text-white transition-colors ${
+									ready ? 'bg-green-500 hover:bg-gray-600!' : 'bg-gray-500 hover:bg-gray-600!'
+								}`}
+							>
+								{ready ? '✅ Ready' : 'Set Ready'}
+							</button>
+						</div>
 					</Card>
 				</div>
 			</div>
@@ -1223,7 +1224,7 @@ export default function LobbyPage() {
 			{!isChatOpen && (
 				<button
 					onClick={() => setIsChatOpen(true)}
-					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!'
+					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-gray-600!'
 					style={{ backdropFilter: 'blur(4px)' }}>
 					<span className='text-xl'>💬</span>
 				</button>
