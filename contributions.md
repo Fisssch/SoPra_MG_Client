@@ -247,8 +247,10 @@ reason).
 |                    | 03.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/21c70769de820ee53f2f2465ac2c53459b5b5ed2) | Added display showing which players are ready in the lobby. | Good to see who is not ready yet. |
 |                    | 03.05.2025 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/c98a79fc4783a59e95edb6331c6958a9b4c25255) | Added a second "set ready" button. | Noticed that this seems a problem when playing as the button before was very small and some users did not find it intuitively. |
 |                    | 03.05.2025 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Server/commit/cca5d8b90e9419f57a326d2ac2c269b5524ef98a) | Added the check if the hint is valid in the backend. | Important rule for a fair game. |
-| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [07.05.25] | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/0ad7544f579138e47aa84153b3869e71b83990f2) | Move Lost Player option to Lobby (SERVER)| Team decision to do so. |
+|                    | [07.05.25] | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/4f693b725d43194f2dfd5d8225eb2cbe7d59a862) | Preparation to merge | resolve conflicts |
+|                    | [07.05.25] | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/653fe948920adda91543ca91bf95c3b7c2f035df) | Move Lost Player option to Lobby (CLIENT) | Team decision to do so. |
+|                    | [07.05.25] | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/f934d6b207bc3499f79ef88b019747a574ad6e90) | Move Lost Player Bugfix and Vercel deplayment (CLIENT) | Importance to build pull and online deployment |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 
