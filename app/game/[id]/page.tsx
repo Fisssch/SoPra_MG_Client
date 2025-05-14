@@ -584,6 +584,10 @@ const GamePage: React.FC = () => {
                         <div
                           onClick={(e) => {
                             e.stopPropagation();
+                            if (!currentHint){
+                              message.warning("Wait for the hint, before selecting words!"); 
+                              return; 
+                            }
                             handleSelectedWord(card.word, card.selected);
                           }}
                           className={`absolute top-1 right-1 w-3 h-3 rounded-full cursor-pointer ${
