@@ -260,8 +260,9 @@ reason).
 
 | **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
 |--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
-| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Silvan Wyss](https://github.com/Fisssch)** | 13.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/898437730b52afa8403581871bb31ea6284084a0) | Implemented some of the feedback from group 26. | If we get the chance to have another group give us feedback, we might as well use it. |
+|                    | 14.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/1d1032a41cb351440417a19890f641f0be564a42) | Implemented backend logic for a new game mode: timed mode. | We were told that our Sprint 2 workload is minimal, so we decided to add another game mode. |
+|                    | 14.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/c6fe3d6445e12d6670b2f100de5e71aff5176eda) | Handled merge conflicts with the main branch. | If we don't handle the merge conflicts it's going to be hard to merge the branches. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
