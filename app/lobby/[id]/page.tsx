@@ -24,6 +24,7 @@ interface LobbyInfoDTO {
 	lobbyCode: number;
 	createdAt: string;
 	language: string;
+	openForLostPlayers: boolean;
 }
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
@@ -81,6 +82,9 @@ export default function LobbyPage() {
 
 	const [customWords, setCustomWords] = useState<string[]>([]);
 	const [newCustomWord, setNewCustomWord] = useState<string>('');
+
+	// Open for lost players state
+	const [openForLostPlayers, setOpenForLostPlayers] = useState<boolean>(false);
 
 	const [theme, setTheme] = useState<string>('');
 	const [newTheme, setNewTheme] = useState<string>('');
@@ -152,6 +156,7 @@ export default function LobbyPage() {
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
 			setLanguage(lobbyInfo.language);
 			localStorage.setItem('language', lobbyInfo.language);
+			setOpenForLostPlayers(lobbyInfo.openForLostPlayers);
 
 			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
 			const createdAt = new Date(lobbyInfo.createdAt).getTime();
@@ -317,6 +322,15 @@ export default function LobbyPage() {
 					});
 				} catch (themeErr) {
 					console.error('Websocket error in theme:', themeErr);
+				} 
+
+				// openForLostPlayers
+				try {
+				await wsS.subscribe(`/topic/lobby/${id}/lostPlayers`, (isOpen: boolean) => {
+					setOpenForLostPlayers(isOpen);
+				});
+				} catch (lostErr) {
+				console.error('WebSocket error in lostPlayers:', lostErr);
 				}
 
 				// all players ready but not good to start
@@ -691,13 +705,30 @@ export default function LobbyPage() {
 					</span>
 					<span
 						onClick={() => !ready && setIsGameModeModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
-						Change GameMode
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
+					>
+      					Change GameMode
 					</span>
+					{/* Toggle Open Lobby under Game Options */}
 					<span
-						onClick={() => !ready && setIsLanguageModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
-						Change Language
+						onClick={async () => {
+							try {
+								const updatedFlag = !openForLostPlayers;
+								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
+									Authorization: `Bearer ${token}`,
+								});
+								setOpenForLostPlayers(updatedFlag);
+								message.success(`Lobby is now ${updatedFlag ? 'open' : 'closed'} for lost players.`);
+							} catch (err) {
+								console.error('Failed to toggle lost player setting:', err);
+								message.error('Could not change lost player setting.');
+							}
+						}}
+						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-yellow-400"
+					>
+						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
 					</span>
 					<span
 						onClick={handleCopyLobbyCode}
