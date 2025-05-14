@@ -716,6 +716,7 @@ export default function LobbyPage() {
 					<div className = "flex items-center gap-2">
 					<span
 						onClick={async () => {
+							if (ready) return; 
 							try {
 								const updatedFlag = !openForLostPlayers;
 								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
@@ -728,7 +729,9 @@ export default function LobbyPage() {
 								message.error('Could not change lost player setting.');
 							}
 						}}
-						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-blue-400"
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
 					>
 						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
 					</span>
@@ -737,6 +740,7 @@ export default function LobbyPage() {
 							title="Open Lobby"
 							content="When enabled, random players are able to join this Lobby."
 							trigger="click"
+							open = {ready ? false: undefined}
 							styles={{
 								body: {
 									backgroundColor: '#1f2937',
@@ -748,8 +752,16 @@ export default function LobbyPage() {
 								},
 							}}
 						>
-							<InfoCircleOutlined className="text-gray-400 hover:text-blue-400 cursor-pointer text-sm" onClick={e => e.stopPropagation()} />
-					</Popover>
+							<InfoCircleOutlined 
+								className={`text-sm ${
+									ready ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-yellow-400 cursor-pointer'
+								}`}
+								onClick={(e) => {
+									if (ready) return;
+									e.stopPropagation();
+								}}
+    						/>
+						</Popover>
 					</span>
 					</div>
 					
