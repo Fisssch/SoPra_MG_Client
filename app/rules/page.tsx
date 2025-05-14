@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { FaArrowLeft } from 'react-icons/fa';
 import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({
@@ -84,7 +83,7 @@ export default function RulesPage() {
         onClick={() => router.push('/mainpage')}
         className="mt-10 flex items-center gap-2 bg-blue-600 px-6 py-3 rounded-lg text-lg font-semibold text-white hover:bg-blue-700 transition-all shadow-md"
       >
-        <FaArrowLeft /> Back to Main Page
+        Back to Main Page
       </button>
     </div>
   );

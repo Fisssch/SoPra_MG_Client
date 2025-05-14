@@ -711,9 +711,12 @@ export default function LobbyPage() {
 					>
       					Change GameMode
 					</span>
+
 					{/* Toggle Open Lobby under Game Options */}
+					<div className = "flex items-center gap-2">
 					<span
 						onClick={async () => {
+							if (ready) return; 
 							try {
 								const updatedFlag = !openForLostPlayers;
 								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
@@ -726,10 +729,42 @@ export default function LobbyPage() {
 								message.error('Could not change lost player setting.');
 							}
 						}}
-						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-yellow-400"
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
 					>
 						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
 					</span>
+						<span className="hover:text-blue-400 transition-colors">
+						<Popover
+							title="Open Lobby"
+							content="When enabled, random players are able to join this Lobby."
+							trigger="click"
+							open = {ready ? false: undefined}
+							styles={{
+								body: {
+									backgroundColor: '#1f2937',
+									color: 'white',
+									fontSize: '13px',
+									maxWidth: '260px',
+									lineHeight: '1.4',
+									whiteSpace: 'normal',
+								},
+							}}
+						>
+							<InfoCircleOutlined 
+								className={`text-sm ${
+									ready ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-yellow-400 cursor-pointer'
+								}`}
+								onClick={(e) => {
+									if (ready) return;
+									e.stopPropagation();
+								}}
+    						/>
+						</Popover>
+					</span>
+					</div>
+					
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
@@ -796,17 +831,7 @@ export default function LobbyPage() {
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
 						</div>
-						{/* Set Ready Button */}
-						<div className="mt-6 flex justify-center">
-						<button
-							onClick={handleReadyToggle}
-							className={`px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
-							ready ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
-							}`}
-						>
-							{ready ? '✅ Ready' : 'Set Ready'}
-						</button>
-						</div>
+
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
 							<div className='mt-8!'>
@@ -876,6 +901,17 @@ export default function LobbyPage() {
 								)}
 							</div>
 						)}
+						{/* Set Ready Button */}
+						<div className="mt-10! flex justify-center">
+							<button
+								onClick={handleReadyToggle}
+								className={`px-15! py-2 rounded-lg font-semibold text-white transition-colors ${
+									ready ? 'bg-green-500 hover:bg-gray-600!' : 'bg-gray-500 hover:bg-gray-600!'
+								}`}
+							>
+								{ready ? '✅ Ready' : 'Set Ready'}
+							</button>
+						</div>
 					</Card>
 				</div>
 			</div>
@@ -996,7 +1032,7 @@ export default function LobbyPage() {
 										As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only
 										give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates
 										will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to
-										words belonging to the other team or, even worse, the assassin word (black card)S!
+										words belonging to the other team or, even worse, the assassin word (black card)!
 									</span>
 								}>
 								<InfoCircleOutlined
@@ -1148,7 +1184,7 @@ export default function LobbyPage() {
 						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
 								title='Own Words Mode'
-								content='Bring your own words up to 25! The game fills in the rest if needed.'
+								content='Bring your own words up to 25! The game automatically fills in the rest if needed.'
 								trigger='click'
 								styles={{
 									body: {
@@ -1254,7 +1290,7 @@ export default function LobbyPage() {
 			{!isChatOpen && (
 				<button
 					onClick={() => setIsChatOpen(true)}
-					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!'
+					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-gray-600!'
 					style={{ backdropFilter: 'blur(4px)' }}>
 					<span className='text-xl'>💬</span>
 				</button>
