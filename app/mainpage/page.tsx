@@ -69,7 +69,7 @@ export default function Home() {
 
      // Überprüfen, ob eine offene Lobby zurückgegeben wurde
      if (!response || !response.id) {
-       message.info("Es existiert keine offene Lobby. Du kannst eine neue Lobby erstellen.");
+       message.info("There's currently no Open Lobby. Feel free to create a new one.");
        return; // Es existiert keine offene Lobby, keine Aktion wird durchgeführt
      }
 
@@ -97,9 +97,17 @@ export default function Home() {
      // Weiterleitung zur Lobby-Seite
      window.location.href = `/lobby/${lobby.id}`;
    } catch (error: any) {
-     console.error("Fehler beim Beitreten der offenen Lobby:", error);
-     message.error("Konnte keine offene Lobby finden oder beitreten.");
-   }
+     if (
+      error?.response?.status === 404 || 
+      error?.status === 404 ||         
+      error?.message?.includes("not found")
+    ) {
+      message.info("There's currently no Open Lobby. Feel free to create a new one.");
+    } else {
+      console.error("Error while joining the Open Lobby", error);
+      message.error("Couldn't find or join the Open Lobby.");
+    }
+  }
  };
 
   // Funktion für Beitritt oder Erstellung einer Lobby
@@ -214,8 +222,8 @@ export default function Home() {
         </Button>
         <Button
           type="default"
-          size="large"
-          className="bg-white text-black font-medium rounded-md px-6 py-2"
+          size="middle"
+          style={{ width: 250 }}
           onClick={fetchOpenLobby} // Button zum Beitreten einer offenen Lobby
         >
           Join Open Lobby
