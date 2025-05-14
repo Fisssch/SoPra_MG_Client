@@ -159,12 +159,21 @@ export default function Home() {
 
       window.location.href = `/lobby/${lobby.id}`;
     } catch (error: any) {
-      console.error("Join/Create lobby error:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "";
 
-      if (error?.status === 400 || error?.message?.includes("Lobby with code")) {
-        message.error("Ungültiger Lobby-Code. Bitte überprüfe deine Eingabe.");
+      if (
+        error?.status === 400 ||
+        errorMessage.toLowerCase().includes("lobby with code")
+      ) {
+        message.error("Invalid lobby code. Please check your input.");
+      } else if (
+        errorMessage.toLowerCase().includes("game has already started") ||
+        errorMessage.toLowerCase().includes("cannot join")
+      ) {
+        message.info("You can't join this lobby because the game has already started.");
       } else {
-        message.error("Konnte der Lobby nicht beitreten oder sie erstellen.");
+        console.error("Join/Create lobby error:", error);
+        message.error("Could not join or create the lobby.");
       }
     }
   };
