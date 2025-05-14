@@ -711,7 +711,9 @@ export default function LobbyPage() {
 					>
       					Change GameMode
 					</span>
+
 					{/* Toggle Open Lobby under Game Options */}
+					<div className = "flex items-center gap-2">
 					<span
 						onClick={async () => {
 							try {
@@ -726,10 +728,31 @@ export default function LobbyPage() {
 								message.error('Could not change lost player setting.');
 							}
 						}}
-						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-yellow-400"
+						className="flex items-center gap-2 cursor-pointer transition-colors hover:text-blue-400"
 					>
 						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
 					</span>
+						<span className="hover:text-blue-400 transition-colors">
+						<Popover
+							title="Open Lobby"
+							content="When enabled, random players are able to join this Lobby."
+							trigger="click"
+							styles={{
+								body: {
+									backgroundColor: '#1f2937',
+									color: 'white',
+									fontSize: '13px',
+									maxWidth: '260px',
+									lineHeight: '1.4',
+									whiteSpace: 'normal',
+								},
+							}}
+						>
+							<InfoCircleOutlined className="text-gray-400 hover:text-blue-400 cursor-pointer text-sm" onClick={e => e.stopPropagation()} />
+					</Popover>
+					</span>
+					</div>
+					
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
@@ -997,7 +1020,7 @@ export default function LobbyPage() {
 										As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only
 										give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates
 										will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to
-										words belonging to the other team or, even worse, the assassin word (black card)S!
+										words belonging to the other team or, even worse, the assassin word (black card)!
 									</span>
 								}>
 								<InfoCircleOutlined
@@ -1149,7 +1172,7 @@ export default function LobbyPage() {
 						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
 								title='Own Words Mode'
-								content='Bring your own words up to 25! The game fills in the rest if needed.'
+								content='Bring your own words up to 25! The game automatically fills in the rest if needed.'
 								trigger='click'
 								styles={{
 									body: {
