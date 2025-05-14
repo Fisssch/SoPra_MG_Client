@@ -322,6 +322,15 @@ export default function LobbyPage() {
 					});
 				} catch (themeErr) {
 					console.error('Websocket error in theme:', themeErr);
+				} 
+
+				// openForLostPlayers
+				try {
+				await wsS.subscribe(`/topic/lobby/${id}/lostPlayers`, (isOpen: boolean) => {
+					setOpenForLostPlayers(isOpen);
+				});
+				} catch (lostErr) {
+				console.error('WebSocket error in lostPlayers:', lostErr);
 				}
 
 				// all players ready but not good to start
