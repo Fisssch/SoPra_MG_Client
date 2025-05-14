@@ -13,6 +13,7 @@ type Card = {
     word: string;
     color: 'RED' | 'BLUE' | 'NEUTRAL' | 'BLACK';
     guessed: boolean;
+    selected: boolean;
 };
 
 type GameData = {
@@ -87,7 +88,6 @@ const GamePage: React.FC = () => {
       localStorage.setItem(getHintKey(gameId, teamColor), "true");
       setHintSubmitted(true);
     } catch (err) {
-      console.error('Error sending hint:', err);
     
       if (
         typeof err === 'object' &&
@@ -99,13 +99,18 @@ const GamePage: React.FC = () => {
       ) {
         const status = (err as any).status;
         const messageText = (err as any).message;
-    
+         // Handle specific error for hint matching a word on the board
+        if (status === 400 && messageText.includes("Hint cannot be the same as a word on the board")) {
+          message.error("Hinweis darf nicht mit einem Wort auf dem Spielfeld übereinstimmen.");
+          return;
+      } 
         if (status === 400 && messageText.includes("Hint cannot be empty")) {
           message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
           return;
         }
       }
-    
+      
+      console.error("Unexpected error sending hint:", err); 
       message.error("Hinweis konnte nicht gesendet werden.");
     }
   };
@@ -139,6 +144,28 @@ const GamePage: React.FC = () => {
       console.error("Error making guess:", err);
     }
   };
+
+  const handleSelectedWord = async (word: string, selected: boolean) => {
+    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+    const team = localStorage.getItem("playerTeam")?.toUpperCase(); 
+
+    if (!token || !team) {
+      console.error("Missing token or team in localStorage.");
+      return;
+    }
+
+    try {
+      await apiService.put(`/game/${gameId}/selectWord`, {
+        wordStr: word,
+        selected: !selected, // Toggle selection --> if already selected then it will deselect, if not selected then select
+        teamColor: team
+      }, {
+        'Authorization': `Bearer ${token}`,
+      });
+    } catch (err) {
+      console.error("Error selecting word:", err);
+    }
+  }; 
 
   const handleEndTurn = async () => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
@@ -182,7 +209,7 @@ const GamePage: React.FC = () => {
       setIsSpymaster(role === 'true'); // becomes setIsSpymaster(true)
 
       try {
-        //get gamemode & startingteam first
+        // Get gamemode & starting team first
         const storedGameMode = localStorage.getItem('gameMode') ?? 'CLASSIC';
         const storedStartingTeam = (localStorage.getItem('startingTeam')?.toUpperCase() || 'RED') as 'RED' | 'BLUE';
 
@@ -191,10 +218,15 @@ const GamePage: React.FC = () => {
           gameMode: storedGameMode.toUpperCase()
         }, {
           'Authorization': `Bearer ${token}`,
-
         });
 
         setGameData(res.data as GameData);
+
+        // Restore remaining guesses from localStorage
+        const storedRemainingGuesses = localStorage.getItem(`remainingGuesses_${gameId}`);
+        if (storedRemainingGuesses) {
+          setRemainingGuesses(parseInt(storedRemainingGuesses, 10));
+        }
       } catch (err: any) {
         setError(err?.response?.data?.message || err.message);
       } finally {
@@ -207,29 +239,34 @@ const GamePage: React.FC = () => {
         await ws.connect();
 
         // Subscribe to game board updates
-        // Subscribe to game board updates
-      await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
-        console.log("Received updated board and remaining guesses:", payload);
-        const { updatedBoard, guessesLeft } = payload;
+        await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
+          console.log("Received updated board and remaining guesses:", payload);
+          const { updatedBoard, guessesLeft } = payload;
 
-        // Update the game board
-        setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
+          // Update the game board
+          setGameData((prev) => (prev ? { ...prev, board: updatedBoard } : prev));
 
-        // Update remaining guesses
-        setRemainingGuesses(guessesLeft);
-      });
+          // Update remaining guesses
+          setRemainingGuesses(guessesLeft);
+
+          // Store the remaining guesses in localStorage
+          localStorage.setItem(`remainingGuesses_${gameId}`, guessesLeft.toString());
+        });
 
         // Subscribe to hint updates
         await ws.subscribe(`/topic/game/${gameId}/hint`, (payload: { hint: string; wordsCount: number; guessesLeft: number }) => {
           console.log("Received hint payload:", payload);
           const { hint, wordsCount, guessesLeft } = payload;
-        
+
           // Update the current hint
           setCurrentHint({ hint, wordsCount });
-        
+
           // Update remaining guesses
           setRemainingGuesses(guessesLeft);
-        
+
+          // Store the remaining guesses in localStorage
+          localStorage.setItem(`remainingGuesses_${gameId}`, guessesLeft.toString());
+
           // Store the hint in localStorage
           localStorage.setItem(`currentHint_${gameId}`, JSON.stringify({ hint, wordsCount }));
         });
@@ -460,7 +497,7 @@ const GamePage: React.FC = () => {
             <div
                 className="bg-blue-700 h-32 w-40 p-4 rounded-xl flex flex-col justify-center items-center shadow-md border-4 border-blue-400 ml-4!">
   <span className="text-3xl font-bold">
-    {gameData.board.filter(card => card.color === 'BLUE' && !card.guessed).length}
+    {(gameData?.board ?? []).filter(card => card.color === 'BLUE' && !card.guessed).length} 
   </span>
               <span className="text-2xl font-bold mt-2">Team blau</span>
             </div>
@@ -470,7 +507,7 @@ const GamePage: React.FC = () => {
             <div
                 className="bg-red-700 h-32 w-40 p-4 rounded-xl flex flex-col justify-center items-center shadow-md border-4 border-red-400 absolute right-4 ">
     <span className="text-3xl font-bold mt-5">
-      {gameData.board.filter(card => card.color === 'RED' && !card.guessed).length}
+      {(gameData?.board ?? []).filter(card => card.color === 'RED' && !card.guessed).length}
     </span>
               <span className="text-2xl font-bold mt-2">Team rot</span>
             </div>
@@ -480,7 +517,7 @@ const GamePage: React.FC = () => {
           {/* Game board */}
           <div className="flex justify-center mt-8">
             <div className="grid grid-cols-5 gap-5 max-w-5xl">
-              {gameData.board.map((card, index) => {
+              {(gameData?.board ?? []).map((card, index) => {
                 const baseStyles =
                     'flex items-center justify-center text-center break-words w-32 sm:w-36 min-h-[120px] px-6 py-4 text-base font-semibold border-4 rounded-2xl shadow-md transition-all duration-200 leading-tight';
 
@@ -508,18 +545,18 @@ const GamePage: React.FC = () => {
                               teamColor === gameData.teamTurn
                           ) {
                             if (!currentHint) {
-                              alert("Warte zuerst auf den Hinweis!");
+                              message.warning("Warte zuerst auf den Hinweis!");
                               return;
                             }
                             handleGuess(card.word);
                           }
                         }}
                         className={`${baseStyles} ${
-                            card.guessed
-                                ? guessedStyle[card.color]
-                                : isSpymaster
-                                    ? unguessedStyles[card.color]
-                                    : 'bg-amber-100 text-black border-gray-500'
+                          card.guessed
+                              ? guessedStyle[card.color]
+                              : `${isSpymaster ? unguessedStyles[card.color].replace(/border-[^\s]+/, '') : 'bg-amber-100 text-black'} ${
+                                    card.selected ? 'border-yellow-500' : 'border-gray-500'
+                                }`
                         } ${
                             !card.guessed && !isSpymaster && teamColor === gameData.teamTurn
                                 ? 'cursor-pointer hover:scale-105'
@@ -529,8 +566,22 @@ const GamePage: React.FC = () => {
                           overflowWrap: 'break-word',
                           wordBreak: 'break-word',
                           textAlign: 'center',
+                          position: 'relative',
                         }}
                     >
+                      {/* Select Button */}
+                      {!card.guessed && !isSpymaster && teamColor === gameData.teamTurn && (
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSelectedWord(card.word, card.selected);
+                          }}
+                          className={`absolute top-1 right-1 w-3 h-3 rounded-full cursor-pointer ${
+                            card.selected ? 'bg-yellow-500' : 'bg-gray-500'
+                          }`}
+                        ></div>
+                      )}
+
                       {card.word}
                     </div>
                 );

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, App } from "antd";
 import { calculateHash } from "@/utils/hash";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 
@@ -21,16 +21,19 @@ const Login: React.FC = () => {
   const apiService = useApi();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [initialMessage, setInitialMessage] = useState<string | null>(null);
 
   const {set: setToken} = useLocalStorage<string>("token", "");
   const {set: setUserId} = useLocalStorage<string>("id", "");
+
+  const { message } = App.useApp();
+
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const msg = params.get("message");
     if (msg) {
-      setMessage(msg);
+      setInitialMessage(msg);
     }
   }, []);
 
@@ -52,11 +55,11 @@ const Login: React.FC = () => {
 
       if (user?.id) {
         setUserId(String(user.id));
-        alert("Login successful!");
+        message.success("Login successful!");
         router.push("/mainpage");
       }
     } catch (error: any) {
-      alert(`Login failed: ${error.message || "Unknown error"}`);
+      message.error(`Login failed: ${error.message || "Unknown error"}`);
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ const Login: React.FC = () => {
           }}
       >
         <div className="login-container">
-          {message && (
+          {initialMessage && (
               <div
                   style={{
                     backgroundColor: "#ffefef",
@@ -84,7 +87,7 @@ const Login: React.FC = () => {
                     color: "#b00020",
                   }}
               >
-                {message}
+                {initialMessage}
               </div>
           )}
 
