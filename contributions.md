@@ -251,8 +251,11 @@ reason).
 |                    | [07.05.25] | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/4f693b725d43194f2dfd5d8225eb2cbe7d59a862) | Preparation to merge | resolve conflicts |
 |                    | [07.05.25] | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/653fe948920adda91543ca91bf95c3b7c2f035df) | Move Lost Player option to Lobby (CLIENT) | Team decision to do so. |
 |                    | [07.05.25] | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/f934d6b207bc3499f79ef88b019747a574ad6e90) | Move Lost Player Bugfix and Vercel deplayment (CLIENT) | Importance to build pull and online deployment |
-| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 07.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/pull/107/commits/e6cd86f4c1f1b2036f432d8e772cc8bb9bad481e) | We have a page where the user can change his password. But I forgot to add that conditions for your new passward. Those conditions are that the password is 8-15 chars long and does not have spaces in it. Now it has been added. | Because we also ask this in our register apge it is also important in the change password page for consistency. |
+|                    | 07.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/pull/107/commits/e5e9e80438c57774fc64eabe8fa0872b735365c2) | User was not able to open the rules page. There was always en error. Now it works.   | So that the users can open the rules. |
+|                    | 07.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/pull/107/commits/13c31dcca702c27501182710dc0c0a7221985541) | All players get a small message, which card was selected.                            | As we went through the game together we often got confused which card was selected. Now everyone will always get a message. |
+|                    | 07.05.2025 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/pull/107/commits/983bf58bc7544ba7084d4ae233e3e19825f1702d) | At the end of the game you will see the hole gameboard. There you will also see which card belonged to which team and also the gray cards and the black card as well. | Everyone can see now which card they had to guess and the spymaster don't have to tell them afterwards. |
+|                    | 08.05.2025 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/pull/107/commits/2492818cc6920a596e27d333339bf1216bf746bf) | Changed the position of the new Ready button so that it will always be at the "end". | More appealing for the users. |
 
 ---
 
