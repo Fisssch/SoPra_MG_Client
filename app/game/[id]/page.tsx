@@ -24,6 +24,7 @@ type GameData = {
     startingTeam: 'RED' | 'BLUE';
     winningTeam: string | null;
     gameMode: string;
+    turnDuration?: number;
 };
 
 type makeGuessDTO = {
@@ -55,6 +56,9 @@ const GamePage: React.FC = () => {
   const [isSpymaster, setIsSpymaster] = useState(false);
   const [teamColor, setTeamColor] = useState<'RED' | 'BLUE'>('RED');
   const [hintSubmitted, setHintSubmitted] = useState(false);
+
+  const [countdown, setCountdown] = useState<number>(60);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const clearGameLocalStorage = (gameId: string) => {
     localStorage.removeItem(`currentHint_${gameId}`);
@@ -224,6 +228,7 @@ const GamePage: React.FC = () => {
 
         setGameData(res.data as GameData);
         const gameData = res.data as GameData;
+        console.log("Vom Backend empfangener GameMode:", gameData.gameMode);
         localStorage.setItem(`gameBoard_${gameId}`, JSON.stringify(gameData.board));
 
         // Restore remaining guesses from localStorage
@@ -334,6 +339,45 @@ const GamePage: React.FC = () => {
 
     previousTeamRef.current = currentTeam;
   }, [gameData?.teamTurn]);
+
+  useEffect(() => {
+    if (gameData?.gameMode !== "TIMED") return;
+
+    if (teamColor === gameData.teamTurn) {
+      const duration = gameData.turnDuration || 60;
+      setCountdown(duration);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerRef.current!);
+
+            //end it forcfully
+            handleEndTurn();
+
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [gameData?.teamTurn, gameData?.gameMode, gameData?.turnDuration, teamColor]);
+
+
+  useEffect(() => {
+    if (gameData?.gameMode) {
+      console.log("Aktiver Spielmodus:", gameData.gameMode);
+    }
+  }, [gameData?.gameMode]);
 
   useEffect(() => {
     if (!gameData) return;
@@ -497,6 +541,11 @@ const GamePage: React.FC = () => {
                   Zug beenden
                 </button>
               </div>
+            )}
+            {gameData.gameMode === "TIMED"  && teamColor === gameData.teamTurn && (
+                <div className="text-center mt-2 text-xl text-yellow-400 font-bold">
+                  Verbleibende Zeit deines Teams: {countdown}s
+                </div>
             )}
           </div>
 
