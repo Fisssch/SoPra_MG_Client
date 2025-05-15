@@ -266,8 +266,15 @@ reason).
 | **[Silvan Wyss](https://github.com/Fisssch)** | 13.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/898437730b52afa8403581871bb31ea6284084a0) | Implemented some of the feedback from group 26. | If we get the chance to have another group give us feedback, we might as well use it. |
 |                    | 14.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/1d1032a41cb351440417a19890f641f0be564a42) | Implemented backend logic for a new game mode: timed mode. | We were told that our Sprint 2 workload is minimal, so we decided to add another game mode. |
 |                    | 14.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/c6fe3d6445e12d6670b2f100de5e71aff5176eda) | Handled merge conflicts with the main branch. | If we don't handle the merge conflicts it's going to be hard to merge the branches. |
-| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | 14.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/0a3a200370a2eba2ec145f2e50ad02acc8f9f78e) | messages for open lobby functionality | players want to receive useful messages |
+|                    | 14.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/9d6716a587d214eb4b8132c316b1de59a638d207) | messages for joining via lobby code | players want to receive useful messages  |
+|                    | 14.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/c3ed52fe4a2cb1cfffe914383a08db5a63b756e4) | Added websocket connection for open lobby state | Players want to receive lobby changes in real time |
+|                    | 14.05.2025 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Client/commit/1fb1ee47d4c268bc2443c441e045907dcd67d3d7) | Added information regarding open lobby option | Players want to know what exactly the Open lobby option is |
+|                    | 14.05.2025 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/6d50e5151539920bdc02310efcfec4bf15ad42f7) | Lobby state not changeable once a player is ready | If players are ready then they shouldn't have the option to change things |
+|                    | 14.05.2025 | [Commit 6](https://github.com/Fisssch/SoPra_MG_Server/commit/999f8d4d4b195486209c70afa4bbf49508036bc5) | Added gguard to prevent joining running games for lost players | Once a game has started players should not be able to join a lobby anymore |
+|                    | 14.05.2025 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Server/commit/eee810704a860aa10df264872b874dc8fa19e9d6) | Added websocket connection for open lobby state | players want to get lobby updates in real time |
+|                    | 14.05.2025 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Server/commit/3eb2a473dbf5eea7dee5b87734d538f50bd9f2c8) | Added read me server part | A good readme is needed in order to explain the whole project |
+|                    | 14.05.2025 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Server/commit/5d4e57b7f644b62eaa8bb8b9409db3dacaa963af) | Debugging and bug fixing: lobby timer gets now correctly reseted after a lobby closes | Players want to have working lobby timers |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
