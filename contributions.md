@@ -277,7 +277,7 @@ reason).
 |                    | 14.05.2025 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Server/commit/5d4e57b7f644b62eaa8bb8b9409db3dacaa963af) | Debugging and bug fixing: lobby timer gets now correctly reseted after a lobby closes | Players want to have working lobby timers |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | 14.05.25 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/3746b123a5e1c07b4550f40b9ba566819976ef4b) | Increase Test coverage above 75% | Requirement to pass M4 |
+|                    | 15.05.25 | [Commit 2]() | Assure further coverage for future merges of branches and adjust testing according to Feedback for M3 | Test covarage has to stay above 75% and considering Feedback for M3 is important to show progression |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
