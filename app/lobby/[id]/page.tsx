@@ -409,9 +409,9 @@ export default function LobbyPage() {
 				const msg = error?.message || '';
 
 				if (status === 409 && msg.includes('spymaster')) {
-					message.error('Dieses Team hat bereits einen Spymaster.');
+					message.error('This team already has a Spymaster.');
 				} else {
-					message.error('Ein Fehler ist aufgetreten beim Rollenwechsel.');
+					message.error('EAn error occurred while changing roles.');
 				}
 			}
 		}
