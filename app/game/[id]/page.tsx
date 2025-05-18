@@ -111,6 +111,10 @@ const GamePage: React.FC = () => {
           message.error("Please enter a hint that consists of only one word and is not empty");
           return;
         }
+        if (status === 400 && messageText.includes("Word count must be at least 1")) {
+          message.error("You must provide a number greater than 0 for the hint.");
+          return;
+        }
       }
       console.error("Unexpected error sending hint:", err); 
       message.error("Failed to send the hint. Please try again");
