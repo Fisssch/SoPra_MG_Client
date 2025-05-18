@@ -281,3 +281,20 @@ reason).
 |                    | 15.05.25   | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/b396c5a4e03db02b8e198e8cbae49d43d9f9cd6a) | Assure further coverage for future merges of branches and adjust testing according to Feedback for M3 | Test covarage has to stay above 75% and considering Feedback for M3 is important to show progression    |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 15.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/269342b953d4331a16141f7c26046f7abf848439) | New gamemode in the lobby.                                                                            | We decided to do a new gamemode so that is important that we have the option in the lobby to choose it. |
 |                    | 15.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/74823372dd5839106f12553aca10105ec58a1a55) | You have the timer in the game also it swiches the team if time runs out, but has a few bugs          | Important so that the user can play the new gamemode.                                                   |
+
+---
+
+## Contributions Week 9 - 16.05.25 - 21.05.25
+
+| **Student** | **Date**   | **Link to Commit** | **Description** | **Relevance** |
+|-------------|------------|--------------------|-----------------|---------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | 18.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/ac72c9d5d9527665cf3815fa713df12990721b37) | Made some changes to make sure that the timed moke works correctly. | We want to have a working game. |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
+|                    | [Date] | [Commit 2]() | Descr | Rel |
