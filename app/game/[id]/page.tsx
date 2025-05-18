@@ -354,9 +354,6 @@ const GamePage: React.FC = () => {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
 
-            //end it forcfully
-            handleEndTurn();
-
             return 0;
           }
           return prev - 1;
@@ -544,7 +541,7 @@ const GamePage: React.FC = () => {
             )}
             {gameData.gameMode === "TIMED"  && teamColor === gameData.teamTurn && (
                 <div className="text-center mt-2 text-xl text-yellow-400 font-bold">
-                  Verbleibende Zeit deines Teams: {countdown}s
+                  Time left: {countdown}s
                 </div>
             )}
           </div>
