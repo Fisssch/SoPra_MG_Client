@@ -288,12 +288,12 @@ const GamePage: React.FC = () => {
           const content = guess.wordStr?.trim()
               ? (
                   <span>
-                    Geratenes Wort: <strong>{formatWord(guess.wordStr)}</strong>
+                    Guessed word: <strong>{formatWord(guess.wordStr)}</strong>
                   </span>
                 )
               : (
                   <span>
-                    <strong>Kein Wort wurde geraten.</strong>
+                    <strong>No word guessed.</strong>
                   </span>
               );
 
