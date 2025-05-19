@@ -25,6 +25,7 @@ interface LobbyInfoDTO {
 	createdAt: string;
 	language: string;
 	openForLostPlayers: boolean;
+	turnDuration: number;
 }
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
@@ -102,6 +103,9 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
+	//Timed gamemode
+	const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
+
 	const wsS = useRef(new webSocketService()).current;
 
 	useEffect(() => {
@@ -154,6 +158,7 @@ export default function LobbyPage() {
 			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
 			setGameMode(lobbyInfo.gameMode);
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
+			console.log("🎮 GameMode aus LobbyInfo (vom Backend):", lobbyInfo.gameMode);
 			setLanguage(lobbyInfo.language);
 			localStorage.setItem('language', lobbyInfo.language);
 			setOpenForLostPlayers(lobbyInfo.openForLostPlayers);
@@ -175,6 +180,11 @@ export default function LobbyPage() {
 				Authorization: `Bearer ${token}`,
 			});
 			setTheme(themeRes.theme);
+
+			if (lobbyInfo.gameMode === 'TIMED' && lobbyInfo.turnDuration) {
+				setSelectedTurnDuration(lobbyInfo.turnDuration);
+				localStorage.setItem(`lobby_${id}_turnDuration`, lobbyInfo.turnDuration.toString());
+			}
 		} catch (error) {
 			console.error('Error loading player info:', error);
 			alert('Player info could not be loaded.');
@@ -196,7 +206,7 @@ export default function LobbyPage() {
 		}
 	}, [token, userId, id]);
 
-	useEffect(() => {
+    useEffect(() => {
 		// Subscribe to team chat when we have a team
 		const subscribeToTeamChat = async () => {
 			if (teamColor) {
@@ -229,6 +239,27 @@ export default function LobbyPage() {
 			try {
 				await wsS.connect();
 
+                try {
+                    await wsS.subscribe(`/topic/lobby/${id}/turnDuration`, (rawValue: any) => {
+                        console.log("📡 Received message on /turnDuration:", rawValue);
+
+                        const newDuration =
+                            typeof rawValue === 'string' ? parseInt(rawValue) :
+                                typeof rawValue === 'number' ? rawValue :
+                                    NaN;
+
+                        if (!isNaN(newDuration)) {
+                            setSelectedTurnDuration(newDuration);
+                            localStorage.setItem(`lobby_${id}_turnDuration`, newDuration.toString());
+                            console.log("✅ Turn duration updated via WS:", newDuration);
+                        } else {
+                            console.warn("⚠️ Invalid turn duration value from WebSocket:", rawValue);
+                        }
+                    });
+                } catch (err) {
+                    console.error("WebSocket error in turnDuration:", err);
+                }
+
 				// Ready/Start
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
@@ -237,11 +268,13 @@ export default function LobbyPage() {
 								const mytoken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
 								const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
 								localStorage.setItem('startingTeam', startingTeam);
+								console.log("🚀 GameMode an Backend gesendet:", (localStorage.getItem('gameMode') ?? 'CLASSIC').toUpperCase());
+								console.log("🚀 Spiel wird gestartet mit GameMode:", localStorage.getItem('gameMode'));
 								await apiService.post(
 									`/game/${id}/start`,
 									{
 										startingTeam: startingTeam,
-										gameMode: gameMode?.toUpperCase() ?? 'CLASSIC',
+										gameMode: (localStorage.getItem('gameMode') ?? 'CLASSIC').toUpperCase(),
 									},
 									{
 										Authorization: `Bearer ${mytoken}`,
@@ -262,6 +295,7 @@ export default function LobbyPage() {
 				// GameMode
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
+						console.log("🌀 GameMode geändert via WebSocket:", lobbyDto.gameMode);
 						setGameMode(lobbyDto.gameMode); // global
 						setSelectedGameMode(lobbyDto.gameMode); // lokal
 						localStorage.setItem('gameMode', lobbyDto.gameMode);
@@ -464,6 +498,20 @@ export default function LobbyPage() {
 			}
 		} else {
 			setIsGameModeModalOpen(false);
+		}
+	};
+
+	const handleTurnDurationChange = async (newDuration: number) => {
+		setSelectedTurnDuration(newDuration);
+		localStorage.setItem(`lobby_${id}_turnDuration`, newDuration.toString());
+
+		try {
+			await apiService.put(`/lobby/${id}/turnDuration`, newDuration, {
+				Authorization: `Bearer ${token}`,
+			});
+			console.log("⏱️ Turn duration updated to", newDuration);
+		} catch (error) {
+			console.error("❌ Failed to update turn duration", error);
 		}
 	};
 
@@ -799,7 +847,10 @@ export default function LobbyPage() {
 								Your Team: <b>{formatEnum(teamColor ?? '')}</b>
 							</p>
 							<p>
-								Gamemode: <b>{formatEnum(gameMode ?? '')}</b>
+								Gamemode: <b>
+								{formatEnum(gameMode ?? '')}
+								{gameMode === 'TIMED' && selectedTurnDuration ? ` (${selectedTurnDuration}s)` : ''}
+							</b>
 							</p>
 							<p>
 								Language: <b>{formatEnum(language ?? '')}</b>
@@ -1225,6 +1276,45 @@ export default function LobbyPage() {
 							</Popover>
 						</div>
 					</Button>
+					<Button
+						type={selectedGameMode === 'TIMED' ? 'primary' : 'default'}
+						onClick={() => setSelectedGameMode('TIMED')}
+						block
+						className='flex items-center justify-start gap-2'>
+						<span>Timed</span>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
+							<Popover
+								title='Timed Mode'
+								content='Each Field Operative has a limited amount of time per turn. When time runs out, the turn automatically switches to the other team.'
+								trigger='click'
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+									},
+								}}>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
+					</Button>
+					{selectedGameMode === 'TIMED' && (
+						<div className='mt-2 flex flex-col items-center w-full'>
+							<label className='text-sm text-black mb-1'>Select Turn Duration:</label>
+							<select
+								value={selectedTurnDuration}
+								onChange={(e) => handleTurnDurationChange(parseInt(e.target.value))}
+								className='p-3 rounded-md bg-gray-400 text-white w-40 border border-white/30 shadow-sm text-sm text-center'
+							>
+								<option value={30}>30 Seconds</option>
+								<option value={60}>60 Seconds</option>
+								<option value={90}>90 Seconds</option>
+							</select>
+						</div>
+					)}
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
 						<Button type='primary' onClick={handleGameModeChange}>
