@@ -103,10 +103,20 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	//Timed gamemode
-	const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
+// Timed gamemode
+const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
 
-	const wsS = useRef(new webSocketService()).current;
+const wsS = useRef(new WebSocketService()).current;
+
+// use this before entering new game
+const clearAllHints = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('currentHint_') || key.startsWith('hintSubmitted_')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -265,6 +275,7 @@ export default function LobbyPage() {
 					await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
 						if (shouldStart) {
 							try {
+								clearAllHints(); //clear hints if still in local storage before entering game 
 								const mytoken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
 								const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
 								localStorage.setItem('startingTeam', startingTeam);
