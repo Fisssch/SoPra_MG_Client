@@ -85,7 +85,7 @@ const Dashboard: React.FC = () => {
 
         setUsers(users);
       } catch (error) {
-        console.error("Error durig loading of the users:", error);
+        console.error("Error during loading of the users:", error);
       }
     };
 

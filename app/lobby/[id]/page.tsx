@@ -103,10 +103,20 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	//Timed gamemode
-	const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
+// Timed gamemode
+const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
 
-	const wsS = useRef(new webSocketService()).current;
+const wsS = useRef(new webSocketService()).current;
+
+// use this before entering new game
+const clearAllHints = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('currentHint_') || key.startsWith('hintSubmitted_')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -265,6 +275,7 @@ export default function LobbyPage() {
 					await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
 						if (shouldStart) {
 							try {
+								clearAllHints(); //clear hints if still in local storage before entering game 
 								const mytoken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
 								const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
 								localStorage.setItem('startingTeam', startingTeam);
@@ -443,9 +454,9 @@ export default function LobbyPage() {
 				const msg = error?.message || '';
 
 				if (status === 409 && msg.includes('spymaster')) {
-					message.error('Dieses Team hat bereits einen Spymaster.');
+					message.error('This team already has a Spymaster.');
 				} else {
-					message.error('Ein Fehler ist aufgetreten beim Rollenwechsel.');
+					message.error('EAn error occurred while changing roles.');
 				}
 			}
 		}
@@ -693,44 +704,41 @@ export default function LobbyPage() {
 			<div className='mb-6'>
 				<h3 className='text-lg font-bold text-white mb-2'>{title}</h3>
 
-      {/* Header Row */}
-      <div className="grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
-        <span className="text-left">Username</span>
-        <span className="text-left pl-1">Role</span>
-        <span className="text-left pl-1">Status</span>
-      </div>
+				{/* Header Row */}
+				<div className='grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2'>
+					<span className='text-left'>Username</span>
+					<span className='text-left pl-1'>Role</span>
+					<span className='text-left pl-1'>Status</span>
+				</div>
 
-      {/* Player Rows */}
-      <div className="flex flex-col">
-        {players.length === 0 ? (
-          <p className="text-white text-sm italic">No players in this team.</p>
-        ) : (
-          players.map((player, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-3 text-white text-sm items-center border-t border-white/30"
-            >
-              {/* Column 1: Username */}
-              <div className="px-2 py-2 text-left">{player.username}</div>
+				{/* Player Rows */}
+				<div className='flex flex-col'>
+					{players.length === 0 ? (
+						<p className='text-white text-sm italic'>No players in this team.</p>
+					) : (
+						players.map((player, index) => (
+							<div key={index} className='grid grid-cols-3 text-white text-sm items-center border-t border-white/30'>
+								{/* Column 1: Username */}
+								<div className='px-2 py-2 text-left'>{player.username}</div>
 
-              {/* Column 2: Role */}
-              <div className="px-2 py-2 text-left">{formatEnum(player.role)}</div>
+								{/* Column 2: Role */}
+								<div className='px-2 py-2 text-left'>{formatEnum(player.role)}</div>
 
-              {/* Column 3: Ready Status */}
-              <div className="px-2 py-2 text-left">
-                {player.ready ? (
-                  <span className="text-green-400 font-bold">✅ Ready</span>
-                ) : (
-                  <span className="text-gray-400 fond-bold">Not Ready</span>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
+								{/* Column 3: Ready Status */}
+								<div className='px-2 py-2 text-left'>
+									{player.ready ? (
+										<span className='text-green-400 font-bold'>✅ Ready</span>
+									) : (
+										<span className='text-gray-400 fond-bold'>Not Ready</span>
+									)}
+								</div>
+							</div>
+						))
+					)}
+				</div>
+			</div>
+		);
+	};
 
 	return (
 		<div className='min-h-screen w-full flex text-white' style={backgroundStyle}>
@@ -861,7 +869,7 @@ export default function LobbyPage() {
 							<p>
 								Players Ready:{' '}
 								<b>
-									{readyPlayers}/{totalPlayers}
+									{readyPlayers}/{Math.max(totalPlayers, 4)}
 								</b>
 							</p>
 							{timeLeft && timeLeft > 0 && (
@@ -873,7 +881,6 @@ export default function LobbyPage() {
 									min
 								</p>
 							)}
-							
 						</div>
 
 						{/* Team Info */}
@@ -882,7 +889,6 @@ export default function LobbyPage() {
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
 						</div>
-
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
 							<div className='mt-8!'>
@@ -903,8 +909,7 @@ export default function LobbyPage() {
 									/>
 									<p className='text-sm text-white'>{customWords.length} / 25 words added</p>
 								</div>
-								
-  
+
 								{/* Anzeige der hinzugefügten Wörter */}
 								{customWords.length === 0 ? (
 									<p className='text-white'>No words added yet.</p>

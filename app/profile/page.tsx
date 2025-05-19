@@ -125,6 +125,9 @@ export default function Profile() {
         <Button type="default" size="middle" style={{ width: 250 }} onClick={handleChangePassword}>
           Change Password
         </Button>
+        <Button type="default" size = "middle" style = {{ width:  250 }} onClick={() => router.push("/mainpage")}>
+          Back to Home
+        </Button>
       </div>
     </div>
   );
