@@ -108,16 +108,20 @@ const GamePage: React.FC = () => {
         const messageText = (err as any).message;
          // Handle specific error for hint matching a word on the board
         if (status === 400 && messageText.includes("Hint cannot be the same as a word on the board")) {
-          message.error("Hinweis darf nicht mit einem Wort auf dem Spielfeld übereinstimmen.");
+          message.error("Hint cannot be the same as a word on the board!");
           return;
       }
         if (status === 400 && messageText.includes("Hint cannot be empty")) {
-          message.error("Hinweis darf nicht leer sein und nur ein Wort enthalten.");
+          message.error("Please enter a hint that consists of only one word and is not empty");
+          return;
+        }
+        if (status === 400 && messageText.includes("Word count must be at least 1")) {
+          message.error("You must provide a number greater than 0 for the hint.");
           return;
         }
       }
       console.error("Unexpected error sending hint:", err); 
-      message.error("Hinweis konnte nicht gesendet werden.");
+      message.error("Failed to send the hint. Please try again");
     }
   };
   const handleGuess = async (word: string) => {
@@ -187,7 +191,7 @@ const GamePage: React.FC = () => {
       console.log("Turn ended successfully.");
     } catch (err) {
       console.error("Error ending turn:", err);
-      message.error("Zug konnte nicht beendet werden.");
+      message.error("Failed to end the turn. Please try again.");
     }
   };
 
@@ -459,13 +463,13 @@ const GamePage: React.FC = () => {
                         // Field operative sees only the hint if it's their team's turn
                         <div className="text-center mt-8">
                           <p className="text-4xl">
-                            Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
+                            Hint: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
                           </p>
                         </div>
                     ) : (
                         // Field operative sees "waiting for hint" if no hint is available
                         <h1 className="text-4xl font-bold text-white mt-6">
-                          Wartet auf den Hinweis von eurem Spymaster...
+                          Waiting for your Spymaster to give a hint...
                         </h1>
                     )
                 ) : (
@@ -473,12 +477,12 @@ const GamePage: React.FC = () => {
                         // Spymaster sees the input fields to provide a hint
                         <div className="flex flex-col items-center gap-2 mt-6">
                           <p className="text-4xl font-bold mb-4">
-                            Du bist dran, gib ein Hinweis und eine Zahl an!
+                            Your turn! Provide a hint and a number!
                           </p>
                           <div className="flex items-center gap-2 mt-2!">
                             <input
                                 type="text"
-                                placeholder="Gib einen Hinweis ein"
+                                placeholder="Enter a hint"
                                 className="bg-[rgba(70,90,110,0.55)] text-white px-4 py-3 rounded w-64 text-lg"
                                 value={hintText}
                                 onChange={(e) => setHintText(e.target.value)}
@@ -498,21 +502,21 @@ const GamePage: React.FC = () => {
                                 onClick={sendHint}
                                 className="bg-green-600 px-6 py-3 rounded text-lg font-semibold text-white"
                             >
-                              Hinweis absenden
+                              Send Hint
                             </button>
                           </div>
                         </div>
                     ) : (
                         // Message displayed after the hint is submitted
                         <p className="text-4xl font-bold text-white mt-6">
-                          Hinweis abgegeben! Warte auf die Reaktion des anderen Teams...
+                          Hint submitted. Now waiting for the other team’s move...
                         </p>
                     )
                 )
             ) : (
                 // Opposing team sees "it's the other team's turn"
                 <p className="text-4xl font-bold mt-6">
-                  Das andere Team ist dran...
+                  It’s the other team’s turn...
                 </p>
             )}
 
@@ -520,7 +524,7 @@ const GamePage: React.FC = () => {
             {currentHint && teamColor !== gameData.teamTurn && (
                 <div className="text-center mt-6!">
                   <p className="text-3xl">
-                    Hinweis: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
+                    Hint: <strong>{currentHint.hint}</strong> ({currentHint.wordsCount})
                   </p>
                 </div>
             )}
@@ -529,13 +533,13 @@ const GamePage: React.FC = () => {
             {teamColor === gameData.teamTurn && !isSpymaster && currentHint && (
               <div className="text-center mt-4">
                 <p className="text-2xl font-semibold italic ">
-                  Verbleibende Versuche: <strong >{remainingGuesses}</strong>
+                  Remaining attempts: <strong >{remainingGuesses}</strong>
                 </p>
                 <button
                   onClick={handleEndTurn}
                   className="mt-4 bg-red-600 px-6 py-3 rounded text-lg font-semibold text-white hover:bg-red-700 transition-all"
                 >
-                  Zug beenden
+                  End turn
                 </button>
               </div>
             )}
@@ -555,7 +559,7 @@ const GamePage: React.FC = () => {
   <span className="text-3xl font-bold">
     {(gameData?.board ?? []).filter(card => card.color === 'BLUE' && !card.guessed).length}
   </span>
-              <span className="text-2xl font-bold mt-2">Team blau</span>
+              <span className="text-2xl font-bold mt-2">Team blue</span>
             </div>
 
 
@@ -565,7 +569,7 @@ const GamePage: React.FC = () => {
     <span className="text-3xl font-bold mt-5">
       {(gameData?.board ?? []).filter(card => card.color === 'RED' && !card.guessed).length}
     </span>
-              <span className="text-2xl font-bold mt-2">Team rot</span>
+              <span className="text-2xl font-bold mt-2">Team red</span>
             </div>
           </div>
 
@@ -601,7 +605,7 @@ const GamePage: React.FC = () => {
                               teamColor === gameData.teamTurn
                           ) {
                             if (!currentHint) {
-                              message.warning("Warte zuerst auf den Hinweis!");
+                              message.warning("Wait for the hint first!");
                               return;
                             }
                             handleGuess(card.word);

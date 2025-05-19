@@ -61,7 +61,7 @@ export default function Result() {
                 });
                 console.log("Spieler aus der Lobby entfernt.");
             } catch (error) {
-                console.warn("Konnte Spieler nicht aus der Lobby entfernen:", error);
+                console.warn("Could not remove player from lobby:", error);
             }
         }
 

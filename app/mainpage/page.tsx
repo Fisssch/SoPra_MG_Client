@@ -140,7 +140,7 @@ export default function Home() {
         lobby = response.data ?? response;
       }
 
-      if (!lobby || !lobby.id) throw new Error("Lobby konnte nicht geladen werden.");
+      if (!lobby || !lobby.id) throw new Error("Lobby could not be loaded.");
 
       await apiService.put<PlayerResponseDTO>(
         `/lobby/${lobby.id}/${userId}`,
