@@ -106,7 +106,7 @@ export default function LobbyPage() {
 // Timed gamemode
 const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
 
-const wsS = useRef(new WebSocketService()).current;
+const wsS = useRef(new webSocketService()).current;
 
 // use this before entering new game
 const clearAllHints = () => {
