@@ -65,6 +65,7 @@ const GamePage: React.FC = () => {
     localStorage.removeItem(`hintSubmitted_${gameId}_RED`);
     localStorage.removeItem(`hintSubmitted_${gameId}_BLUE`);
     localStorage.removeItem(`gameStartedOnce_${gameId}`);
+    localStorage.removeItem("turnStartTime");
   };
 
   const formatWord = (word: string) =>
@@ -285,15 +286,26 @@ const GamePage: React.FC = () => {
         });
 
         // Subscribe to guess updates
-          await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
-            setGameData((prev) => prev ? { ...prev, teamTurn: guess.teamColor } : prev);
-            message.open({type: 'info', content: (
-                <span>
-                  Geratenes Wort: <strong>{formatWord(guess.wordStr)}</strong>
-                </span>
-              ),
-            });
+        await ws.subscribe(`/topic/game/${gameId}/guess`, (guess: makeGuessDTO) => {
+          setGameData((prev) => prev ? { ...prev, teamTurn: guess.teamColor } : prev);
+
+          const content = guess.wordStr?.trim()
+              ? (
+                  <span>
+                    Guessed word: <strong>{formatWord(guess.wordStr)}</strong>
+                  </span>
+                )
+              : (
+                  <span>
+                    <strong>No word guessed.</strong>
+                  </span>
+              );
+
+          message.open({
+            type: 'info',
+            content,
           });
+        });
 
           // Subscribe to game completion
         await ws.subscribe(`/topic/game/${gameId}/gameCompleted`, (winningTeam: string) => {
@@ -347,9 +359,21 @@ const GamePage: React.FC = () => {
   useEffect(() => {
     if (gameData?.gameMode !== "TIMED") return;
 
+    const duration = gameData.turnDuration || 60;
+
+    // Nur wenn unser Team am Zug ist
     if (teamColor === gameData.teamTurn) {
-      const duration = gameData.turnDuration || 60;
-      setCountdown(duration);
+      let startTime = localStorage.getItem("turnStartTime");
+
+      // Wenn kein Startzeitpunkt gespeichert ist, jetzt speichern
+      if (!startTime) {
+        startTime = Date.now().toString();
+        localStorage.setItem("turnStartTime", startTime);
+      }
+
+      const elapsed = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+      const remaining = Math.max(duration - elapsed, 0);
+      setCountdown(remaining);
 
       if (timerRef.current) clearInterval(timerRef.current);
 
@@ -357,12 +381,14 @@ const GamePage: React.FC = () => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
-
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
+    } else {
+      // Wenn gegnerisches Team dran ist: Startzeit zurücksetzen
+      localStorage.removeItem("turnStartTime");
     }
 
     return () => {
@@ -371,7 +397,12 @@ const GamePage: React.FC = () => {
         timerRef.current = null;
       }
     };
-  }, [gameData?.teamTurn, gameData?.gameMode, gameData?.turnDuration, teamColor]);
+  }, [
+    gameData?.teamTurn,
+    gameData?.gameMode,
+    gameData?.turnDuration,
+    teamColor,
+  ]);
 
 
   useEffect(() => {
@@ -543,9 +574,9 @@ const GamePage: React.FC = () => {
                 </button>
               </div>
             )}
-            {gameData.gameMode === "TIMED"  && teamColor === gameData.teamTurn && (
-                <div className="text-center mt-2 text-xl text-yellow-400 font-bold">
-                  Time left: {countdown}s
+            {gameData.gameMode === "TIMED" && teamColor === gameData.teamTurn && (
+                <div className="text-center mt-2 text-2xl text-white font-bold">
+                  Time left: <span className="text-yellow-400">{countdown}s</span>
                 </div>
             )}
           </div>
