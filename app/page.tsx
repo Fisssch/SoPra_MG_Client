@@ -6,14 +6,6 @@ import { webSocketService } from './api/webSocketService';
 import { useEffect } from 'react';
 
 export default function Home() {
-	const wsS = new webSocketService();
-
-	useEffect(() => {
-		return () => {
-			wsS.disconnect();
-		};
-	}, []);
-
 	const router = useRouter();
 
 	return (
