@@ -275,8 +275,8 @@ reason).
 |                    | 14.05.2025 | [Commit 7](https://github.com/Fisssch/SoPra_MG_Server/commit/eee810704a860aa10df264872b874dc8fa19e9d6) | Added websocket connection for open lobby state                                                       | players want to get lobby updates in real time                                                          |
 |                    | 14.05.2025 | [Commit 8](https://github.com/Fisssch/SoPra_MG_Server/commit/3eb2a473dbf5eea7dee5b87734d538f50bd9f2c8) | Added read me server part                                                                             | A good readme is needed in order to explain the whole project                                           |
 |                    | 14.05.2025 | [Commit 9](https://github.com/Fisssch/SoPra_MG_Server/commit/5d4e57b7f644b62eaa8bb8b9409db3dacaa963af) | Debugging and bug fixing: lobby timer gets now correctly reseted after a lobby closes                 | Players want to have working lobby timers                                                               |
-| **[Elia Wyrsch](https://github.com/eliawy)** | [Date]     | [Commit 1]() | JOKER                                                                                                | Rel                                                                                                     |
-|                    | [Date]     | [Commit 2]() | JOKER                                                                                               | Rel                                                                                                     |
+| **[Elia Wyrsch](https://github.com/eliawy)** | | | JOKER | |
+|                    | | | JOKER | |
 | **[Luis Schmid](https://github.com/LooPyt)** | 14.05.25   | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/3746b123a5e1c07b4550f40b9ba566819976ef4b) | Increase Test coverage above 75%                                                                      | Requirement to pass M4                                                                                  |
 |                    | 15.05.25   | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/b396c5a4e03db02b8e198e8cbae49d43d9f9cd6a) | Assure further coverage for future merges of branches and adjust testing according to Feedback for M3 | Test covarage has to stay above 75% and considering Feedback for M3 is important to show progression    |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | 15.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/269342b953d4331a16141f7c26046f7abf848439) | New gamemode in the lobby.                                                                            | We decided to do a new gamemode so that is important that we have the option in the lobby to choose it. |
@@ -289,7 +289,7 @@ reason).
 | **Student** | **Date**   | **Link to Commit** | **Description** | **Relevance** |
 |-------------|------------|--------------------|-----------------|---------------|
 | **[Silvan Wyss](https://github.com/Fisssch)** | 18.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/ac72c9d5d9527665cf3815fa713df12990721b37) | Made some changes to make sure that the timed moke works correctly. | We want to have a working game. |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+|                    | 19.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/e561d18d8af77636bf3c8bae0ce01beb0ed2d06e) | Added some more tests. | We want/need to have enough test coverage. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
