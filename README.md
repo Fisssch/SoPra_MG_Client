@@ -56,7 +56,7 @@ Below are brief descriptions of the main user flows in the application, illustra
 
 ### Start Page
 
-The start page lets players choose a game mode and either create a new lobby or join an existing one.
+The start page lets players create a lobby, join a existing one, read through the game rules or get an overview of all users.
 
 ![Start Page](./screenshots/startpage.png)
 
@@ -64,7 +64,7 @@ The start page lets players choose a game mode and either create a new lobby or 
 
 ### Lobby
 
-In the lobby, players wait until enough participants have joined. Roles are assigned, the selected game mode is shown, and the game can be started.
+In the lobby, players wait until enough participants have joined. Roles are assigned, the gamemode can be selected and changed and the lobby code can be copied directly.
 
 ![Lobby](./screenshots/lobbypage.png)
 
@@ -89,7 +89,7 @@ Players take turns giving hints or guessing and can follow the game progress in 
 
 ### Result Page
 
-At the end of the game, the result screen shows which team won. Players can then return to the start page or start a new game.
+At the end of the game, the result screen shows which team won and the board of the game. Players can then return to the start page or start a new game.
 
 ![Result Page](./screenshots/resultpage.png)
 
