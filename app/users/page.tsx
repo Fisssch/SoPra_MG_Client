@@ -79,9 +79,12 @@ const Dashboard: React.FC = () => {
         const rawToken = localStorage.getItem("token");
         const token = rawToken?.replace(/^"|"$/g, "");
 
-        const users: User[] = await apiService.get<User[]>("/users", {
+        let users: User[] = await apiService.get<User[]>("/users", {
           Authorization: `Bearer ${token}`,
         });
+
+        // Sort users alphabetically by username
+      users = users.sort((a, b) => a.username.localeCompare(b.username));
 
         setUsers(users);
       } catch (error) {
