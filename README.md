@@ -75,11 +75,13 @@ In the lobby, players wait until enough participants have joined. Roles are assi
 The game board displays 25 word cards.  
 Players take turns giving hints or guessing and can follow the game progress in real time.
 
-- Example: Blue Spymaster can enter a hint.
+- Example: Blue Spymaster can enter a hint. The spymaster can see which card belongs to which team.
 ![Game Page – Enter Hint](./screenshots/gamepage_blue_spymaster.png)
 
+- Meanwhile the red spymaster has to wait for his turn.
 ![Game Page – Red spymaster waits for turn.](./screenshots/gamepage_red_spymaster.png)
 
+- And the blue field operative waits for the hint while not seing which card belongs to which team. 
 ![Game Page – Blue field operative waits for a hint](./screenshots/gamepage_blue_fieldoperative.png)
 
 
