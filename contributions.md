@@ -247,15 +247,15 @@ reason).
 
 ## Contributions Week 8 - 09.05.25 - 15.05.25
 
-| **Student** | **Date** | **Link to Commit** | **Description** | **Relevance** |
-|--------------------|----------|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|--------------------------------|
-| **[Silvan Wyss](https://github.com/Fisssch)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **Student** | **Date**   | **Link to Commit** | **Description**   | **Relevance**                                                                                                |
+|--------------------|------------|-----------------------------------------------------------------------------------------------------------------|-------------------|--------------------------------------------------------------------------------------------------------------|
+| **[Silvan Wyss](https://github.com/Fisssch)** | [Date]     | [Commit 1]() | Descr             | Rel                                                                                                          |
+|                    | [Date]     | [Commit 2]() | Descr             | Rel                                                                                                          |
+| **[Mathis Beeler](https://github.com/beelermathis)** | [Date]     | [Commit 1]() | Descr             | Rel                                                                                                          |
+|                    | [Date]     | [Commit 2]() | Descr             | Rel                                                                                                          |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [Date]     | [Commit 1]() | Descr             | Rel                                                                                                          |
+|                    | [Date]     | [Commit 2]() | Descr             | Rel                                                                                                          |
+| **[Luis Schmid](https://github.com/LooPyt)** | 20.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/4e7a527fba4eca97abb45057d79cf900a0dfdddd) | Implement Repository test with real DB | According to Feedback for M3                                                                                 |
+|                    | 20.05.2025     | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/14c03f6d9a36ae9ca2390a1401224faa6dce4292) | Increase Coverage | Provide Coverage for more recently added code lines is impportant to maintain high test coverage to passe M4 |
+| **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date]     | [Commit 1]() | Descr             | Rel                                                                                                          |
+|                    | [Date]     | [Commit 2]() | Descr             | Rel                                                                                                          |
