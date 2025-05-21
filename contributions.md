@@ -290,12 +290,15 @@ reason).
 |-------------|------------|--------------------|-----------------|---------------|
 | **[Silvan Wyss](https://github.com/Fisssch)** | 18.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/ac72c9d5d9527665cf3815fa713df12990721b37) | Made some changes to make sure that the timed moke works correctly. | We want to have a working game. |
 |                    | 19.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/e561d18d8af77636bf3c8bae0ce01beb0ed2d06e) | Added some more tests. | We want/need to have enough test coverage. |
-| **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Mathis Beeler](https://github.com/beelermathis)** | 16.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/5c9dbd366dbe5cf5fa09b3161323003726947f0b) | fixed/added tests | we want working tests |
+|                    | 18.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/496d1547d6084cfd9a57261e2332f725651bfbb1) | Debugging and bug fix: timer in timed mode works now correctly | Players want a game with working gamemodes |
+|                    | 18.05.2025 | [Commit 3](https://github.com/Fisssch/SoPra_MG_Server/commit/6ef02e5cbdccd930ea44ac43b80937b3cfd8f1dc) | Slightly changed functions for timed gamemode | Players want to have working gamemodes |
+|                    | 20.05.2025 | [Commit 4](https://github.com/Fisssch/SoPra_MG_Server/commit/63d2cfb79c584f4c57781bfb904cce3bcefb6888) | Added more tests | We want/need a test coverage above 75% |
+|                    | 18.05.2025 | [Commit 5](https://github.com/Fisssch/SoPra_MG_Client/commit/2f1340386274dfaac5c00348361029bf729d4592) | Changed player messages | Players want to receive messages which make sense to them |
 | **[Elia Wyrsch](https://github.com/eliawy)** | [21.05.2025] | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/c5d1c37690b9eeb7c028724ccfa9784c8c94bf3e) | Added a sorting to the users overview list. | It's more convenient to see the users sorted in alphabetical order.  |
 |                    | [21.05.2025] | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/35754ad48f03b0ce36316551c1df2e437e6d3be6) | Added possibility to search for certain users in the users page. | Good if a player wants to check if a certain user is online or look at the stats of a specific user. |
 |                    | [21.05.2025] | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/137c7bb87712bd0d65beaf56fd2668f2e69995af) | Added screenshots and the whole illustration part of the readme. | Good for the readme to directly see how the game would look like and get a idea of how the user can interact with the application. |
-| **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Luis Schmid](https://github.com/LooPyt)** | 20.05.2025 | [Commit 1](https://github.com/Fisssch/SoPra_MG_Server/commit/4e7a527fba4eca97abb45057d79cf900a0dfdddd) | Implement Repository test with real DB | According to Feedback for M3 | 
+|                    | 20.05.2025     | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/14c03f6d9a36ae9ca2390a1401224faa6dce4292) | Increase Coverage | Provide Coverage for more recently added code lines is impportant to maintain high test coverage to passe M4 |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
