@@ -292,8 +292,9 @@ reason).
 |                    | 19.05.2025 | [Commit 2](https://github.com/Fisssch/SoPra_MG_Server/commit/e561d18d8af77636bf3c8bae0ce01beb0ed2d06e) | Added some more tests. | We want/need to have enough test coverage. |
 | **[Mathis Beeler](https://github.com/beelermathis)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
-| **[Elia Wyrsch](https://github.com/eliawy)** | [Date] | [Commit 1]() | Descr | Rel |
-|                    | [Date] | [Commit 2]() | Descr | Rel |
+| **[Elia Wyrsch](https://github.com/eliawy)** | [21.05.2025] | [Commit 1](https://github.com/Fisssch/SoPra_MG_Client/commit/c5d1c37690b9eeb7c028724ccfa9784c8c94bf3e) | Added a sorting to the users overview list. | It's more convenient to see the users sorted in alphabetical order.  |
+|                    | [21.05.2025] | [Commit 2](https://github.com/Fisssch/SoPra_MG_Client/commit/35754ad48f03b0ce36316551c1df2e437e6d3be6) | Added possibility to search for certain users in the users page. | Good if a player wants to check if a certain user is online or look at the stats of a specific user. |
+|                    | [21.05.2025] | [Commit 3](https://github.com/Fisssch/SoPra_MG_Client/commit/137c7bb87712bd0d65beaf56fd2668f2e69995af) | Added screenshots and the whole illustration part of the readme. | Good for the readme to directly see how the game would look like and get a idea of how the user can interact with the application. |
 | **[Luis Schmid](https://github.com/LooPyt)** | [Date] | [Commit 1]() | Descr | Rel |
 |                    | [Date] | [Commit 2]() | Descr | Rel |
 | **[Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)** | [Date] | [Commit 1]() | Descr | Rel |
