@@ -107,3 +107,7 @@ At the end of the game, the result screen shows which team won. Players can then
 - [Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)
 
 We thank Youssef Farag for her guidance as well as all teaching assistants of the module Software Engineering Praktikum at the University of Zurich for their feedback and considerations on our project.
+
+## License
+
+This project is licensed under the [Apache License 2.0](https://github.com/Fisssch/SoPra_MG_Server/blob/main/LICENSE)
