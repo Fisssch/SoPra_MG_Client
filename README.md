@@ -50,6 +50,47 @@ You can run the tests with:
 
 The below command builds the app for production to the build folder:
 `npm run build`
+## Illustrations
+
+Below are brief descriptions of the main user flows in the application, illustrated with screenshots.
+
+### Start Page
+
+The start page lets players choose a game mode and either create a new lobby or join an existing one.
+
+![Start Page](./screenshots/startpage.png)
+
+---
+
+### Lobby
+
+In the lobby, players wait until enough participants have joined. Roles are assigned, the selected game mode is shown, and the game can be started.
+
+![Lobby](./screenshots/lobbypage.png)
+
+---
+
+### Game Page
+
+The game board displays 25 word cards.  
+Players take turns giving hints or guessing and can follow the game progress in real time.
+
+- Example: Blue Spymaster can enter a hint.
+![Game Page – Enter Hint](./screenshots/gamepage_blue_spymaster.png)
+
+![Game Page – Red spymaster waits for turn.](./screenshots/gamepage_red_spymaster.png)
+
+![Game Page – Blue field operative waits for a hint](./screenshots/gamepage_blue_fieldoperative.png)
+
+
+---
+
+### Result Page
+
+At the end of the game, the result screen shows which team won. Players can then return to the start page or start a new game.
+
+![Result Page](./screenshots/resultpage.png)
+
 
 ## Roadmap
 - Add option/ gamemode where a AI will play as spymaster if you have less than 4 players.
