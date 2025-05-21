@@ -106,7 +106,7 @@ At the end of the game, the result screen shows which team won and the board of 
 - [Luis Schmid](https://github.com/LooPyt)
 - [Helinton Philip Pathmarajah](https://github.com/Helinton-Philip-Pathmarajah)
 
-We thank Youssef Farag for her guidance as well as all teaching assistants of the module Software Engineering Praktikum at the University of Zurich for their feedback and considerations on our project.
+We thank Youssef Farag for his guidance as well as all teaching assistants of the module Software Engineering Praktikum at the University of Zurich for their feedback and considerations on our project.
 
 ## License
 
