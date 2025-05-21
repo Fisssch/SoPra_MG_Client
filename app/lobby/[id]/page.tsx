@@ -24,6 +24,8 @@ interface LobbyInfoDTO {
 	lobbyCode: number;
 	createdAt: string;
 	language: string;
+	openForLostPlayers: boolean;
+	turnDuration: number;
 }
 interface LobbyPlayerStatusDTO {
 	totalPlayers: number;
@@ -82,6 +84,9 @@ export default function LobbyPage() {
 	const [customWords, setCustomWords] = useState<string[]>([]);
 	const [newCustomWord, setNewCustomWord] = useState<string>('');
 
+	// Open for lost players state
+	const [openForLostPlayers, setOpenForLostPlayers] = useState<boolean>(false);
+
 	const [theme, setTheme] = useState<string>('');
 	const [newTheme, setNewTheme] = useState<string>('');
 
@@ -98,7 +103,20 @@ export default function LobbyPage() {
 	const redTeamPlayers = lobbyPlayers.filter(p => p.team === 'RED');
 	const blueTeamPlayers = lobbyPlayers.filter(p => p.team === 'BLUE');
 
-	const wsS = useRef(new webSocketService()).current;
+// Timed gamemode
+const [selectedTurnDuration, setSelectedTurnDuration] = useState<number>(60);
+
+const wsS = useRef(new webSocketService()).current;
+
+// use this before entering new game
+const clearAllHints = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('currentHint_') || key.startsWith('hintSubmitted_')) {
+      localStorage.removeItem(key);
+    }
+  });
+};
+
 
 	useEffect(() => {
 		//if (!timerActive) return;
@@ -152,6 +170,7 @@ export default function LobbyPage() {
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
 			setLanguage(lobbyInfo.language);
 			localStorage.setItem('language', lobbyInfo.language);
+			setOpenForLostPlayers(lobbyInfo.openForLostPlayers);
 
 			const statusRes = await apiService.get<LobbyPlayerStatusDTO>(`/lobby/${id}/players`, { Authorization: `Bearer ${token}` });
 			const createdAt = new Date(lobbyInfo.createdAt).getTime();
@@ -170,6 +189,11 @@ export default function LobbyPage() {
 				Authorization: `Bearer ${token}`,
 			});
 			setTheme(themeRes.theme);
+
+			if (lobbyInfo.gameMode === 'TIMED' && lobbyInfo.turnDuration) {
+				setSelectedTurnDuration(lobbyInfo.turnDuration);
+				localStorage.setItem(`lobby_${id}_turnDuration`, lobbyInfo.turnDuration.toString());
+			}
 		} catch (error) {
 			console.error('Error loading player info:', error);
 			alert('Player info could not be loaded.');
@@ -191,7 +215,7 @@ export default function LobbyPage() {
 		}
 	}, [token, userId, id]);
 
-	useEffect(() => {
+    useEffect(() => {
 		// Subscribe to team chat when we have a team
 		const subscribeToTeamChat = async () => {
 			if (teamColor) {
@@ -224,11 +248,30 @@ export default function LobbyPage() {
 			try {
 				await wsS.connect();
 
+                try {
+                    await wsS.subscribe(`/topic/lobby/${id}/turnDuration`, (rawValue: any) => {
+                        const newDuration =
+                            typeof rawValue === 'string' ? parseInt(rawValue) :
+                                typeof rawValue === 'number' ? rawValue :
+                                    NaN;
+
+                        if (!isNaN(newDuration)) {
+                            setSelectedTurnDuration(newDuration);
+                            localStorage.setItem(`lobby_${id}_turnDuration`, newDuration.toString());
+                        } else {
+                            console.warn("Invalid turn duration value from WebSocket:", rawValue);
+                        }
+                    });
+                } catch (err) {
+                    console.error("WebSocket error in turnDuration:", err);
+                }
+
 				// Ready/Start
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/start`, async (shouldStart: boolean) => {
 						if (shouldStart) {
 							try {
+								clearAllHints(); //clear hints if still in local storage before entering game 
 								const mytoken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
 								const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
 								localStorage.setItem('startingTeam', startingTeam);
@@ -236,7 +279,7 @@ export default function LobbyPage() {
 									`/game/${id}/start`,
 									{
 										startingTeam: startingTeam,
-										gameMode: gameMode?.toUpperCase() ?? 'CLASSIC',
+										gameMode: (localStorage.getItem('gameMode') ?? 'CLASSIC').toUpperCase(),
 									},
 									{
 										Authorization: `Bearer ${mytoken}`,
@@ -292,7 +335,6 @@ export default function LobbyPage() {
 				//own words
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
-						console.log('Custom words updated:', updatedCustomWords);
 						setCustomWords(updatedCustomWords);
 					});
 				} catch (customWordsErr) {
@@ -312,11 +354,19 @@ export default function LobbyPage() {
 				//theme
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/theme`, (receivedTheme: string) => {
-						console.log('Received updated theme:', receivedTheme);
 						setTheme(receivedTheme);
 					});
 				} catch (themeErr) {
 					console.error('Websocket error in theme:', themeErr);
+				} 
+
+				// openForLostPlayers
+				try {
+				await wsS.subscribe(`/topic/lobby/${id}/lostPlayers`, (isOpen: boolean) => {
+					setOpenForLostPlayers(isOpen);
+				});
+				} catch (lostErr) {
+				console.error('WebSocket error in lostPlayers:', lostErr);
 				}
 
 				// all players ready but not good to start
@@ -395,9 +445,9 @@ export default function LobbyPage() {
 				const msg = error?.message || '';
 
 				if (status === 409 && msg.includes('spymaster')) {
-					message.error('Dieses Team hat bereits einen Spymaster.');
+					message.error('This team already has a Spymaster.');
 				} else {
-					message.error('Ein Fehler ist aufgetreten beim Rollenwechsel.');
+					message.error('EAn error occurred while changing roles.');
 				}
 			}
 		}
@@ -450,6 +500,19 @@ export default function LobbyPage() {
 			}
 		} else {
 			setIsGameModeModalOpen(false);
+		}
+	};
+
+	const handleTurnDurationChange = async (newDuration: number) => {
+		setSelectedTurnDuration(newDuration);
+		localStorage.setItem(`lobby_${id}_turnDuration`, newDuration.toString());
+
+		try {
+			await apiService.put(`/lobby/${id}/turnDuration`, newDuration, {
+				Authorization: `Bearer ${token}`,
+			});
+		} catch (error) {
+			console.error("Failed to update turn duration", error);
 		}
 	};
 
@@ -631,44 +694,41 @@ export default function LobbyPage() {
 			<div className='mb-6'>
 				<h3 className='text-lg font-bold text-white mb-2'>{title}</h3>
 
-      {/* Header Row */}
-      <div className="grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2">
-        <span className="text-left">Username</span>
-        <span className="text-left pl-1">Role</span>
-        <span className="text-left pl-1">Status</span>
-      </div>
+				{/* Header Row */}
+				<div className='grid grid-cols-3 gap-x-1 text-white text-base items-center border-t border-white/30 py-2'>
+					<span className='text-left'>Username</span>
+					<span className='text-left pl-1'>Role</span>
+					<span className='text-left pl-1'>Status</span>
+				</div>
 
-      {/* Player Rows */}
-      <div className="flex flex-col">
-        {players.length === 0 ? (
-          <p className="text-white text-sm italic">No players in this team.</p>
-        ) : (
-          players.map((player, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-3 text-white text-sm items-center border-t border-white/30"
-            >
-              {/* Column 1: Username */}
-              <div className="px-2 py-2 text-left">{player.username}</div>
+				{/* Player Rows */}
+				<div className='flex flex-col'>
+					{players.length === 0 ? (
+						<p className='text-white text-sm italic'>No players in this team.</p>
+					) : (
+						players.map((player, index) => (
+							<div key={index} className='grid grid-cols-3 text-white text-sm items-center border-t border-white/30'>
+								{/* Column 1: Username */}
+								<div className='px-2 py-2 text-left'>{player.username}</div>
 
-              {/* Column 2: Role */}
-              <div className="px-2 py-2 text-left">{formatEnum(player.role)}</div>
+								{/* Column 2: Role */}
+								<div className='px-2 py-2 text-left'>{formatEnum(player.role)}</div>
 
-              {/* Column 3: Ready Status */}
-              <div className="px-2 py-2 text-left">
-                {player.ready ? (
-                  <span className="text-green-400 font-bold">✅ Ready</span>
-                ) : (
-                  <span className="text-gray-400 fond-bold">Not Ready</span>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-};
+								{/* Column 3: Ready Status */}
+								<div className='px-2 py-2 text-left'>
+									{player.ready ? (
+										<span className='text-green-400 font-bold'>✅ Ready</span>
+									) : (
+										<span className='text-gray-400 fond-bold'>Not Ready</span>
+									)}
+								</div>
+							</div>
+						))
+					)}
+				</div>
+			</div>
+		);
+	};
 
 	return (
 		<div className='min-h-screen w-full flex text-white' style={backgroundStyle}>
@@ -691,14 +751,66 @@ export default function LobbyPage() {
 					</span>
 					<span
 						onClick={() => !ready && setIsGameModeModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
-						Change GameMode
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
+					>
+      					Change GameMode
 					</span>
+
+					{/* Toggle Open Lobby under Game Options */}
+					<div className = "flex items-center gap-2">
 					<span
-						onClick={() => !ready && setIsLanguageModalOpen(true)}
-						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
-						Change Language
+						onClick={async () => {
+							if (ready) return;
+							try {
+								const updatedFlag = !openForLostPlayers;
+								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
+									Authorization: `Bearer ${token}`,
+								});
+								setOpenForLostPlayers(updatedFlag);
+								message.success(`Lobby is now ${updatedFlag ? 'open' : 'closed'} for lost players.`);
+							} catch (err) {
+								console.error('Failed to toggle lost player setting:', err);
+								message.error('Could not change lost player setting.');
+							}
+						}}
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}
+					>
+						{openForLostPlayers ? '✅ Open Lobby' : 'Open Lobby'}
 					</span>
+						<span className="hover:text-blue-400 transition-colors">
+						<Popover
+							title="Open Lobby"
+							content="When enabled, random players are able to join this Lobby."
+							trigger="click"
+							open = {ready ? false: undefined}
+							styles={{
+								body: {
+									backgroundColor: '#1f2937',
+									color: 'white',
+									fontSize: '13px',
+									maxWidth: '260px',
+									lineHeight: '1.4',
+									whiteSpace: 'normal',
+								},
+							}}
+						>
+							<InfoCircleOutlined
+								className={`text-sm ${
+									ready ? 'text-gray-500! cursor-not-allowed' : 'text-gray-400 hover:text-yellow-400! cursor-pointer'
+								}`}
+								onClick={(e) => {
+									if (ready) return;
+									e.stopPropagation();
+								}}
+    						/>
+						</Popover>
+					</span>
+					</div>
+
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
@@ -733,7 +845,10 @@ export default function LobbyPage() {
 								Your Team: <b>{formatEnum(teamColor ?? '')}</b>
 							</p>
 							<p>
-								Gamemode: <b>{formatEnum(gameMode ?? '')}</b>
+								Gamemode: <b>
+								{formatEnum(gameMode ?? '')}
+								{gameMode === 'TIMED' && selectedTurnDuration ? ` (${selectedTurnDuration}s)` : ''}
+							</b>
 							</p>
 							<p>
 								Language: <b>{formatEnum(language ?? '')}</b>
@@ -744,7 +859,7 @@ export default function LobbyPage() {
 							<p>
 								Players Ready:{' '}
 								<b>
-									{readyPlayers}/{totalPlayers}
+									{readyPlayers}/{Math.max(totalPlayers, 4)}
 								</b>
 							</p>
 							{timeLeft && timeLeft > 0 && (
@@ -756,7 +871,6 @@ export default function LobbyPage() {
 									min
 								</p>
 							)}
-							
 						</div>
 
 						{/* Team Info */}
@@ -764,17 +878,6 @@ export default function LobbyPage() {
 							<h2 className='text-2xl font-bold mb-1!'>Teams</h2>
 							<TeamTable title='Red Team' players={redTeamPlayers} color='RED' />
 							<TeamTable title='Blue Team' players={blueTeamPlayers} color='BLUE' />
-						</div>
-						{/* Set Ready Button */}
-						<div className="mt-6 flex justify-center">
-						<button
-							onClick={handleReadyToggle}
-							className={`px-6 py-2 rounded-lg font-semibold text-white transition-colors ${
-							ready ? 'bg-green-500 hover:bg-green-600' : 'bg-gray-500 hover:bg-gray-600'
-							}`}
-						>
-							{ready ? '✅ Ready' : 'Set Ready'}
-						</button>
 						</div>
 						{/* Custom Words only visible when gamemode == OWN_WORDS*/}
 						{gameMode === 'OWN_WORDS' && (
@@ -796,8 +899,7 @@ export default function LobbyPage() {
 									/>
 									<p className='text-sm text-white'>{customWords.length} / 25 words added</p>
 								</div>
-								
-  
+
 								{/* Anzeige der hinzugefügten Wörter */}
 								{customWords.length === 0 ? (
 									<p className='text-white'>No words added yet.</p>
@@ -845,6 +947,17 @@ export default function LobbyPage() {
 								)}
 							</div>
 						)}
+						{/* Set Ready Button */}
+						<div className="mt-10! flex justify-center">
+							<button
+								onClick={handleReadyToggle}
+								className={`px-15! py-2 rounded-lg font-semibold text-white transition-colors ${
+									ready ? 'bg-green-500 hover:bg-gray-600!' : 'bg-gray-500 hover:bg-gray-600!'
+								}`}
+							>
+								{ready ? '✅ Ready' : 'Set Ready'}
+							</button>
+						</div>
 					</Card>
 				</div>
 			</div>
@@ -965,7 +1078,7 @@ export default function LobbyPage() {
 										As the Spymaster, your job is to guide your teammates toward the correct words on the board by giving clever clues. You can only
 										give one word as a clue and a number that tells your team how many of the words on the board relate to that clue. Your teammates
 										will then discuss and try to guess which words you meant. Be careful though, you must avoid giving clues that could lead them to
-										words belonging to the other team or, even worse, the assassin word (black card)S!
+										words belonging to the other team or, even worse, the assassin word (black card)!
 									</span>
 								}>
 								<InfoCircleOutlined
@@ -1117,7 +1230,7 @@ export default function LobbyPage() {
 						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
 								title='Own Words Mode'
-								content='Bring your own words up to 25! The game fills in the rest if needed.'
+								content='Bring your own words up to 25! The game automatically fills in the rest if needed.'
 								trigger='click'
 								styles={{
 									body: {
@@ -1158,6 +1271,45 @@ export default function LobbyPage() {
 							</Popover>
 						</div>
 					</Button>
+					<Button
+						type={selectedGameMode === 'TIMED' ? 'primary' : 'default'}
+						onClick={() => setSelectedGameMode('TIMED')}
+						block
+						className='flex items-center justify-start gap-2'>
+						<span>Timed</span>
+						<div className='ml-auto' onClick={e => e.stopPropagation()}>
+							<Popover
+								title='Timed Mode'
+								content='Each Team has a limited amount of time per turn. When time runs out, the turn automatically switches to the other team.'
+								trigger='click'
+								styles={{
+									body: {
+										backgroundColor: '#1f2937',
+										color: 'white',
+									},
+								}}>
+								<InfoCircleOutlined
+									className={`text-gray-700! cursor-pointer text-lg ${
+										teamColor === 'RED' ? 'hover:text-red-500!' : teamColor === 'BLUE' ? 'hover:text-blue-500!' : 'hover:text-gray-500!'
+									}`}
+								/>
+							</Popover>
+						</div>
+					</Button>
+					{selectedGameMode === 'TIMED' && (
+						<div className='mt-2 flex flex-col items-center w-full'>
+							<label className='text-sm text-black mb-1'>Select Turn Duration:</label>
+							<select
+								value={selectedTurnDuration}
+								onChange={(e) => handleTurnDurationChange(parseInt(e.target.value))}
+								className='p-3 rounded-md bg-gray-400 text-white w-40 border border-white/30 shadow-sm text-sm text-center'
+							>
+								<option value={30}>30 Seconds</option>
+								<option value={60}>60 Seconds</option>
+								<option value={90}>90 Seconds</option>
+							</select>
+						</div>
+					)}
 					<div className='mt-4 flex gap-3'>
 						<Button onClick={() => setIsGameModeModalOpen(false)}>Cancel</Button>
 						<Button type='primary' onClick={handleGameModeChange}>
@@ -1223,7 +1375,7 @@ export default function LobbyPage() {
 			{!isChatOpen && (
 				<button
 					onClick={() => setIsChatOpen(true)}
-					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-white/70!'
+					className='fixed bottom-3 right-3 z-50 rounded-full! hover:bg-gray-600!'
 					style={{ backdropFilter: 'blur(4px)' }}>
 					<span className='text-xl'>💬</span>
 				</button>

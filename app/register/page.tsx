@@ -38,7 +38,6 @@ const Register: React.FC = () => {
       });
 
       const authHeader = headers.get("Authorization");
-      console.log("Authorization Header:", authHeader); 
       if (authHeader?.startsWith("Bearer ")) {
         const token = authHeader.split(" ")[1];
         setToken(token);

@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
-import { Button, Card, Table, Badge, Tooltip } from "antd";
+import { Button, Card, Table, Badge, Tooltip, Input } from "antd"; // Import Input component from Ant Design
 import type { TableProps } from "antd"; // antd component library allows imports of types
 // Optionally, you can import a CSS module or file for additional styling:
 // import "@/styles/views/Dashboard.scss";
@@ -39,9 +39,8 @@ const Dashboard: React.FC = () => {
   const apiService = useApi();
   const [users, setUsers] = useState<User[] | null>(null);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  // useLocalStorage hook example use
-  // The hook returns an object with the value and two functions
-  // Simply choose what you need from the hook:
+  const [searchQuery, setSearchQuery] = useState<string>(""); // State for search query
+
   useEffect(() => {
     const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
     if (!token) {
@@ -79,13 +78,16 @@ const Dashboard: React.FC = () => {
         const rawToken = localStorage.getItem("token");
         const token = rawToken?.replace(/^"|"$/g, "");
 
-        const users: User[] = await apiService.get<User[]>("/users", {
+        let users: User[] = await apiService.get<User[]>("/users", {
           Authorization: `Bearer ${token}`,
         });
 
+        // Sort users alphabetically by username
+        users = users.sort((a, b) => a.username.localeCompare(b.username));
+
         setUsers(users);
       } catch (error) {
-        console.error("Error durig loading of the users:", error);
+        console.error("Error during loading of the users:", error);
       }
     };
 
@@ -97,6 +99,11 @@ const Dashboard: React.FC = () => {
   if (authorized === null) {
     return null;
   }
+
+  // Filter users based on the search query
+  const filteredUsers = users?.filter((user) =>
+    user.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
       <div
@@ -119,33 +126,58 @@ const Dashboard: React.FC = () => {
           >
             {users && (
                 <>
-                  {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
-                  <Table<User>
-                      columns={columns}
-                      dataSource={users}
-                      rowKey="id"
-                      pagination={{ pageSize: 5 }}
-                      onRow={(row) => ({
-                        onClick: () => router.push(`/users/${row.id}`),
-                        style: { cursor: "pointer" },
-                      })}
-                  />
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "10px",
-                    alignItems: "center",
-                    marginTop: "1px",
-                  }}>
-                    <Button onClick={handleLogout} type="primary" style={{ width: "70%" }}>
-                      Logout
-                    </Button>
-                    <Button onClick={() => router.push('/mainpage')} type="default" style={{ width: "70%" }}>
-                      Back to Home
-                    </Button>
-                  </div>
-                </>
-            )}
+              {/* Search Bar */}
+              <Input.Search
+                placeholder="Search for a user"
+                allowClear
+                onChange={(e) => setSearchQuery(e.target.value)} // Update search query
+                style={{ marginBottom: "16px" }}
+              />
+
+              {/* antd Table: pass the columns and filtered data */}
+              <Table<User>
+                columns={columns}
+                dataSource={filteredUsers} // Use filtered users
+                rowKey="id"
+                pagination={{ pageSize: 5 }}
+                locale={{
+                  emptyText: (
+                    <div style={{ color: "white", fontSize: "16px" }}>
+                      No users found.
+                    </div>
+                  ),
+                }}
+                onRow={(row) => ({
+                  onClick: () => router.push(`/users/${row.id}`),
+                  style: { cursor: "pointer" },
+                })}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  alignItems: "center",
+                  marginTop: "1px",
+                }}
+              >
+                <Button
+                  onClick={handleLogout}
+                  type="primary"
+                  style={{ width: "70%" }}
+                >
+                  Logout
+                </Button>
+                <Button
+                  onClick={() => router.push("/mainpage")}
+                  type="default"
+                  style={{ width: "70%" }}
+                >
+                  Back to Home
+                </Button>
+              </div>
+            </>
+          )}
           </Card>
         </div>
       </div>

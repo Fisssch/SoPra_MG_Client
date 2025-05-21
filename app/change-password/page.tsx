@@ -105,9 +105,21 @@ const EditPassword: React.FC = () => {
                         </Form.Item>
 
                         <Form.Item
+                            name="newPassword"
                             label={<div className="text-black text-center mb-1">New Password</div>}
                             required
                             style={{ display: "flex", justifyContent: "center" }}
+                            rules={[
+                                { required: true, message: "Please input your password!" },
+                                { min: 8, message: "Password must be at least 8 characters" },
+                                { max: 15, message: "Password must be no more than 15 characters" },
+                                {
+                                    validator: (_, value) =>
+                                        value && /\s/.test(value)
+                                            ? Promise.reject("Password cannot contain spaces")
+                                            : Promise.resolve(),
+                                },
+                            ]}
                         >
                             <Input.Password
                                 placeholder="Enter new password"

@@ -198,3 +198,7 @@ button {
     @apply bg-background text-foreground;
   }
 }
+
+.ant-pagination-item-ellipsis {
+  color: white !important;
+}
