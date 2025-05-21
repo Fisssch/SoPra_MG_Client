@@ -168,7 +168,6 @@ const clearAllHints = () => {
 			localStorage.setItem('lobbyCode', lobbyInfo.lobbyCode.toString());
 			setGameMode(lobbyInfo.gameMode);
 			localStorage.setItem('gameMode', lobbyInfo.gameMode);
-			console.log("🎮 GameMode aus LobbyInfo (vom Backend):", lobbyInfo.gameMode);
 			setLanguage(lobbyInfo.language);
 			localStorage.setItem('language', lobbyInfo.language);
 			setOpenForLostPlayers(lobbyInfo.openForLostPlayers);
@@ -251,8 +250,6 @@ const clearAllHints = () => {
 
                 try {
                     await wsS.subscribe(`/topic/lobby/${id}/turnDuration`, (rawValue: any) => {
-                        console.log("📡 Received message on /turnDuration:", rawValue);
-
                         const newDuration =
                             typeof rawValue === 'string' ? parseInt(rawValue) :
                                 typeof rawValue === 'number' ? rawValue :
@@ -261,9 +258,8 @@ const clearAllHints = () => {
                         if (!isNaN(newDuration)) {
                             setSelectedTurnDuration(newDuration);
                             localStorage.setItem(`lobby_${id}_turnDuration`, newDuration.toString());
-                            console.log("✅ Turn duration updated via WS:", newDuration);
                         } else {
-                            console.warn("⚠️ Invalid turn duration value from WebSocket:", rawValue);
+                            console.warn("Invalid turn duration value from WebSocket:", rawValue);
                         }
                     });
                 } catch (err) {
@@ -279,8 +275,6 @@ const clearAllHints = () => {
 								const mytoken = localStorage.getItem('token')?.replace(/^"|"$/g, '');
 								const startingTeam = Math.random() < 0.5 ? 'RED' : 'BLUE';
 								localStorage.setItem('startingTeam', startingTeam);
-								console.log("🚀 GameMode an Backend gesendet:", (localStorage.getItem('gameMode') ?? 'CLASSIC').toUpperCase());
-								console.log("🚀 Spiel wird gestartet mit GameMode:", localStorage.getItem('gameMode'));
 								await apiService.post(
 									`/game/${id}/start`,
 									{
@@ -306,7 +300,6 @@ const clearAllHints = () => {
 				// GameMode
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/gameMode`, (lobbyDto: LobbyInfoDTO) => {
-						console.log("🌀 GameMode geändert via WebSocket:", lobbyDto.gameMode);
 						setGameMode(lobbyDto.gameMode); // global
 						setSelectedGameMode(lobbyDto.gameMode); // lokal
 						localStorage.setItem('gameMode', lobbyDto.gameMode);
@@ -342,7 +335,6 @@ const clearAllHints = () => {
 				//own words
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/customWords`, (updatedCustomWords: string[]) => {
-						console.log('Custom words updated:', updatedCustomWords);
 						setCustomWords(updatedCustomWords);
 					});
 				} catch (customWordsErr) {
@@ -362,7 +354,6 @@ const clearAllHints = () => {
 				//theme
 				try {
 					await wsS.subscribe(`/topic/lobby/${id}/theme`, (receivedTheme: string) => {
-						console.log('Received updated theme:', receivedTheme);
 						setTheme(receivedTheme);
 					});
 				} catch (themeErr) {
@@ -520,9 +511,8 @@ const clearAllHints = () => {
 			await apiService.put(`/lobby/${id}/turnDuration`, newDuration, {
 				Authorization: `Bearer ${token}`,
 			});
-			console.log("⏱️ Turn duration updated to", newDuration);
 		} catch (error) {
-			console.error("❌ Failed to update turn duration", error);
+			console.error("Failed to update turn duration", error);
 		}
 	};
 
@@ -772,7 +762,7 @@ const clearAllHints = () => {
 					<div className = "flex items-center gap-2">
 					<span
 						onClick={async () => {
-							if (ready) return; 
+							if (ready) return;
 							try {
 								const updatedFlag = !openForLostPlayers;
 								await apiService.put(`/lobby/${id}/lost-players`, { openForLostPlayers: updatedFlag }, {
@@ -808,9 +798,9 @@ const clearAllHints = () => {
 								},
 							}}
 						>
-							<InfoCircleOutlined 
+							<InfoCircleOutlined
 								className={`text-sm ${
-									ready ? 'text-gray-500 cursor-not-allowed' : 'text-gray-400 hover:text-yellow-400 cursor-pointer'
+									ready ? 'text-gray-500! cursor-not-allowed' : 'text-gray-400 hover:text-yellow-400! cursor-pointer'
 								}`}
 								onClick={(e) => {
 									if (ready) return;
@@ -820,7 +810,7 @@ const clearAllHints = () => {
 						</Popover>
 					</span>
 					</div>
-					
+
 					<span
 						onClick={handleCopyLobbyCode}
 						className={`flex items-center gap-2 cursor-pointer transition-colors ${ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'}`}>
@@ -1290,7 +1280,7 @@ const clearAllHints = () => {
 						<div className='ml-auto' onClick={e => e.stopPropagation()}>
 							<Popover
 								title='Timed Mode'
-								content='Each Field Operative has a limited amount of time per turn. When time runs out, the turn automatically switches to the other team.'
+								content='Each Team has a limited amount of time per turn. When time runs out, the turn automatically switches to the other team.'
 								trigger='click'
 								styles={{
 									body: {

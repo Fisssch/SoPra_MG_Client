@@ -78,12 +78,6 @@ const GamePage: React.FC = () => {
       return;
     }
     try {
-      console.log("Sending hint with payload:", {
-        hint: hintText,
-        wordsCount: hintNumber,
-
-      });
-
       await apiService.put(`/game/${gameId}/hint`, {
         hint: hintText,
         wordsCount: hintNumber,
@@ -189,7 +183,6 @@ const GamePage: React.FC = () => {
       await apiService.put(`/game/${gameId}/endTurn`, {}, {
         'Authorization': `Bearer ${token}`,
       });
-      console.log("Turn ended successfully.");
     } catch (err) {
       console.error("Error ending turn:", err);
       message.error("Failed to end the turn. Please try again.");
@@ -233,7 +226,6 @@ const GamePage: React.FC = () => {
 
         setGameData(res.data as GameData);
         const gameData = res.data as GameData;
-        console.log("Vom Backend empfangener GameMode:", gameData.gameMode);
         localStorage.setItem(`gameBoard_${gameId}`, JSON.stringify(gameData.board));
 
         // Restore remaining guesses from localStorage
@@ -254,7 +246,6 @@ const GamePage: React.FC = () => {
 
         // Subscribe to game board updates
         await ws.subscribe(`/topic/game/${gameId}/board`, (payload: { updatedBoard: Card[]; guessesLeft: number }) => {
-          console.log("Received updated board and remaining guesses:", payload);
           const { updatedBoard, guessesLeft } = payload;
 
           // Update the game board
@@ -269,7 +260,6 @@ const GamePage: React.FC = () => {
 
         // Subscribe to hint updates
         await ws.subscribe(`/topic/game/${gameId}/hint`, (payload: { hint: string; wordsCount: number; guessesLeft: number }) => {
-          console.log("Received hint payload:", payload);
           const { hint, wordsCount, guessesLeft } = payload;
 
           // Update the current hint
@@ -314,7 +304,6 @@ const GamePage: React.FC = () => {
           router.replace(`/result/${gameId}`);
         });
         await ws.subscribe(`/topic/game/${gameId}/turn`, (payload: { teamTurn: 'RED' | 'BLUE' }) => {
-          console.log("Turn ended. Switching to the next team:", payload.teamTurn);
 
           // Reset local state if needed
           // Update the gameData state with the new teamTurn
@@ -404,12 +393,6 @@ const GamePage: React.FC = () => {
     teamColor,
   ]);
 
-
-  useEffect(() => {
-    if (gameData?.gameMode) {
-      console.log("Aktiver Spielmodus:", gameData.gameMode);
-    }
-  }, [gameData?.gameMode]);
 
   useEffect(() => {
     if (!gameData) return;

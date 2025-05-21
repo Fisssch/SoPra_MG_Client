@@ -59,7 +59,6 @@ export default function Result() {
                 await apiService.delete(`/lobby/${lobbyId}/${playerId}`, {
                     Authorization: `Bearer ${token}`,
                 });
-                console.log("Spieler aus der Lobby entfernt.");
             } catch (error) {
                 console.warn("Could not remove player from lobby:", error);
             }
