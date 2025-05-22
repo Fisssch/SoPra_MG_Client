@@ -68,11 +68,19 @@ const EditUsername: React.FC = () => {
                         layout="vertical"
                     >
                         <Form.Item
-                            label={
-                                <div className="text-black text-center mb-1">New Username</div>
-                            }
-                            required
-                            style={{ display: "flex", justifyContent: "center" }}
+                            label={<div className="text-black text-center mb-1">New Username</div>}
+                            name = "username"
+                            rules={[
+                                { required: true, message: "Please input a new username!" },
+                                { min: 4, message: "Username must be at least 4 characters" },
+                                { max: 20, message: "Username must be no more than 20 characters" },
+                                {
+                                    validator: (_, value) =>
+                                        value && /\s/.test(value)
+                                            ? Promise.reject("Username cannot contain spaces")
+                                            : Promise.resolve(),
+                                },
+                            ]}
                         >
                             <Input
                                 placeholder="Enter new username"
