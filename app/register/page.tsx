@@ -93,7 +93,17 @@ const Register: React.FC = () => {
         <Form.Item
           name="username"
           label={<span className="text-black">Username</span>}
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[
+            { required: true, message: "Please input your username!" },
+            { min: 4, message: "Username must be at least 4 characters" },
+            { max: 20, message: "Username must be no more than 20 characters" },
+            {
+              validator: (_, value) =>
+                value && /\s/.test(value)
+                  ? Promise.reject("Username cannot contain spaces ")
+                  : Promise.resolve(),
+            },
+          ]}
         >
           <Input placeholder="Enter username" />
         </Form.Item>
