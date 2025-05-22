@@ -50,7 +50,18 @@ const Register: React.FC = () => {
 }
 
     } catch (error: any) {
-      message.error(`Registration failed: ${error.message || "Unknown error"}`);
+      const errorText = error?.message || "Unknown error";
+      
+      if (
+        errorText.includes("409") &&
+        errorText.toLowerCase().includes("username") &&
+        errorText.toLowerCase().includes("taken")
+      ) {
+        message.warning("Username already exists. Please choose another one.");
+      } else {
+        message.error(`Registration failed: ${errorText}`);
+      }
+
     } finally {
       setLoading(false);
     }
