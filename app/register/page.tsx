@@ -88,7 +88,7 @@ const Register: React.FC = () => {
             {
               validator: (_, value) =>
                 value && /\s/.test(value)
-                  ? Promise.reject("Username cannot contain spaces")
+                  ? Promise.reject("Username cannot contain spaces ")
                   : Promise.resolve(),
             },
           ]}
