@@ -758,6 +758,14 @@ const clearAllHints = () => {
       					Change GameMode
 					</span>
 
+					<span
+						onClick={() => !ready && setIsLanguageModalOpen(true)}
+						className={`flex items-center gap-2 cursor-pointer transition-colors ${
+							ready ? 'text-gray-500 cursor-not-allowed' : 'hover:text-blue-400'
+						}`}>
+						Change Language
+					</span>
+
 					{/* Toggle Open Lobby under Game Options */}
 					<div className = "flex items-center gap-2">
 					<span
